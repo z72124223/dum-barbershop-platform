@@ -1,6 +1,6 @@
 # M1-B 工作日誌 — Domain & Mock Engine
 
-Status: READY  
+Status: PAUSED_LOCAL
 Issue: #5  
 Expected branch: `work/5-domain-engine`  
 Owner window: Window B  
@@ -177,19 +177,19 @@ Gate 後若要做破壞性 contract 變更，必須先在 Issue #5 說明，並�
 
 ## 6. Durable Checkpoint
 
-Base / Last synced main SHA:  
-Last good commit SHA:  
-Last checkpoint time (Asia/Taipei):  
-Completed:  
-In progress:  
-Exact next action:  
-Exact resume commands:  
-Files currently touched:  
-Checks passed:  
-Checks failing or not run:  
-Known blockers:  
+Base / Last synced main SHA: `8408ec2a68d7e5de9b9e6f60167dd76e0fd7387e`
+Last good commit SHA: `8408ec2a68d7e5de9b9e6f60167dd76e0fd7387e` (validated code baseline; the following checkpoint commit contains log metadata only)
+Last checkpoint time (Asia/Taipei): `2026-07-12 22:20 +08:00`
+Completed: Required reading; Issue #7 auto-claim; Issue #5 CLAIMED comment; dedicated branch/worktree creation; remote `main` base verification.
+In progress: None; the Owner requested this window stop before Domain implementation began.
+Exact next action: Implement the shared domain model exports under `src/domain/models/` without changing root scaffold files.
+Exact resume commands: `git fetch --all --prune`; `git -C .worktrees/work-5-domain-engine switch work/5-domain-engine`; `git -C .worktrees/work-5-domain-engine pull --ff-only`; verify `git -C .worktrees/work-5-domain-engine status --short --branch`.
+Files currently touched: `docs/workstreams/M1-B.md` only (checkpoint metadata)
+Checks passed: Required reading, Issue #5 claim verification, branch/base verification.
+Checks failing or not run: Typecheck, tests, lint, and build not run; Window A has not published `BOOTSTRAP_READY`.
+Known blockers: Full project checks depend on Window A `BOOTSTRAP_READY`; pure TypeScript implementation can continue.
 Owner decision needed: None  
-Uncommitted changes:  
+Uncommitted changes: none after this checkpoint commit
 PR:  
 
 ---
@@ -201,3 +201,17 @@ PR:
 - 尚未認領
 - 第一個動作：讀 Issue #5、建立 `work/5-domain-engine` branch / worktree，更新本檔為 `IN_PROGRESS`。
 - 可先依固定路徑建立純 TypeScript domain；看到 Window A 的 `BOOTSTRAP_READY` 後同步根架構並跑完整 checks。
+
+### Checkpoint 1 — CLAIMED / IN_PROGRESS
+
+- Auto-claim selected Issue #5 after confirming Issue #4 was claimed and M1-B remained `READY`.
+- Branch: `work/5-domain-engine`
+- Base: `8408ec2a68d7e5de9b9e6f60167dd76e0fd7387e`
+- Next: implement the provider-neutral domain contracts and booking engine inside Window B-owned paths.
+
+### Checkpoint 2 — PAUSED_LOCAL
+
+- Owner requested the Codex window stop before implementation began.
+- No application or Domain source files were created or modified.
+- Resume the same Issue, branch, worktree, and journal; do not create a parallel implementation.
+- Exact next action: create the shared model exports under `src/domain/models/`.
