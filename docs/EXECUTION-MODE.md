@@ -1,72 +1,85 @@
 # DUM BARBERSHOP Platform — Execution Mode
 
-版本：1.0.0  
+版本：2.0.0  
 狀態：Accepted
 
-## 1. 主要實作工具
+## 1. 兩個工作角色
 
-本專案的程式實作工具為 **Codex**，且優先使用 **Codex 本機環境**。
+本專案只維持：
 
-- 網站程式、預約引擎、測試、Build、除錯與整合，由 Codex 在本機 Repository / Worktree 中完成。
-- ChatGPT Work 不作為本專案的主要程式實作者。
-- Work 可用於非程式交付，例如文件整理、研究、報告或視覺素材，但不得取代 Codex 的本機程式流程。
+- **GPT 工作**：Issue #13，負責規格、內容、Git 任務、QA 與 PR Review。
+- **Codex 工作**：Issue #14，負責全部本機程式碼、引擎、測試、Build 與整合。
 
-## 2. 不會自動切換
+詳細責任以 `docs/TWO-ROLE-WORK-MODEL.md` 為準。
 
-ChatGPT Work 與 Codex 是使用者選擇的工作模式，不應假設系統會在任務中自動從 Work 切換到 Codex。
+## 2. Work / Codex 不會建立新工作者
 
-進入任何需要修改程式碼、執行終端機、安裝套件、跑測試或建立 Build 的任務時，Owner 應直接選擇 **Codex**。
+Work 與 Codex 是同一個 Task 內可選的工作模式。切換模式：
 
-## 3. Codex 啟動條件
+- 不會建立新 Task
+- 不會建立新視窗
+- 不會建立第二個 Agent
+- 不會自動交接 Git 工作
 
-從 M1 起即進入 Codex 實作階段。Codex 必須：
+Owner 若需要 GPT 與 Codex 各自工作，應建立兩個獨立 Task，或至少以 Issue #13 與 #14 明確分離工作紀錄。
 
-1. 開啟或 Clone `z72124223/dum-barbershop-platform`
-2. 使用本機環境
-3. 先讀根目錄 `AGENTS.md`
-4. 再依 AGENTS.md 指定順序讀取文件
-5. 只執行已建立的 GitHub Issue
-6. 建立獨立 Branch / Worktree
-7. 修改程式並執行驗證
-8. 建立 Draft Pull Request
-9. 不直接依賴聊天記憶或未提交指令
+## 3. GPT 執行方式
 
-## 4. 任務延續
+GPT 開始工作時必須：
 
-Codex 不必回到規劃聊天視窗取得下一步。
+1. 讀 `AGENTS.md` 與必讀文件。
+2. 讀 Issue #13。
+3. 讀 `docs/workstreams/GPT.md`。
+4. 維護規格、內容、Issues、QA 與 Review。
+5. 不直接修改正式應用程式碼。
+6. 在中斷前更新日誌與 Issue checkpoint。
 
-完成目前 Issue 後：
+GPT 可持續從 Git 追蹤 Codex 的 Commit、PR、checks 與未解決問題。
 
-- 若 Repository 已有下一個明確、未被阻擋且標記可執行的 Issue，可依優先順序繼續認領。
-- 若下一階段需要 Owner 決策，Codex 必須停止該部分並在 GitHub Issue 或 `docs/DECISIONS.md` 留下 `TODO(owner-decision)`。
-- Codex 不得自行填補價格、會員、訂金、取消、個資或其他 Reserved 決策。
-- 沒有 Issue 的工作不得直接實作。
+## 4. Codex 執行方式
 
-## 5. Work 的角色
+從 M1 起，所有程式實作由 Codex 完成。Codex 必須：
 
-Work 在本專案中是選用工具，適用於：
+1. 開啟或 Clone `z72124223/dum-barbershop-platform`。
+2. 使用本機環境；可用 Local checkout 或 Worktree，但不得直接在 `main` 開發。
+3. 讀 `AGENTS.md` 與必讀文件。
+4. 認領 Issue #14。
+5. 使用 `codex/14-m1-platform` 或 Issue 核准的 feature branch。
+6. 實作網站、Domain、Mock engine、Staff UI、測試與整合。
+7. 執行 Typecheck、Lint、Tests 與 Production Build。
+8. 定期 Commit、Push 並更新 `docs/workstreams/CODEX.md`。
+9. 建立 Draft PR。
+10. 回應 GPT Review，直到驗收完成。
 
-- 將已確認內容整理成文件
-- 比較公開方案並形成研究報告
-- 製作非程式交付物
-- 協助人工驗收或摘要
+## 5. Codex 不需回規劃聊天取得下一步
 
-Work 不負責：
+Codex 的下一步來源依序為：
 
-- 主要網站引擎
-- 預約 Domain
-- 本機依賴安裝
-- 程式 Build 與測試
-- Git Worktree 中的日常開發
+1. Project Constitution
+2. Decisions
+3. Blueprint / Architecture / Roadmap
+4. Issue #14
+5. GPT 在 PR 的 Review comments 或新建缺陷 Issue
+6. `docs/workstreams/CODEX.md` 的 Exact next action
 
-## 6. Git 是交接面
+沒有 Issue 或 Review 依據的功能不得自行增加。
 
-不同視窗、模型或 Agent 之間不得依賴隱性跨視窗傳話。所有交接都透過：
+## 6. Git 是唯一交接面
+
+GPT 與 Codex 不依賴跨 Task 的隱性記憶。所有交接必須透過：
 
 - Repository 文件
 - GitHub Issues
 - Branch / Commit
 - Pull Requests
 - Review comments
+- Durable work logs
 
-完成以上紀錄後，新的 Codex 任務應能單獨從 Git 還原完整上下文。
+新的 GPT 或 Codex Task 應能只讀 Git 還原完整上下文。
+
+## 7. 本機程式與正式資料限制
+
+- 程式、依賴、測試、Build 與除錯由 Codex 本機環境執行。
+- 真實 API Key、Token、付款資料與客戶個資不得提交。
+- M1 只使用 fictional Mock Data。
+- 正式預約、付款、Calendar、通知與會員供應商未核准前不得啟用。

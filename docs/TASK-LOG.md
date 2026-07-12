@@ -1,94 +1,113 @@
 # DUM BARBERSHOP Platform — Task Log
 
-最後初始化：2026-07-12（Asia/Taipei）  
+最後更新：2026-07-12（Asia/Taipei）  
 目前 Milestone：M1 — Local Framework with Mock Data  
-父任務：Issue #2  
-協調：Issue #7  
-最終整合：Issue #8
+父任務：Issue #2
 
-此檔案是里程碑級儀表板，不取代各工作軌的詳細日誌。各窗口日常只更新自己的 `docs/workstreams/M1-*.md`，避免多人同時衝突；Window C / Integrator 在 Gate 或合併時更新本檔。
+本檔案是里程碑級儀表板。詳細續接資訊位於角色日誌：
 
----
+- GPT：`docs/workstreams/GPT.md`
+- Codex：`docs/workstreams/CODEX.md`
 
 ## M1 Dashboard
 
-| Workstream | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
+| Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
-| A — Platform & Public | #4 | `work/4-platform-public` | READY | A0 `BOOTSTRAP_READY` pending | `docs/workstreams/M1-A.md` | Scaffold, theme, shared UI, public pages |
-| B — Domain & Engine | #5 | `work/5-domain-engine` | READY | B0 `DOMAIN_CONTRACT_READY` pending | `docs/workstreams/M1-B.md` | Models, mock booking engine, adapters, tests |
-| C — Booking & Staff | #6 | `work/6-booking-staff` | READY | C0 `UI_INTEGRATION_READY` pending | `docs/workstreams/M1-C.md` | Booking flow, staff UI, integration |
-| M1 Integration Gate | #8 | integration branch decided at Gate | BLOCKED_DEPENDENCY | Waiting for A/B/C PRs | This file + Issue #8 | Merge, validate, docs, final M1 PR |
+| GPT — Planning & QA | #13 | documentation / review branch as needed | READY | `GPT_BASELINE_READY` pending | `docs/workstreams/GPT.md` | Specs, content, Issues, QA, PR review |
+| Codex — Implementation | #14 | `codex/14-m1-platform` | READY | `SCAFFOLD_READY` pending | `docs/workstreams/CODEX.md` | Complete code, engine, UI, tests and integration |
 
----
+## Codex implementation gates
 
-## Required Gate Evidence
-
-### A0 — BOOTSTRAP_READY
+### 1. SCAFFOLD_READY
 
 - Commit SHA:
-- PR:
-- Install command:
-- Dev command:
+- Draft PR:
+- Package manager / lockfile:
+- Install:
+- Dev:
 - Typecheck:
 - Lint:
 - Build:
 
-### B0 — DOMAIN_CONTRACT_READY
+### 2. DOMAIN_READY
 
 - Commit SHA:
-- PR:
 - Models exported:
-- Booking engine entry points:
-- Adapter ports:
+- Availability engine:
+- Status transition API:
+- Adapter ports / Mock repositories:
 - Tests:
 
-### C0 — UI_INTEGRATION_READY
+### 3. PUBLIC_SITE_READY
 
 - Commit SHA:
-- PR:
-- Booking flow status:
-- Staff prototype status:
-- Domain integration status:
-- UI checks:
+- Public routes:
+- Shared UI / tokens:
+- Mobile navigation:
 
-### M1 — FINAL_VALIDATION
+### 4. BOOKING_STAFF_READY
+
+- Commit SHA:
+- Booking flow:
+- Staff Prototype:
+- Domain integration:
+- Error / empty / loading states:
+
+### 5. M1_VALIDATION_READY
 
 - Integration commit:
-- Final PR:
+- Final Draft PR:
 - Typecheck:
 - Lint:
 - Tests:
 - Production build:
-- Mobile smoke test:
+- Mobile smoke:
 - Secret / real-data check:
 - README updated:
 - Remaining limitations:
 
----
+## GPT gates
 
-## Merge Order
+### GPT_BASELINE_READY
 
-1. Workstream A
-2. Workstream B
-3. Workstream C after syncing A + B
-4. Issue #8 final integration and validation
+- Issue #14 scope reviewed:
+- Blueprint coverage:
+- Reserved decisions protected:
+- QA checklist ready:
 
-A and B may swap order if their PRs are independent and conflict-free. C must integrate the current contracts rather than introducing duplicates.
+### GPT_PR_REVIEW_COMPLETE
 
----
+- PR reviewed against Constitution / Decisions / Blueprint:
+- Functional findings:
+- UI / content findings:
+- Security / data findings:
+- Required fixes resolved:
+- Acceptance recommendation:
 
-## Current Owner Decisions Blocking M1
+## Work order
 
-None. M1 uses Mock Data and disabled placeholders for all reserved business rules.
+1. GPT confirms the implementation baseline and QA checklist in Issue #13.
+2. Codex executes Issue #14 from scaffold through complete M1 validation.
+3. Codex opens a Draft PR and records evidence.
+4. GPT reviews the PR and creates concrete review comments / defects.
+5. Codex resolves findings and re-runs checks.
+6. GPT records acceptance and updates Roadmap / Task Log.
+7. Approved PR merges into `main`.
 
-Any new Owner decision request must be recorded in the relevant Issue and `docs/DECISIONS.md`; it should block only the affected portion, not unrelated work.
+GPT work does not need to block Codex startup when the Blueprint and Issue #14 are already sufficient. Both roles can proceed, but Git remains the only coordination surface.
 
----
+## Current Owner decisions blocking M1
 
-## Log Update Rules
+None. M1 uses fictional Mock Data and disabled placeholders for unresolved business policies.
 
-- Each window updates only its own detailed log during normal work.
-- Each Gate must be recorded in the related Issue comment with a commit SHA.
-- Integrator updates this dashboard after a Gate, PR merge, or final validation.
-- A status without a remote Commit / PR is not considered durable progress.
-- Chat messages never override this file or the Issues.
+## Durable progress rules
+
+- A status without a Git Commit, pushed branch, Issue checkpoint or PR is not durable progress.
+- GPT updates its own log and Issue #13.
+- Codex updates its own log and Issue #14.
+- Before quota exhaustion or task closure, record Last good commit, Exact next action, resume steps and checks.
+- Chat messages never override this file or GitHub Issues.
+
+## Superseded execution model
+
+The previous three-workstream Issues #4–#8 and `docs/M1-THREE-WINDOW-PLAN.md` are historical only. They must not be used for new implementation work.

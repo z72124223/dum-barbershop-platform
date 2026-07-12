@@ -1,238 +1,150 @@
-# DUM BARBERSHOP Platform — Multi-Worker Protocol
+# DUM BARBERSHOP Platform — GPT / Codex Work Protocol
 
-版本：1.0  
+版本：2.0  
 狀態：Required
 
-本文件規範 Owner、規劃視窗、GPT Work、Codex、人類開發者與其他 Agent 如何共同工作。
-
----
+本文件規範 Owner、GPT 與 Codex 如何透過 Git 共同完成專案。
 
 ## 1. 角色
 
 ### Owner
 
-- 最終商業與責任決策者
-- 核准 Frozen Core、營運政策、會員、訂金、個資與正式上線
-- 對 `Needs Owner Decision` 項目做最終決定
+- 最終商業與責任決策者。
+- 核准 Frozen Core、營運政策、會員、訂金、個資、正式供應商與上線。
+- 對 `Needs Owner Decision` 項目做最終決定。
 
-### Planner / Architect
+### GPT — Issue #13
 
-- 將 Owner 想法整理成 Git 文件、Issue 與驗收條件
-- 維護 Blueprint、Decisions、Roadmap、Architecture 與工作分配
-- 不直接替 Owner 決定保留事項
-- 不以聊天內容取代 Git 紀錄
+- 維護 Blueprint、Decisions、Roadmap、Architecture、Issues 與驗收條件。
+- 整理品牌內容、資料需求與 QA checklist。
+- 審查 Codex PR 是否符合 Git 規格。
+- 將程式修改要求寫成 Review comments 或缺陷 Issues。
+- 維護 GPT durable log 與里程碑 Task Log。
+- 不直接建立平行程式版本。
 
-### Implementer / Codex
+### Codex — Issue #14
 
-- 從本機環境實作程式
-- 依 Issue 與 Repository 文件工作
-- 使用自己的 branch / worktree
-- 執行安裝、測試、Lint、Build 與本機驗證
-- 將程式、設定、文件與 Checkpoint 推回 Git
+- 在本機環境實作所有程式碼、預約引擎、UI、測試與整合。
+- 維護 feature branch、Commit、Push、checks 與 Draft PR。
+- 維護 Codex durable log。
+- 回應 GPT Review。
+- 不自行決定 Reserved 商業規則。
 
-### Work / Research Window
+## 2. 規格優先順序
 
-- 可協助研究、比較、文件、表格或非程式成果
-- 不假設會自動轉為 Codex
-- 不得取代需要本機程式碼、終端機、測試與 Build 的流程
+任何工作都必須依 `docs/PROJECT-CONSTITUTION.md` 的優先順序判斷。
 
-### Integrator
-
-- 依已核准的合併順序整合多工作軌
-- 解決衝突時保留 Frozen Core 與已確認 contract
-- 執行完整驗證
-- 更新 Task Log、README 與整合 Issue
-
----
-
-## 2. 工作來源優先順序
-
-任何人或 Agent 執行前都必須依 `PROJECT-CONSTITUTION.md` 的優先順序判斷規格。
-
-實作任務必須同時具備：
+正式程式工作必須同時具備：
 
 1. Repository 文件依據
 2. GitHub Issue
-3. 明確驗收條件
-4. 明確工作範圍與檔案所有權
-5. 可識別的 branch / worktree
+3. 明確 Scope / Out of scope
+4. Acceptance criteria
+5. Validation requirements
+6. Reserved / Owner decision guardrails
 
-沒有 Issue 的想法不能直接變成功能。
+沒有 Issue 的想法不得直接變成功能。
 
----
+## 3. GPT 工作流程
 
-## 3. Issue 規則
+1. 讀 `AGENTS.md` 與必讀文件。
+2. 讀 Issue #13 與 `docs/workstreams/GPT.md`。
+3. 更新規格、Issues、內容或 QA。
+4. 查看 Codex Issue #14、checkpoints 與 Draft PR。
+5. Review 時引用具體檔案、行為、規格與驗收條件。
+6. 將所有要求正式留在 GitHub，不只留在聊天。
+7. 更新 GPT 日誌與 Task Log。
 
-每個 Issue 至少包含：
+## 4. Codex 工作流程
 
-- Objective
-- Required reading
-- Scope
-- Out of scope
-- File / directory ownership
-- Dependencies and Gates
-- Acceptance criteria
-- Validation requirements
-- Owner decisions that must remain reserved
+1. 讀 `AGENTS.md` 與必讀文件。
+2. 認領 Issue #14。
+3. 使用 `codex/14-m1-platform` 或 Issue 核准 branch。
+4. 從最新 `main` 開始，不直接修改 `main`。
+5. 依 checkpoint 順序完成 Scaffold、Domain、Public Site、Booking / Staff、Validation。
+6. 定期 Commit、Push、更新 Codex 日誌與 Issue comment。
+7. 建立 Draft PR，列出 checks、限制與待決策項目。
+8. 回應 GPT Review 並重新驗證。
 
-執行者開始前必須在 Issue 留下：
+## 5. Branch 與 Worktree
 
-```text
-CLAIMED
-Window / Agent:
-Branch:
-Base commit:
-Planned first checkpoint:
-```
+- M1 Codex 預設 branch：`codex/14-m1-platform`。
+- 只有一個 Codex 程式實作工作，不再使用三個平行 branches。
+- Codex 可使用 Local checkout 或 Worktree；不得直接在 `main` 開發。
+- 不得為同一 Issue 建立第二套程式實作、第二個 lockfile 或重複 Domain。
+- GPT 文件修改可使用獨立 documentation branch / PR，或透過受控文件更新；不得覆蓋 Codex 未合併程式。
 
-如果已有其他窗口認領同一工作，不得另開平行實作。
+## 6. 責任邊界
 
----
+### GPT 主要擁有
 
-## 4. Branch 與 Worktree
+- `docs/**` 的產品規格、決策、Roadmap、QA 與工作流程
+- GitHub Issues、PR Review 與驗收紀錄
+- README 的產品與流程說明
 
-- 每個 Issue 使用獨立 branch。
-- 建議格式：`work/<issue-number>-<slug>` 或 `agent/<issue-number>-<slug>`。
-- 三個窗口不得使用同一 branch。
-- 原則上不得直接推送 `main`。
-- 可以使用 Git worktree 讓不同窗口同時在同一 Repository 的不同資料夾工作。
-- branch 必須定期同步 `main`，但不得以 force push 覆蓋其他人的已知工作。
+### Codex 主要擁有
 
----
+- `src/**`
+- package manager / lockfile
+- Build、Lint、Test、TypeScript 與框架設定
+- `.env.example`
+- README 的安裝、啟動、測試與 Build 指令
+- `docs/workstreams/CODEX.md`
 
-## 5. 檔案所有權
+需要跨責任範圍時，先在 Issue 或 PR 留下說明，避免靜默覆蓋。
 
-平行工作必須先定義檔案所有權。
+## 7. Checkpoints
 
-- 執行者只修改自己擁有的檔案。
-- 需要跨工作軌修改時，在 Issue 留下 `CROSS-STREAM REQUEST`。
-- 共用根設定、lockfile、Design Tokens、Domain Contracts 等只能有一個明確 owner。
-- 不得為避開協調而複製第二套型別、第二套 UI 元件、第二套設定或第二個 lockfile。
-
-M1 的具體所有權以 `docs/M1-THREE-WINDOW-PLAN.md` 為準。
-
----
-
-## 6. Gate 與依賴
-
-跨工作軌依賴使用具名 Gate，不靠聊天通知。
-
-Gate comment 必須包含：
+Codex checkpoint 至少記錄：
 
 - Gate 名稱
-- Commit SHA
-- 可使用的輸出或 contract
-- 已執行的 checks
+- Branch 與 Commit SHA
+- 完成輸出
+- checks
 - 已知限制
-
-等待 Gate 的窗口將狀態設為 `BLOCKED_DEPENDENCY`，但仍可繼續不依賴該 Gate 的範圍。
-
-M1 Gate：
-
-- `BOOTSTRAP_READY`
-- `DOMAIN_CONTRACT_READY`
-- `UI_INTEGRATION_READY`
-- `FINAL_VALIDATION`
-
----
-
-## 7. Checkpoint 與進度日誌
-
-每個工作軌必須有自己的 Durable Log。
-
-Checkpoint 至少記錄：
-
-- Status
-- Branch
-- Base / Last synced main SHA
-- Last good commit SHA
-- Completed
-- In progress
 - Exact next action
-- Resume commands
-- Checks passed / failing / not run
-- Blockers
-- Uncommitted changes
-- PR
 
-使用量將盡、視窗中斷或換人接手時，必須依 `docs/CONTINUITY-PROTOCOL.md` Commit、Push、更新日誌與 Issue。
+GPT checkpoint 至少記錄：
 
----
+- 已完成規格 / QA / Review
+- 正在審查的 PR 與 Commit
+- 尚待 Codex 修正項目
+- Owner decision / blocker
+- Exact next action
 
-## 8. Pull Request 規則
+完整續接規則以 `docs/CONTINUITY-PROTOCOL.md` 為準。
 
-預設建立 Draft PR。
+## 8. Review 規則
 
-PR 至少包含：
+GPT Review 必須具體：
 
-- 關聯 Issue
-- What changed
-- Why
-- User / developer impact
-- Files or modules owned
-- Validation commands and results
-- Screenshots or equivalent UI evidence（有 UI 時）
-- Known limitations
-- Cross-stream dependencies
-- Owner decisions not implemented
-- Resume or follow-up information
+- 說明違反哪個文件、Issue 或驗收條件。
+- 說明預期與實際行為。
+- 提供重現步驟或可驗證標準。
+- 區分 Required fix、Suggestion 與 Owner decision。
 
-PR 未通過驗收條件前不得宣稱 Issue 完成。
+Codex 必須：
 
----
+- 回覆每個 Required fix。
+- 修改後重跑相關 checks。
+- 不得用刪除有效功能或繞過測試來消除錯誤。
 
-## 9. Merge 與整合
+## 9. 阻塞與決策
 
-- 優先使用小而明確的 PR。
-- 依工作計畫的 merge order 整合。
-- Integrator 解決衝突時不得擅自改變已核准 Domain Contract 或 Frozen Core。
-- 若 contract 必須變更，先建立 Issue / ADR，通知受影響工作軌，再修改。
-- 合併後更新 Task Log 與相關工作日誌。
+- 需要 Owner 決策時，GPT 更新 `docs/DECISIONS.md` 與 Issue。
+- Codex 使用 Mock、disabled 或 `TODO(owner-decision)`，繼續其他工作。
+- 技術阻塞由 Codex 記錄重現方式、錯誤、已嘗試方法與 Exact next action。
+- GPT 不以聊天中的模糊建議取代正式 Issue / Review。
 
----
+## 10. 完成與合併
 
-## 10. Owner Decision
+M1 PR 合併前：
 
-遇到以下情況需 Owner 決策：
+- Codex Issue #14 驗收與 checks 完整。
+- GPT 完成對 Constitution、Decisions、Blueprint、Architecture 與 Issue 的 Review。
+- Required fixes 已解決。
+- 無秘密、真實客戶資料或未核准正式整合。
+- README 與 durable logs 更新。
+- GPT 在 Issue #13 記錄接受或明確剩餘阻塞。
 
-- 影響顧客權益
-- 影響店家責任
-- 付款、訂金、退款
-- 會員、儲值、點數
-- 正式服務與價格
-- 個資保存與員工權限
-- 正式供應商選擇
-- Frozen Core 變更
-
-處理方式：
-
-1. 在 Issue 留下 `OWNER DECISION REQUIRED`
-2. 說明選項、影響與最保守預設
-3. 將受影響部分 disabled / Mock / TODO
-4. 繼續其他不受影響的工作
-5. Owner 決策後寫入 `docs/DECISIONS.md`
-
----
-
-## 11. 安全與資料
-
-- 不提交 API Key、Token、密碼、憑證與真實客戶資料。
-- `.env.example` 只能包含變數名稱與假值說明。
-- 測試與截圖使用明顯虛構資料。
-- 發現秘密或真實資料時立即停止 Push，先清理與記錄。
-- 外部整合失敗不得造成預約無聲遺失。
-
----
-
-## 12. 完成與交接
-
-單一工作軌完成條件：
-
-- 驗收條件完成
-- Checks 通過或限制已明確揭露
-- 工作已 Commit / Push
-- 日誌更新
-- Draft PR 已建立
-- 可由全新窗口只依 Git 重現與接手
-
-整個里程碑只有在 Integration Gate 通過後才完成。
+PR 合併後，GPT 更新 Roadmap、Task Log 與下一階段 Issues。

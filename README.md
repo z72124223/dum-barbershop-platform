@@ -4,7 +4,7 @@ DUM BARBERSHOP website, booking and multi-staff operation platform.
 
 ## Repository authority
 
-This private repository is the project's **single source of truth** for product decisions, architecture, implementation, review, and release history.
+This private repository is the project's **single source of truth** for product decisions, architecture, implementation, review and release history.
 
 Chat messages and local notes are not authoritative until they are recorded in this repository.
 
@@ -19,47 +19,47 @@ Core documents:
 3. [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md)
 4. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 5. [`docs/ROADMAP.md`](docs/ROADMAP.md)
-6. [`docs/EXECUTION-MODE.md`](docs/EXECUTION-MODE.md)
-7. [`docs/WORK-PROTOCOL.md`](docs/WORK-PROTOCOL.md)
-8. [`docs/LOCAL-ENGINE.md`](docs/LOCAL-ENGINE.md)
+6. [`docs/TWO-ROLE-WORK-MODEL.md`](docs/TWO-ROLE-WORK-MODEL.md)
+7. [`docs/EXECUTION-MODE.md`](docs/EXECUTION-MODE.md)
+8. [`docs/WORK-PROTOCOL.md`](docs/WORK-PROTOCOL.md)
+9. [`docs/CONTINUITY-PROTOCOL.md`](docs/CONTINUITY-PROTOCOL.md)
+10. [`docs/TASK-LOG.md`](docs/TASK-LOG.md)
 
-M1 coordination:
+Role logs:
 
-- [`docs/M1-THREE-WINDOW-PLAN.md`](docs/M1-THREE-WINDOW-PLAN.md)
-- [`docs/CONTINUITY-PROTOCOL.md`](docs/CONTINUITY-PROTOCOL.md)
-- [`docs/TASK-LOG.md`](docs/TASK-LOG.md)
-- [`docs/workstreams/M1-A.md`](docs/workstreams/M1-A.md)
-- [`docs/workstreams/M1-B.md`](docs/workstreams/M1-B.md)
-- [`docs/workstreams/M1-C.md`](docs/workstreams/M1-C.md)
+- [`docs/workstreams/GPT.md`](docs/workstreams/GPT.md)
+- [`docs/workstreams/CODEX.md`](docs/workstreams/CODEX.md)
 
 ## Current state
 
 The project is in **M1 — Local Framework with Mock Data**.
 
-M1 is split across three independent Codex / local work windows:
+M1 now uses two official work roles:
 
-| Window | Issue | Responsibility |
+| Role | Issue | Responsibility |
 |---|---:|---|
-| A | #4 | Platform scaffold, dark design system, shared UI, public pages |
-| B | #5 | Domain models, mock booking engine, adapters, tests |
-| C | #6 | Booking flow, staff prototype, integration and validation |
+| GPT | #13 | Specifications, content, Git tasks, QA and PR review |
+| Codex | #14 | Complete local codebase, booking engine, UI, tests, build and integration |
 
 - Parent Epic: Issue #2
-- Coordination: Issue #7
-- Final Integration Gate: Issue #8
+- Codex branch: `codex/14-m1-platform`
+- Task dashboard: `docs/TASK-LOG.md`
 
-No production booking provider, payment system, membership policy, real customer database, or calendar integration has been approved yet.
+The previous three-window Issues #4–#8 are superseded and must not be used for new implementation work.
+
+No production booking provider, payment system, membership policy, real customer database or calendar integration has been approved yet.
 
 ## Continuity
 
-Every work window must maintain a remote branch and durable work log. Before quota exhaustion, shutdown, or handoff, it must Commit, Push, update its `docs/workstreams/*.md` file and leave a `CHECKPOINT` comment in its Issue.
+GPT and Codex each maintain one durable work log. Before quota exhaustion, shutdown or handoff, the active role must update its log and leave a `CHECKPOINT` in its Issue.
 
-A new window resumes from Git and does not require the previous chat context.
+Codex must also Commit and Push all recoverable code to its remote feature branch. A new Task resumes from Git and does not require previous chat context.
 
 ## Repository
 
 - Owner: `z72124223`
 - Visibility: Private
 - Default branch: `main`
-- Implementation: Codex local environment / local worktrees
-- Work unit: GitHub Issue → dedicated branch → checkpoints → draft PR → review → merge
+- Product / QA role: GPT
+- Implementation: Codex local environment
+- Work unit: GitHub Issue → durable log → feature branch / review → checkpoints → draft PR → review → merge
