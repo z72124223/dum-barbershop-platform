@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: none
+- Uncommitted changes: `next-env.d.ts` generated route type path plus this log update until checkpoint commit
 
 ## Current objective
 
@@ -83,7 +83,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Exact next action
 
-Complete the in-progress merge commit, run the full existing pnpm checks, and publish the `SCAFFOLD_MIGRATED` checkpoint in Issue #14.
+Create the multi-staff Domain models and barrel exports under `src/domain/**`, then add availability and booking-transition tests before publishing `DOMAIN_READY`.
 
 ## Resume commands
 
@@ -108,7 +108,7 @@ During merge conflicts:
 ## Current checks
 
 - Inherited scaffold checks: PASS at `20004c615876c3beb7110bec2e0a97764c21735a`
-- Checks after current-main merge: not run
+- Checks after current-main merge `4a7c263edc5d6e80e82386bd86f116271443a873`: install, typecheck, lint, test and production build PASS
 - Domain tests: not run
 - Booking / Staff tests: not run
 - Mobile smoke: not run
@@ -121,3 +121,18 @@ During merge conflicts:
 ## Owner decision needed
 
 - None required to continue M1.
+
+## SCAFFOLD_MIGRATED checkpoint
+
+- Status: `IN_PROGRESS`
+- Base / last synced main SHA: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
+- Last good code commit: `4a7c263edc5d6e80e82386bd86f116271443a873`
+- Last checkpoint time: `2026-07-12 22:51:33 +08:00`
+- Completed: latest governance merged from `origin/main`; conflicts resolved in favor of main governance while preserving the inherited Next.js scaffold and public-site code.
+- Checks passed: `pnpm install`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`.
+- Production routes: `/`, `/about`, `/barbers`, `/contact`, `/membership`, `/policies`, `/services`, `/works`.
+- Exact next action: create multi-staff Domain models and exports under `src/domain/**`, then add availability and transition tests.
+- Resume steps: `git fetch --all --prune`; `git switch codex/14-m1-platform`; `git pull --ff-only`; `pnpm install`; `pnpm typecheck`; `pnpm lint`; `pnpm test`; `pnpm build`.
+- Known blockers: none.
+- Owner decision needed: none for M1 Mock implementation.
+- Draft PR: none yet.
