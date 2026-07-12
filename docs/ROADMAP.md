@@ -7,8 +7,11 @@
 - Define ownership and multi-worker rules
 
 Exit criteria:
+
 - Core documents exist on `main`
 - Work begins only from GitHub Issues
+
+Status: **Complete**
 
 ## Phase 1 — Local Framework
 
@@ -22,10 +25,53 @@ Exit criteria:
 
 No production integrations are allowed in this phase.
 
+### M1 parallel workstreams
+
+M1 is executed through three independent windows:
+
+1. **M1-A / Issue #4 — Platform & Public Experience**
+   - Local scaffold
+   - Dark design system
+   - Shared UI and global shell
+   - Public site pages
+
+2. **M1-B / Issue #5 — Domain & Mock Engine**
+   - Multi-staff domain models
+   - Availability calculation
+   - Booking status transitions
+   - Mock data and adapters
+   - Domain tests
+
+3. **M1-C / Issue #6 — Booking, Staff & Integration**
+   - Customer booking flow
+   - Staff prototype
+   - Domain integration
+   - Final M1 validation
+
+Coordination: Issue #7  
+Final Integration Gate: Issue #8  
+Detailed plan: `docs/M1-THREE-WINDOW-PLAN.md`  
+Continuity: `docs/CONTINUITY-PROTOCOL.md`
+
+M1 exit criteria:
+
+- A0 `BOOTSTRAP_READY` recorded
+- B0 `DOMAIN_CONTRACT_READY` recorded
+- C0 `UI_INTEGRATION_READY` recorded
+- Typecheck, lint, tests and production build pass after integration
+- Mobile-first Mock booking flow is usable
+- Staff Mock workflow is usable
+- No real provider, payment, customer data or secret is connected
+- README and Task Log reflect the reproducible local state
+
+Status: **Active**
+
 ## Phase 2 — Brand Content
 
 - Add approved logo, photography, copy, real services, staff profiles, prices, address, and hours
 - Finalize design tokens
+
+Starts after M1 Integration Gate passes.
 
 ## Phase 3 — Booking Provider Evaluation and Integration
 
@@ -67,8 +113,13 @@ Starts only after Owner approves the membership model.
 
 ## Current milestone
 
-`M0: Repository governance baseline`
+`M1: Local UI and domain framework with mock data — ACTIVE`
 
-Next implementation milestone after approval:
+Current execution sources:
 
-`M1: Local UI and domain framework with mock data`
+- Parent Epic: Issue #2
+- Workstream A: Issue #4
+- Workstream B: Issue #5
+- Workstream C: Issue #6
+- Coordination: Issue #7
+- Integration Gate: Issue #8
