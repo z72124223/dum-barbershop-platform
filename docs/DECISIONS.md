@@ -88,6 +88,15 @@
 - 操作方式：Work 與 Codex 不假設自動切換；需要程式開發時由 Owner 直接選擇 Codex。
 - 交接方式：Codex 只依 Git 文件、Issue、Branch、Commit、PR 與 Review 工作，不依賴規劃聊天視窗。
 
+### D-015 — 專案只保留 GPT 與 Codex 兩個工作角色
+
+- 狀態：Accepted
+- 決策：取消 M1 的 Window A / B / C 三個平行 Codex 工作軌，改為兩個正式工作角色。
+- GPT：Issue #13，負責規格、內容、Git 任務、QA、驗收與 PR Review。
+- Codex：Issue #14，負責原 A / B / C 的全部程式範圍、引擎、UI、測試、Build 與整合。
+- 歷史處理：Issues #4–#8 與 `docs/M1-THREE-WINDOW-PLAN.md` 標記為 Superseded，不得再用於新實作。
+- 交接：兩個角色只透過 Git 文件、Issues、Commit、PR、Review 與 durable logs 協作。
+
 ---
 
 ## Reserved
@@ -164,3 +173,7 @@ PostgreSQL 類型資料庫為優先候選，實際託管方案待評估。
 ### X-004 — 將第三方供應商 SDK 散落在整個程式
 
 原因：會造成供應商鎖定並破壞可替換性。
+
+### X-005 — M1 同時啟動三個 Codex 實作者
+
+原因：Owner 決定簡化為單一 Codex 程式實作與單一 GPT 規格 / QA 工作，降低介面混淆、分支衝突與續接成本。

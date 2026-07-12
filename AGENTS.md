@@ -1,6 +1,6 @@
 # AGENTS.md — DUM BARBERSHOP Platform
 
-本檔案適用於所有人類開發者、GPT Work、Codex、其他 AI Agent 與自動化工具。
+本檔案適用於 Owner、GPT、Codex、人類開發者與其他 Agent。
 
 ## 1. 唯一最高標準
 
@@ -13,41 +13,49 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 3. `docs/BLUEPRINT.md`
 4. `docs/ARCHITECTURE.md`
 5. `docs/ROADMAP.md`
-6. `docs/EXECUTION-MODE.md`
-7. `docs/WORK-PROTOCOL.md`
-8. `docs/M1-THREE-WINDOW-PLAN.md`（M1 期間必讀）
+6. `docs/TWO-ROLE-WORK-MODEL.md`
+7. `docs/EXECUTION-MODE.md`
+8. `docs/WORK-PROTOCOL.md`
 9. `docs/CONTINUITY-PROTOCOL.md`
 10. `docs/TASK-LOG.md`
-11. 與任務相關的 GitHub Issue
-12. 該工作軌的 `docs/workstreams/*.md`
+11. 與角色相關的 Issue
+12. 角色工作日誌：`docs/workstreams/GPT.md` 或 `docs/workstreams/CODEX.md`
 
-聊天、口頭描述、暫存筆記或本機未提交檔案，若未寫入 Git，不構成正式規格。
+聊天、口頭描述、暫存筆記或未提交本機內容，若未寫入 Git，不構成正式規格。
 
-## 2. 主要實作模式
+## 2. 兩個正式工作角色
 
-- 本專案從 M1 起的主要程式實作者是 **Codex**。
-- 程式開發優先使用 **Codex 本機環境**。
-- Work 與 Codex 不會被假設為自動切換；需要寫程式、執行終端、測試或 Build 時，必須直接使用 Codex。
-- ChatGPT Work 只作為選用的文件、研究與非程式交付工具，不得取代本機 Codex 程式流程。
-- 詳細規則以 `docs/EXECUTION-MODE.md` 為準。
+### GPT — Issue #13
 
-## 3. M1 三工作窗口
+GPT 負責：
 
-M1 固定拆為三個工作軌：
+- 規格、藍圖、決策、Roadmap 與 Architecture 維護
+- 將 Owner 想法整理成 GitHub Issues 與驗收條件
+- 品牌內容、頁面文案、資料需求與 QA checklist
+- 檢查 Reserved / Needs Owner Decision
+- 審查 Codex PR、建立缺陷與後續任務
+- 維護 `docs/workstreams/GPT.md` 與里程碑級 `docs/TASK-LOG.md`
 
-- Window A / Issue #4：Platform & Public Experience
-- Window B / Issue #5：Domain & Mock Engine
-- Window C / Issue #6：Booking, Staff & Integration
+GPT 原則上不得直接修改 `src/**` 正式程式碼、lockfile、Build 或測試設定。需要改程式時，以 Issue 或 PR Review 交由 Codex。
 
-每個窗口必須：
+### Codex — Issue #14
 
-- 使用自己的 Issue、branch / worktree 與工作日誌
-- 只修改 `docs/M1-THREE-WINDOW-PLAN.md` 分配給自己的檔案
-- 在開始時於 Issue 留下 `CLAIMED`
-- 在 Gate 時留下 Commit SHA
-- 在中斷前依 `docs/CONTINUITY-PROTOCOL.md` 建立 Durable Checkpoint
+Codex 負責：
 
-禁止三個窗口共用分支、重複建立 scaffold、重複建立 domain types 或建立第二個 lockfile。
+- 所有本機程式碼、網站、預約引擎與 Staff UI
+- Domain、Mock Data、Adapter ports、測試與整合
+- 安裝依賴、終端機、Typecheck、Lint、Tests、Build 與除錯
+- `.env.example`、本機啟動方式與程式相關 README
+- 維護 `docs/workstreams/CODEX.md`
+- 建立 Draft PR 並處理 GPT Review
+
+M1 不再拆成三個平行 Codex 工作軌。Codex 負責原 A、B、C 的完整程式範圍。
+
+## 3. Task 與模式
+
+- Work / Codex 是同一 Task 內的模式切換，不會自動建立第二個工作者。
+- 專案邏輯上只需要兩份工作：GPT 工作與 Codex 工作。
+- GPT 與 Codex 透過 Git 文件、Issues、Commit、PR 與 Review 交接，不依賴跨視窗記憶。
 
 ## 4. 不得擅自越權
 
@@ -56,49 +64,44 @@ M1 固定拆為三個工作軌：
 - 訂金金額與退款規則
 - 取消、遲到、爽約與插單政策
 - 會員、儲值、點數及優惠權益
-- 正式付款供應商
-- 正式預約供應商
+- 正式付款與正式預約供應商
 - 個資保存期限與員工可見範圍
-- 正式服務價格、服務時間與設計師名單
-- 分店與權限政策
-- 任何會影響客人權益或店家責任的自動決策
+- 正式服務價格、時間與設計師名單
+- 分店、權限與任何影響顧客權益的自動決策
 
-不確定時，保留 `TODO(owner-decision)`，並建立或更新 GitHub Issue。只停止受影響部分，不得因此停止所有無關工作。
+不確定時標記 `TODO(owner-decision)`，只停止受影響部分，繼續其他可執行工作。
 
-## 5. 工作方式
+## 5. Git 工作方式
 
-- 每個開發任務必須有 GitHub Issue。
-- 每個 Agent 使用獨立分支；禁止多人同時在同一分支工作。
-- 分支格式：`agent/<issue-number>-<slug>` 或 `work/<issue-number>-<slug>`。
-- 實作前在 Issue 留下認領訊息，避免重複工作。
+- 每個工作必須有 GitHub Issue。
 - 原則上不得直接推送 `main`。
-- 變更透過 Draft Pull Request 合併；PR 必須說明變更、影響、驗證、限制與未解決事項。
-- 若程式行為與文件衝突，先停止擴大實作，以 `PROJECT-CONSTITUTION.md` 與 `DECISIONS.md` 為準。
-- 完成目前 Issue 後，可依 Repository 中下一個明確且未阻擋的 Issue 繼續；不得自行發明沒有 Issue 的功能。
-- 需要跨工作軌修改時，先在 Issue 留下 `CROSS-STREAM REQUEST`。
+- Codex 使用獨立 feature branch；M1 預設為 `codex/14-m1-platform`。
+- 變更透過 Draft Pull Request 合併。
+- PR 必須說明變更、影響、驗證、限制與未解決事項。
+- GPT 以 Review comments 或缺陷 Issues 要求程式修改，不直接建立平行程式版本。
+- 沒有 Issue 的功能不得自行實作。
 
-## 6. 中斷與使用量不足
+## 6. 使用量不足與續接
 
-- 不得只留下聊天記憶或未 Push 的本機進度。
-- 使用量將盡、視窗結束或換窗口前，必須 Commit、Push、更新自己的工作日誌並在 Issue 留下 `CHECKPOINT`。
-- 日誌必須記錄 `Last good commit SHA`、`Exact next action`、恢復指令、已通過與未通過的檢查。
-- 新窗口接手時沿用同一個 Issue、branch 與工作日誌，不得另建平行實作。
-- 完整規則以 `docs/CONTINUITY-PROTOCOL.md` 為準。
+GPT 與 Codex 都必須遵守 `docs/CONTINUITY-PROTOCOL.md`：
 
-## 7. 本機引擎原則
+- 將可提交進度 Commit 並 Push。
+- 更新自己的 durable work log。
+- 在自己的 Issue 留下 `CHECKPOINT`。
+- 記錄 Last good commit SHA、Exact next action、恢復步驟與 checks。
+- 新 Task 沿用同一個 Issue、branch、PR 與日誌，不另開平行實作。
 
-實際網站、預約核心、整合與測試皆從本機工作環境實作。Git 負責版本、規格、協作與審核。
+## 7. 本機引擎與安全
 
-- 不允許只有雲端聊天紀錄而沒有可重現程式碼。
-- 不允許把 API Key、密碼、Token 或真實客戶資料提交到 Git。
-- 所有必要環境變數必須記錄在 `.env.example`，但不得含真實值。
+- 實際網站、預約核心、整合與測試由 Codex 在本機環境實作。
+- GitHub 管理規格、任務、版本、Review 與歷史。
+- API Key、密碼、Token、付款金鑰與真實客戶資料不得進 Git。
+- 必要環境變數只在 `.env.example` 記錄名稱與說明，不含真實值。
 - 專案必須能依 README 在乾淨本機環境啟動。
 
 ## 8. 架構邊界
 
-第一階段採模組化架構，預約核心不得直接綁死單一第三方供應商。
-
-至少維持以下邊界：
+第一階段至少維持：
 
 - Website / Customer UI
 - Staff App / Staff UI
@@ -108,7 +111,7 @@ M1 固定拆為三個工作軌：
 - Notification Integration
 - Payment / Deposit Integration
 
-第三方服務必須經 Adapter 介面接入，方便替換。
+第三方服務一律透過 Adapter 介面接入，不得散落在 UI 或 Domain。
 
 ## 9. 完成定義
 
@@ -116,24 +119,24 @@ M1 固定拆為三個工作軌：
 
 - 符合 Issue 驗收條件
 - 不違反專案憲法與已確認決策
-- 通過相關型別、Lint、測試與 Build
+- 相關 Typecheck、Lint、Tests 與 Build 通過
 - 文件與工作日誌同步更新
-- 無真實秘密或客戶個資進入 Git
-- 所有工作已 Commit 並 Push
+- 所有可恢復工作已 Commit 並 Push
+- 無秘密或真實客戶資料進 Git
 - PR 清楚揭露限制與後續工作
-- 可由另一個全新窗口只讀 Git 後接手
+- 新 Task 能只讀 Git 後繼續
 
-## 10. Agent 回報格式
+## 10. 暫停或完成回報
 
-完成或暫停工作時至少回報：
+至少記錄：
 
-1. Issue 與工作軌
-2. 分支名稱
+1. 角色與 Issue
+2. Branch
 3. Last good commit SHA
-4. 修改檔案
-5. 完成功能
-6. 執行的驗證
-7. 尚未完成、阻塞或需要 Owner 決策的項目
+4. 修改內容
+5. 已完成項目
+6. Checks
+7. 阻塞或 Owner 決策
 8. Exact next action
-9. PR 連結或 Commit SHA
+9. PR 或 Commit
 10. Uncommitted changes 是否為 none
