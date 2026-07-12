@@ -14,22 +14,38 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Planning & QA | #13 | documentation / review branch as needed | READY | `GPT_BASELINE_READY` pending | `docs/workstreams/GPT.md` | Specs, content, Issues, QA, PR review |
-| Codex — Implementation | #14 | `codex/14-m1-platform` | READY | `SCAFFOLD_READY` pending | `docs/workstreams/CODEX.md` | Complete code, engine, UI, tests and integration |
+| Codex — Implementation | #14 | `codex/14-m1-platform` | READY | Existing scaffold imported; `SCAFFOLD_MIGRATED` pending | `docs/workstreams/CODEX.md` | Complete code, engine, UI, tests and integration |
+
+## Existing Codex code handoff
+
+The former Issue #4 branch produced valid code before the two-role model replaced the three-window workflow.
+
+- Former branch: `work/4-platform-public`
+- Consolidated Codex branch created from it: `codex/14-m1-platform`
+- Imported branch HEAD: `f4bbed09fa905e079478b0b9fe07506aa0ea35b3`
+- Last good code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
+- Package manager: pnpm 11.7.0
+- Existing install / typecheck / lint / test / build: PASS
+- Existing public routes: `/`, `/about`, `/barbers`, `/contact`, `/membership`, `/policies`, `/services`, `/works`
+- Required next action: merge latest `main` into `codex/14-m1-platform`, preserve code, keep latest governance files, re-run checks
+
+The former Issue #5 branch contains only claim / journal setup and no application or Domain code. Issue #6 did not begin. There is no additional code to migrate from them.
 
 ## Codex implementation gates
 
-### 1. SCAFFOLD_READY
+### 0. SCAFFOLD_MIGRATED
 
-- Commit SHA:
-- Draft PR:
-- Package manager / lockfile:
-- Install:
-- Dev:
-- Typecheck:
-- Lint:
-- Build:
+- Source code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
+- Consolidated branch: `codex/14-m1-platform`
+- Latest governance main to merge: `2e0f1f0eb95c713f92e456f76cfa4ae69d68cfd0`
+- Merge commit:
+- Install after merge:
+- Typecheck after merge:
+- Lint after merge:
+- Tests after merge:
+- Build after merge:
 
-### 2. DOMAIN_READY
+### 1. DOMAIN_READY
 
 - Commit SHA:
 - Models exported:
@@ -38,14 +54,15 @@
 - Adapter ports / Mock repositories:
 - Tests:
 
-### 3. PUBLIC_SITE_READY
+### 2. PUBLIC_SITE_READY
 
-- Commit SHA:
+- Inherited public code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
+- Verification / refinement commit:
 - Public routes:
 - Shared UI / tokens:
 - Mobile navigation:
 
-### 4. BOOKING_STAFF_READY
+### 3. BOOKING_STAFF_READY
 
 - Commit SHA:
 - Booking flow:
@@ -53,7 +70,7 @@
 - Domain integration:
 - Error / empty / loading states:
 
-### 5. M1_VALIDATION_READY
+### 4. M1_VALIDATION_READY
 
 - Integration commit:
 - Final Draft PR:
@@ -71,6 +88,7 @@
 ### GPT_BASELINE_READY
 
 - Issue #14 scope reviewed:
+- Existing scaffold handoff reviewed:
 - Blueprint coverage:
 - Reserved decisions protected:
 - QA checklist ready:
@@ -86,15 +104,16 @@
 
 ## Work order
 
-1. GPT confirms the implementation baseline and QA checklist in Issue #13.
-2. Codex executes Issue #14 from scaffold through complete M1 validation.
-3. Codex opens a Draft PR and records evidence.
-4. GPT reviews the PR and creates concrete review comments / defects.
-5. Codex resolves findings and re-runs checks.
-6. GPT records acceptance and updates Roadmap / Task Log.
-7. Approved PR merges into `main`.
+1. Codex merges current `main` into the inherited `codex/14-m1-platform` branch and records `SCAFFOLD_MIGRATED`.
+2. GPT confirms the implementation baseline and QA checklist in Issue #13.
+3. Codex completes Domain, Booking / Staff and full M1 validation in Issue #14.
+4. Codex opens a Draft PR and records evidence.
+5. GPT reviews the PR and creates concrete review comments / defects.
+6. Codex resolves findings and re-runs checks.
+7. GPT records acceptance and updates Roadmap / Task Log.
+8. Approved PR merges into `main`.
 
-GPT work does not need to block Codex startup when the Blueprint and Issue #14 are already sufficient. Both roles can proceed, but Git remains the only coordination surface.
+GPT work does not need to block Codex migration or implementation when Git requirements are already sufficient.
 
 ## Current Owner decisions blocking M1
 
@@ -110,4 +129,4 @@ None. M1 uses fictional Mock Data and disabled placeholders for unresolved busin
 
 ## Superseded execution model
 
-The previous three-workstream Issues #4–#8 and `docs/M1-THREE-WINDOW-PLAN.md` are historical only. They must not be used for new implementation work.
+The previous three-workstream Issues #4–#8 and `docs/M1-THREE-WINDOW-PLAN.md` are historical only. Their usable code has been explicitly migrated as described above.
