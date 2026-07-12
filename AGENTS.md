@@ -15,7 +15,11 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 5. `docs/ROADMAP.md`
 6. `docs/EXECUTION-MODE.md`
 7. `docs/WORK-PROTOCOL.md`
-8. 與任務相關的 GitHub Issue
+8. `docs/M1-THREE-WINDOW-PLAN.md`（M1 期間必讀）
+9. `docs/CONTINUITY-PROTOCOL.md`
+10. `docs/TASK-LOG.md`
+11. 與任務相關的 GitHub Issue
+12. 該工作軌的 `docs/workstreams/*.md`
 
 聊天、口頭描述、暫存筆記或本機未提交檔案，若未寫入 Git，不構成正式規格。
 
@@ -27,7 +31,25 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - ChatGPT Work 只作為選用的文件、研究與非程式交付工具，不得取代本機 Codex 程式流程。
 - 詳細規則以 `docs/EXECUTION-MODE.md` 為準。
 
-## 3. 不得擅自越權
+## 3. M1 三工作窗口
+
+M1 固定拆為三個工作軌：
+
+- Window A / Issue #4：Platform & Public Experience
+- Window B / Issue #5：Domain & Mock Engine
+- Window C / Issue #6：Booking, Staff & Integration
+
+每個窗口必須：
+
+- 使用自己的 Issue、branch / worktree 與工作日誌
+- 只修改 `docs/M1-THREE-WINDOW-PLAN.md` 分配給自己的檔案
+- 在開始時於 Issue 留下 `CLAIMED`
+- 在 Gate 時留下 Commit SHA
+- 在中斷前依 `docs/CONTINUITY-PROTOCOL.md` 建立 Durable Checkpoint
+
+禁止三個窗口共用分支、重複建立 scaffold、重複建立 domain types 或建立第二個 lockfile。
+
+## 4. 不得擅自越權
 
 下列事項沒有 Owner 明確決策與 Git 紀錄時，不得自行定案：
 
@@ -41,20 +63,29 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - 分店與權限政策
 - 任何會影響客人權益或店家責任的自動決策
 
-不確定時，保留 `TODO(owner-decision)`，並建立或更新 GitHub Issue。
+不確定時，保留 `TODO(owner-decision)`，並建立或更新 GitHub Issue。只停止受影響部分，不得因此停止所有無關工作。
 
-## 4. 工作方式
+## 5. 工作方式
 
-- 每個開發任務應有 GitHub Issue。
+- 每個開發任務必須有 GitHub Issue。
 - 每個 Agent 使用獨立分支；禁止多人同時在同一分支工作。
-- 建議分支格式：`agent/<issue-number>-<slug>`、`work/<issue-number>-<slug>`。
+- 分支格式：`agent/<issue-number>-<slug>` 或 `work/<issue-number>-<slug>`。
 - 實作前在 Issue 留下認領訊息，避免重複工作。
 - 原則上不得直接推送 `main`。
-- 變更透過 Pull Request 合併；PR 必須說明變更、影響、驗證與未解決事項。
+- 變更透過 Draft Pull Request 合併；PR 必須說明變更、影響、驗證、限制與未解決事項。
 - 若程式行為與文件衝突，先停止擴大實作，以 `PROJECT-CONSTITUTION.md` 與 `DECISIONS.md` 為準。
 - 完成目前 Issue 後，可依 Repository 中下一個明確且未阻擋的 Issue 繼續；不得自行發明沒有 Issue 的功能。
+- 需要跨工作軌修改時，先在 Issue 留下 `CROSS-STREAM REQUEST`。
 
-## 5. 本機引擎原則
+## 6. 中斷與使用量不足
+
+- 不得只留下聊天記憶或未 Push 的本機進度。
+- 使用量將盡、視窗結束或換窗口前，必須 Commit、Push、更新自己的工作日誌並在 Issue 留下 `CHECKPOINT`。
+- 日誌必須記錄 `Last good commit SHA`、`Exact next action`、恢復指令、已通過與未通過的檢查。
+- 新窗口接手時沿用同一個 Issue、branch 與工作日誌，不得另建平行實作。
+- 完整規則以 `docs/CONTINUITY-PROTOCOL.md` 為準。
+
+## 7. 本機引擎原則
 
 實際網站、預約核心、整合與測試皆從本機工作環境實作。Git 負責版本、規格、協作與審核。
 
@@ -63,7 +94,7 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - 所有必要環境變數必須記錄在 `.env.example`，但不得含真實值。
 - 專案必須能依 README 在乾淨本機環境啟動。
 
-## 6. 架構邊界
+## 8. 架構邊界
 
 第一階段採模組化架構，預約核心不得直接綁死單一第三方供應商。
 
@@ -79,24 +110,30 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 
 第三方服務必須經 Adapter 介面接入，方便替換。
 
-## 7. 完成定義
+## 9. 完成定義
 
 任務只有在以下條件成立時才算完成：
 
 - 符合 Issue 驗收條件
 - 不違反專案憲法與已確認決策
 - 通過相關型別、Lint、測試與 Build
-- 文件同步更新
+- 文件與工作日誌同步更新
 - 無真實秘密或客戶個資進入 Git
+- 所有工作已 Commit 並 Push
 - PR 清楚揭露限制與後續工作
+- 可由另一個全新窗口只讀 Git 後接手
 
-## 8. Agent 回報格式
+## 10. Agent 回報格式
 
-完成工作時至少回報：
+完成或暫停工作時至少回報：
 
-1. 分支名稱
-2. 修改檔案
-3. 完成功能
-4. 執行的驗證
-5. 尚未完成或需要 Owner 決策的項目
-6. PR 連結或 Commit SHA
+1. Issue 與工作軌
+2. 分支名稱
+3. Last good commit SHA
+4. 修改檔案
+5. 完成功能
+6. 執行的驗證
+7. 尚未完成、阻塞或需要 Owner 決策的項目
+8. Exact next action
+9. PR 連結或 Commit SHA
+10. Uncommitted changes 是否為 none
