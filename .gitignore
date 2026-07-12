@@ -1,0 +1,22 @@
+# dependencies and package cache
+/node_modules
+/.pnpm-store
+/.worktrees
+/.pnp
+.pnp.*
+
+# Next.js and production outputs
+/.next/
+/out/
+/build/
+
+# local environment and logs
+.env
+.env.local
+.env.*.local
+*.log
+
+# editor / OS / generated type state
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

@@ -50,6 +50,46 @@ M1 is split across three independent Codex / local work windows:
 
 No production booking provider, payment system, membership policy, real customer database, or calendar integration has been approved yet.
 
+## Local requirements
+
+- Node.js `>=20.9.0`
+- pnpm `11.7.0` (declared in `package.json`)
+
+## Install and run
+
+```bash
+corepack enable
+pnpm install
+cp .env.example .env.local
+pnpm dev
+```
+
+Open `http://localhost:3000`.
+
+The local environment file is optional during M1. Never add credentials, provider tokens or real customer data.
+
+## Validation commands
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+```
+
+## Window A public routes
+
+- `/` — home
+- `/services` — fictional service placeholders
+- `/barbers` — fictional staff placeholders
+- `/works` — work-category placeholders without real customer media
+- `/membership` — disabled membership placeholder
+- `/about` — platform direction
+- `/contact` — safe contact placeholders
+- `/policies` — Owner-decision placeholders
+
+The `/booking` and `/staff` feature routes belong to Window C and are not implemented by Window A.
+
 ## Continuity
 
 Every work window must maintain a remote branch and durable work log. Before quota exhaustion, shutdown, or handoff, it must Commit, Push, update its `docs/workstreams/*.md` file and leave a `CHECKPOINT` comment in its Issue.
