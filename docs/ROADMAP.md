@@ -3,8 +3,8 @@
 ## Phase 0 — Foundation
 
 - Establish Git as the single source of truth
-- Add project constitution, blueprint, architecture, decisions, work protocol, and local engine rules
-- Define ownership and multi-worker rules
+- Add project constitution, blueprint, architecture, decisions, work protocol and local engine rules
+- Define Owner, GPT and Codex responsibilities
 
 Exit criteria:
 
@@ -18,67 +18,65 @@ Status: **Complete**
 - Create the local application skeleton
 - Implement the dark design system
 - Add the public site page structure
-- Add mock booking flow
-- Add mock staff day view
+- Add Mock booking flow
+- Add Mock Staff workspace
 - Add membership placeholder
-- Add typed domain models and adapter boundaries
+- Add typed multi-staff Domain models and adapter boundaries
+- Add tests and reproducible local validation
 
 No production integrations are allowed in this phase.
 
-### M1 parallel workstreams
+### M1 two-role execution
 
-M1 is executed through three independent windows:
+#### GPT / Issue #13
 
-1. **M1-A / Issue #4 — Platform & Public Experience**
-   - Local scaffold
-   - Dark design system
-   - Shared UI and global shell
-   - Public site pages
+- Maintain specifications, content requirements and acceptance criteria
+- Protect Frozen Core and Reserved decisions
+- Prepare QA checklist
+- Review the Codex Draft PR against Git authority
+- Record acceptance, defects and next milestone tasks
 
-2. **M1-B / Issue #5 — Domain & Mock Engine**
-   - Multi-staff domain models
-   - Availability calculation
-   - Booking status transitions
-   - Mock data and adapters
-   - Domain tests
+#### Codex / Issue #14
 
-3. **M1-C / Issue #6 — Booking, Staff & Integration**
-   - Customer booking flow
-   - Staff prototype
-   - Domain integration
-   - Final M1 validation
+- Build the complete local scaffold and design system
+- Build public pages
+- Build multi-staff Domain and Mock booking engine
+- Build customer booking flow and Staff Prototype
+- Add provider-neutral ports and Mock repositories
+- Run Typecheck, Lint, Tests, Production Build and mobile smoke checks
+- Create Draft PR and resolve GPT Review
 
-Coordination: Issue #7  
-Final Integration Gate: Issue #8  
-Detailed plan: `docs/M1-THREE-WINDOW-PLAN.md`  
+Detailed model: `docs/TWO-ROLE-WORK-MODEL.md`  
 Continuity: `docs/CONTINUITY-PROTOCOL.md`
 
-M1 exit criteria:
+### M1 exit criteria
 
-- A0 `BOOTSTRAP_READY` recorded
-- B0 `DOMAIN_CONTRACT_READY` recorded
-- C0 `UI_INTEGRATION_READY` recorded
-- Typecheck, lint, tests and production build pass after integration
+- `GPT_BASELINE_READY` recorded
+- Codex `SCAFFOLD_READY`, `DOMAIN_READY`, `PUBLIC_SITE_READY`, `BOOKING_STAFF_READY` and `M1_VALIDATION_READY` recorded
+- Typecheck, Lint, Tests and Production Build pass
 - Mobile-first Mock booking flow is usable
 - Staff Mock workflow is usable
+- Multi-staff rules are tested
 - No real provider, payment, customer data or secret is connected
 - README and Task Log reflect the reproducible local state
+- GPT completes PR Review and acceptance recommendation
+- Approved PR merges to `main`
 
 Status: **Active**
 
 ## Phase 2 — Brand Content
 
-- Add approved logo, photography, copy, real services, staff profiles, prices, address, and hours
+- Add approved logo, photography, copy, real services, staff profiles, prices, address and hours
 - Finalize design tokens
 
-Starts after M1 Integration Gate passes.
+Starts after M1 validation and GPT acceptance.
 
 ## Phase 3 — Booking Provider Evaluation and Integration
 
-- Compare providers against the approved requirements
+- GPT compares providers against approved requirements
 - Owner selects provider
-- Implement provider adapter
-- Test booking, reschedule, cancellation, multi-staff availability, and notifications
+- Codex implements provider adapter
+- Test booking, reschedule, cancellation, multi-staff availability and notifications
 
 ## Phase 4 — Calendar and Apple Ecosystem
 
@@ -90,7 +88,7 @@ Starts after M1 Integration Gate passes.
 
 ## Phase 5 — Customer History
 
-- Add customer search, visit history, service notes, preferred barber, and audit controls
+- Add customer search, visit history, service notes, preferred barber and audit controls
 - Add authorization boundaries
 
 ## Phase 6 — Membership
@@ -113,13 +111,13 @@ Starts only after Owner approves the membership model.
 
 ## Current milestone
 
-`M1: Local UI and domain framework with mock data — ACTIVE`
+`M1: Local UI and domain framework with Mock Data — ACTIVE`
 
 Current execution sources:
 
 - Parent Epic: Issue #2
-- Workstream A: Issue #4
-- Workstream B: Issue #5
-- Workstream C: Issue #6
-- Coordination: Issue #7
-- Integration Gate: Issue #8
+- GPT work: Issue #13
+- Codex implementation: Issue #14
+- Task dashboard: `docs/TASK-LOG.md`
+
+Issues #4–#8 and the three-window plan are superseded historical records.
