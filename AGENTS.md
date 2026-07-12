@@ -13,12 +13,21 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 3. `docs/BLUEPRINT.md`
 4. `docs/ARCHITECTURE.md`
 5. `docs/ROADMAP.md`
-6. `docs/WORK-PROTOCOL.md`
-7. 與任務相關的 GitHub Issue
+6. `docs/EXECUTION-MODE.md`
+7. `docs/WORK-PROTOCOL.md`
+8. 與任務相關的 GitHub Issue
 
 聊天、口頭描述、暫存筆記或本機未提交檔案，若未寫入 Git，不構成正式規格。
 
-## 2. 不得擅自越權
+## 2. 主要實作模式
+
+- 本專案從 M1 起的主要程式實作者是 **Codex**。
+- 程式開發優先使用 **Codex 本機環境**。
+- Work 與 Codex 不會被假設為自動切換；需要寫程式、執行終端、測試或 Build 時，必須直接使用 Codex。
+- ChatGPT Work 只作為選用的文件、研究與非程式交付工具，不得取代本機 Codex 程式流程。
+- 詳細規則以 `docs/EXECUTION-MODE.md` 為準。
+
+## 3. 不得擅自越權
 
 下列事項沒有 Owner 明確決策與 Git 紀錄時，不得自行定案：
 
@@ -34,7 +43,7 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 
 不確定時，保留 `TODO(owner-decision)`，並建立或更新 GitHub Issue。
 
-## 3. 工作方式
+## 4. 工作方式
 
 - 每個開發任務應有 GitHub Issue。
 - 每個 Agent 使用獨立分支；禁止多人同時在同一分支工作。
@@ -43,8 +52,9 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - 原則上不得直接推送 `main`。
 - 變更透過 Pull Request 合併；PR 必須說明變更、影響、驗證與未解決事項。
 - 若程式行為與文件衝突，先停止擴大實作，以 `PROJECT-CONSTITUTION.md` 與 `DECISIONS.md` 為準。
+- 完成目前 Issue 後，可依 Repository 中下一個明確且未阻擋的 Issue 繼續；不得自行發明沒有 Issue 的功能。
 
-## 4. 本機引擎原則
+## 5. 本機引擎原則
 
 實際網站、預約核心、整合與測試皆從本機工作環境實作。Git 負責版本、規格、協作與審核。
 
@@ -53,7 +63,7 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - 所有必要環境變數必須記錄在 `.env.example`，但不得含真實值。
 - 專案必須能依 README 在乾淨本機環境啟動。
 
-## 5. 架構邊界
+## 6. 架構邊界
 
 第一階段採模組化架構，預約核心不得直接綁死單一第三方供應商。
 
@@ -69,7 +79,7 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 
 第三方服務必須經 Adapter 介面接入，方便替換。
 
-## 6. 完成定義
+## 7. 完成定義
 
 任務只有在以下條件成立時才算完成：
 
@@ -80,7 +90,7 @@ GitHub Repository `z72124223/dum-barbershop-platform` 是本專案的 **Single S
 - 無真實秘密或客戶個資進入 Git
 - PR 清楚揭露限制與後續工作
 
-## 7. Agent 回報格式
+## 8. Agent 回報格式
 
 完成工作時至少回報：
 
