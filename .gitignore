@@ -1,0 +1,23 @@
+# dependencies
+/node_modules
+/.pnpm-store
+/.pnp
+.pnp.*
+
+# Next.js
+/.next/
+/out/
+
+# production
+/build
+
+# local environment and logs
+.env
+.env.local
+.env.*.local
+*.log
+
+# editor / OS
+.DS_Store
+Thumbs.db
+*.tsbuildinfo
