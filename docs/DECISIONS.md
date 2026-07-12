@@ -80,6 +80,14 @@
 - 狀態：Accepted
 - 決策：預約、日曆、通知、付款、登入與會員服務不得直接綁死在 UI 或 Domain 內。
 
+### D-014 — Codex 本機環境是主要程式實作模式
+
+- 狀態：Accepted
+- 決策：從 M1 起，網站、預約引擎、測試、Build、除錯與整合由 Codex 在本機 Repository / Worktree 中實作。
+- Work 定位：ChatGPT Work 只作為選用的文件、研究與非程式交付工具，不是主要程式實作者。
+- 操作方式：Work 與 Codex 不假設自動切換；需要程式開發時由 Owner 直接選擇 Codex。
+- 交接方式：Codex 只依 Git 文件、Issue、Branch、Commit、PR 與 Review 工作，不依賴規劃聊天視窗。
+
 ---
 
 ## Reserved
