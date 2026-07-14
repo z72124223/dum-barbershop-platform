@@ -16,6 +16,7 @@ import {
   mockCalendarBlocks,
   mockCustomers,
   mockMemberships,
+  mockIntegrationOperations,
 } from "../../data/mock";
 import type {
   AuditRepository,
@@ -293,7 +294,7 @@ export function createMockPlatform() {
     bookingProvider: new MockBookingProvider(),
     customers: new MockCustomerRepository(mockCustomers),
     identity: new MockIdentityProvider(),
-    integrations: new MockIntegrationQueue(),
+    integrations: new MockIntegrationQueue(mockIntegrationOperations),
     calendar: new MockCalendarProvider(mockCalendarBlocks),
     notifications: new MockNotificationProvider(),
     payments: new MockPaymentProvider(),

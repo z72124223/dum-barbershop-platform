@@ -60,6 +60,22 @@ Continue from the merged M1 platform and complete every safe, local and non-prod
 - Blockers: none.
 - Owner decision needed: none for the Mock preview; production identity and staff authorization policy remain reserved.
 
+## INTEGRATION_SIMULATION_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:55 +08:00`
+- New routes: `/staff/integrations` and `/staff/quick-actions`.
+- Integration console: Booking Provider, Calendar, Notification, Payment, Membership, Identity and LINE are separated by provider-neutral boundaries.
+- Reliability simulation: queued, success, conflict, timeout, partial failure, bounded retry and terminal behavior with visible idempotency keys and local audit records.
+- Calendar: bidirectional sync direction, external Mock event reference, revision, last-sync time and conflict status are visible.
+- Delivery safety: reminders, review requests, return campaigns and LINE delivery are present only as disabled previews; zero external messages are sent.
+- Apple-style quick actions: Today, Next, Blocks, Checked In and Completed are available as responsive web previews; this is explicitly not a watchOS application.
+- Provider safety: formal booking, payment, membership and LINE integrations remain disabled; no registration, API Key or credential is required.
+- Checks: typecheck PASS, lint PASS, 36/36 tests PASS, production build PASS with 14 application routes plus not-found.
+- Exact next action: complete the public-site information architecture, responsive content previews, installable metadata and page-level empty/loading/error readiness.
+- Blockers: none.
+- Owner decision needed: none for the Mock simulation; all production providers and outbound policies remain reserved.
+
 ## Existing durable checkpoint
 
 - Source branch inherited: `work/4-platform-public`

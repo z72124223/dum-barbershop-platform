@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { IntegrationOperation } from "../models";
 import { completeIntegrationOperation, retryIntegrationOperation } from "./operations";
+import { integrationHealth, pendingIntegrationCount } from "../../features/integrations/integration-console-logic";
 
 function operation(overrides: Partial<IntegrationOperation> = {}): IntegrationOperation {
   return {
@@ -42,5 +43,12 @@ describe("integration operations", () => {
       "2026-07-14T02:01:00.000Z",
     );
     assert.equal(result.status, "partial_failure");
+  });
+
+  it("summarizes provider health without treating disabled providers as failures", () => {
+    assert.equal(integrationHealth("disabled", [operation({ mode: "disabled", status: "disabled" })]), "disabled");
+    assert.equal(integrationHealth("mock", [operation({ status: "conflict" })]), "attention");
+    assert.equal(integrationHealth("mock", [operation({ status: "succeeded" })]), "healthy");
+    assert.equal(pendingIntegrationCount([operation(), operation({ id: "retry", status: "retry_scheduled" })]), 2);
   });
 });

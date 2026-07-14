@@ -291,6 +291,69 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
 .audit-preview summary { color: var(--color-brass); cursor: pointer; }
 .audit-preview p { padding-bottom: .5rem; border-bottom: 1px solid var(--line); color: var(--color-smoke); font-size: .8rem; overflow-wrap: anywhere; }
 
+.integration-shell { display: grid; gap: 1rem; }
+.integration-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; }
+.integration-summary article { min-height: 100px; padding: 1rem; display: grid; align-content: space-between; border: 1px solid var(--line); background: var(--panel); }
+.integration-summary span { color: var(--color-smoke); font-size: .75rem; }
+.integration-summary strong { color: var(--color-brass); font: 2.4rem/1 Impact, sans-serif; }
+.provider-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.provider-card { padding: 1.25rem; border: 1px solid var(--line); background: var(--color-coal); }
+.provider-card.health-attention { border-color: #b57c6f; }
+.provider-card.health-healthy { border-color: #5d9b74; }
+.provider-card.health-disabled { opacity: .78; }
+.provider-card header { display: flex; justify-content: space-between; gap: 1rem; }
+.provider-card header span { color: var(--color-brass); font-size: .65rem; font-weight: 900; letter-spacing: .14em; }
+.provider-card header h2 { margin-top: .35rem; font-size: clamp(1.8rem, 4vw, 3rem); }
+.provider-card header > strong { height: fit-content; padding: .3rem .5rem; border: 1px solid currentColor; color: var(--color-smoke); font-size: .68rem; white-space: nowrap; }
+.provider-card > p { color: var(--color-smoke); }
+.integration-operation { margin-top: 1rem; padding-top: 1rem; display: flex; justify-content: space-between; align-items: end; gap: 1rem; border-top: 1px solid var(--line); }
+.integration-operation > div:first-child { min-width: 0; display: grid; }
+.integration-operation code { color: var(--color-brass); }
+.integration-operation span, .integration-operation small { color: var(--color-smoke); overflow-wrap: anywhere; }
+.simulation-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .25rem; }
+.simulation-actions button, .retry-button { min-height: 36px; padding: .4rem .55rem; border: 1px solid var(--line); background: transparent; color: var(--color-bone); cursor: pointer; }
+.simulation-actions button:hover, .retry-button:hover { border-color: var(--color-brass); color: var(--color-brass); }
+.operation-terminal { font-size: .72rem; }
+.calendar-sync-panel, .delivery-preview { padding: clamp(1rem, 3vw, 2rem); border: 1px solid var(--line); background: var(--color-coal); }
+.calendar-sync-panel > article { padding: .75rem 0; display: grid; grid-template-columns: 1.4fr 1fr .6fr .6fr; gap: .75rem; border-top: 1px solid var(--line); }
+.calendar-sync-panel > article span { color: var(--color-smoke); }
+.calendar-sync-panel .sync-conflict { color: #e0a89a; }
+.calendar-sync-panel .sync-succeeded { color: #99cca9; }
+.delivery-preview { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: .75rem; }
+.delivery-preview > div { grid-row: span 2; padding-right: 1rem; }
+.delivery-preview h2 { font-size: clamp(2.3rem, 5vw, 4rem); }
+.delivery-preview p { color: var(--color-smoke); }
+.delivery-preview article { padding: 1rem; display: grid; gap: .5rem; border: 1px solid var(--line); background: var(--panel); }
+.delivery-preview article span { color: var(--color-smoke); font-size: .75rem; }
+.delivery-preview button { padding: .5rem; border: 1px solid var(--line); background: transparent; color: var(--color-smoke); }
+
+.quick-action-shell { display: grid; gap: 1.5rem; }
+.quick-action-layout { min-height: 620px; padding: clamp(1rem, 4vw, 3rem); display: grid; grid-template-columns: minmax(260px, .75fr) 1.25fr; gap: clamp(2rem, 7vw, 6rem); align-items: center; border: 1px solid var(--line); background: radial-gradient(circle at 25% 45%, rgba(168,138,87,.18), transparent 32%), var(--color-coal); }
+.watch-frame { position: relative; width: min(340px, 100%); aspect-ratio: .82; margin-inline: auto; padding: 18px; border: 10px solid #33332f; border-radius: 78px; background: #070707; box-shadow: 0 30px 90px #000; }
+.watch-screen { height: 100%; padding: 1.25rem; display: flex; flex-direction: column; overflow: hidden; border-radius: 55px; background: linear-gradient(160deg, #171716, #080808); }
+.watch-screen > header { display: grid; gap: .2rem; }
+.watch-screen > header span, .watch-screen > small { color: var(--color-smoke); font-size: .6rem; letter-spacing: .1em; }
+.watch-screen > header strong { color: var(--color-brass); font-size: 1.35rem; }
+.watch-screen > small { margin-top: auto; padding-top: .75rem; text-align: center; }
+.watch-crown { position: absolute; right: -24px; top: 105px; width: 14px; height: 55px; border-radius: 0 8px 8px 0; background: #4a4a45; }
+.watch-list { margin-top: 1rem; display: grid; gap: .45rem; overflow: auto; }
+.watch-list article, .watch-featured { padding: .7rem; display: grid; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(255,255,255,.04); }
+.watch-list time, .watch-featured time { color: var(--color-brass); font-weight: 900; }
+.watch-list span, .watch-list small, .watch-featured span, .watch-featured small { color: var(--color-smoke); font-size: .68rem; }
+.watch-featured { margin-top: 2rem; padding: 1.2rem; }
+.watch-featured time { font-size: 2.4rem; }
+.watch-featured strong { font-size: 1.25rem; }
+.watch-empty { flex: 1; display: grid; place-items: center; align-content: center; }
+.watch-empty strong { color: var(--color-brass); font-size: 1.5rem; }
+.watch-empty span { color: var(--color-smoke); }
+.quick-action-menu { display: grid; grid-template-columns: 1fr 1fr; gap: .65rem; }
+.quick-action-menu > div { grid-column: 1 / -1; margin-bottom: 1rem; }
+.quick-action-menu h2 { font-size: clamp(3rem, 7vw, 6rem); }
+.quick-action-menu p:not(.eyebrow) { max-width: 640px; color: var(--color-smoke); }
+.quick-action-menu button { min-height: 90px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line); background: var(--panel); color: var(--color-bone); cursor: pointer; }
+.quick-action-menu button:hover, .quick-action-menu button[aria-pressed="true"] { border-color: var(--color-brass); background: rgba(168,138,87,.12); }
+.quick-action-menu button strong { color: var(--color-brass); font: 2rem Impact, sans-serif; }
+
 @media (max-width: 820px) {
   .site-header nav { display: none; }
   .site-header { gap: 1rem; }
@@ -310,6 +373,11 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .operations-filters { display: grid; grid-template-columns: 1fr 1fr; }
   .staff-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .staff-metrics { grid-template-columns: repeat(2, 1fr); }
+  .integration-summary { grid-template-columns: repeat(2, 1fr); }
+  .provider-grid { grid-template-columns: 1fr; }
+  .delivery-preview { grid-template-columns: 1fr 1fr; }
+  .delivery-preview > div { grid-column: 1 / -1; grid-row: auto; }
+  .quick-action-layout { grid-template-columns: 1fr; }
   .staff-dashboard, .schedule-layout, .customer-search-panel, .management-grid, .operations-two-column, .configuration-grid { grid-template-columns: 1fr; }
   .booking-detail { grid-template-columns: 1fr 1fr; }
   .booking-detail .summary-list { grid-column: 1 / -1; grid-row: 2; }
@@ -337,6 +405,12 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .booking-detail .summary-list { grid-column: auto; grid-row: auto; }
   .timeline-item { grid-template-columns: 1fr; gap: .2rem; }
   .customer-results > article > div:first-child { flex-direction: column; }
+  .integration-operation { align-items: stretch; flex-direction: column; }
+  .simulation-actions { justify-content: flex-start; }
+  .calendar-sync-panel > article { grid-template-columns: 1fr 1fr; }
+  .delivery-preview { grid-template-columns: 1fr; }
+  .quick-action-menu { grid-template-columns: 1fr; }
+  .quick-action-menu > div { grid-column: auto; }
   .operation-booking { grid-template-columns: 1fr; }
   .operation-actions { justify-content: flex-start; }
   .customer-operations-grid { grid-template-columns: 1fr; }
