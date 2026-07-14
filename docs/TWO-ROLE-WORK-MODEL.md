@@ -1,6 +1,6 @@
 # DUM BARBERSHOP Platform — Two-Role Work Model
 
-版本：1.0  
+版本：1.1
 狀態：Accepted  
 適用：M1 起的所有工作
 
@@ -28,6 +28,7 @@ GitHub Repository 是兩者唯一交接面。
 - 審查 Codex PR 是否符合藍圖、Issue 與 Frozen Core。
 - 建立 QA checklist、缺陷 Issue、驗收紀錄與下一階段任務。
 - 維護 `docs/workstreams/GPT.md` 與 `docs/TASK-LOG.md`。
+- Review 可非同步進行，不構成 Owner 人工核准關卡；發現 Required fix 時必須用 Review comment 或缺陷 Issue 留下可追蹤要求。
 
 ### 不負責
 
@@ -91,7 +92,8 @@ Codex 負責所有程式範圍，包括原三工作軌 A、B、C 的完整內容
 4. 在本機依照 Issue 順序完成 scaffold、Domain、UI、Staff 與驗證。
 5. 定期 Commit、Push、更新 Codex 日誌與 Issue checkpoint。
 6. 建立 Draft PR。
-7. 根據 GPT Review 修正，直到通過驗收。
+7. 根據已存在的 GPT Required fixes 修正；必要 checks 通過且沒有未解決 Required fix 時，可合併非 Production PR，不等待 Owner 人工審核。
+8. 從 Blueprint / Roadmap 建立或接續下一個範圍受限的 Issue 與 feature branch，持續到 Blueprint build-complete。
 
 ---
 
@@ -99,6 +101,7 @@ Codex 負責所有程式範圍，包括原三工作軌 A、B、C 的完整內容
 
 - GPT 不直接修 Codex 程式；以 Review comment 或 Issue 交辦。
 - Codex 不重寫 Frozen Core 或 Owner 決策；有疑問時留言並繼續不受影響部分。
+- Review、註冊、憑證或待決策事項只阻塞直接受影響部分；其他安全施工不得停下。
 - README 若同時涉及產品規格與本機指令：GPT 負責產品段落，Codex 負責安裝、執行、測試與 Build 段落。
 - `docs/TASK-LOG.md` 由 GPT 維護里程碑狀態；Codex 必須提供可核對的 Commit、PR 與 checks。
 
@@ -122,10 +125,10 @@ Codex 負責所有程式範圍，包括原三工作軌 A、B、C 的完整內容
 M1 完成必須同時符合：
 
 - Issue #14 的完整程式驗收通過。
-- Codex Draft PR 經 GPT 對照 Blueprint 與 Issues 完成 Review。
+- Codex PR 已對照 Blueprint 與 Issues 完成自我驗證；若已有 GPT Review，所有 Required fixes 已處理或轉成明確阻塞 Issue。
 - Typecheck、Lint、Tests、Production Build 通過。
 - 公開網站、Mock 預約與 Staff Prototype 可用。
 - 多設計師 Domain 規則有測試。
 - 無秘密、真實客戶資料或未核准正式整合。
-- GPT 更新 Task Log、Roadmap 與驗收紀錄。
-- 核准 PR 合併到 `main`。
+- Task Log、Roadmap 與驗收紀錄可由 GPT 非同步更新，不阻止後續安全施工。
+- 通過必要 checks 的非 Production PR 合併到 `main`。

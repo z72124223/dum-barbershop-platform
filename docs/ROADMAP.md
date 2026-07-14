@@ -59,8 +59,8 @@ Continuity: `docs/CONTINUITY-PROTOCOL.md`
 - Multi-staff rules are tested
 - No real provider, payment, customer data or secret is connected
 - README and Task Log reflect the reproducible local state
-- GPT completes PR Review and acceptance recommendation
-- Approved PR merges to `main`
+- Existing Required review findings are resolved or tracked as scope-limited follow-up Issues
+- Validated non-production PR merges to `main` without requiring Owner manual review
 
 Status: **Active**
 
@@ -69,7 +69,7 @@ Status: **Active**
 - Add approved logo, photography, copy, real services, staff profiles, prices, address and hours
 - Finalize design tokens
 
-Starts after M1 validation and GPT acceptance.
+Starts after M1 validation and PR merge. GPT content / QA review may continue asynchronously and does not block safe placeholder implementation.
 
 ## Phase 3 — Booking Provider Evaluation and Integration
 
@@ -121,3 +121,12 @@ Current execution sources:
 - Task dashboard: `docs/TASK-LOG.md`
 
 Issues #4–#8 and the three-window plan are superseded historical records.
+
+## Continuous implementation policy
+
+- Codex continues through Blueprint phases until all technically implementable non-production scope is build-complete.
+- Each implementation unit still requires a GitHub Issue, feature branch, checks, Commit, Push and PR.
+- Owner manual review is not a blocking gate for validated non-production implementation or merge.
+- Real brand facts, prices, staff identities, policies, provider choices, credentials and production actions remain protected decisions.
+- When a phase depends on those items, Codex implements the interface, Mock / disabled adapter, states, tests and documentation, records `TODO(owner-decision)`, and continues the remaining phases.
+- `Build-complete` does not mean production-ready. Production activation remains a separately verified milestone.

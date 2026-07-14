@@ -97,6 +97,16 @@
 - 歷史處理：Issues #4–#8 與 `docs/M1-THREE-WINDOW-PLAN.md` 標記為 Superseded，不得再用於新實作。
 - 交接：兩個角色只透過 Git 文件、Issues、Commit、PR、Review 與 durable logs 協作。
 
+### D-016 — 持續施工至 Blueprint Build-Complete
+
+- 狀態：Accepted
+- Git 紀錄：Issue #18
+- Owner 決策：Codex 必須持續實作已接受 Blueprint 中所有技術上可完成的非 Production 範圍，不再把 Owner 人工審核當成繼續施工、建立 PR 或合併前置條件。
+- 執行方式：每個工作仍需有 Issue、feature branch、checks、Commit、Push 與 PR；完成後接續下一個有 Git 依據的藍圖工作。
+- Review：GPT / 產品 Review 可非同步進行；已存在的 Required fix 必須處理，但 Review 尚未開始本身不得阻止其他安全施工。
+- 阻塞範圍：帳號註冊、憑證、第三方服務或 Owner 決策只阻塞直接受影響部分。其餘範圍使用 Mock、disabled adapter 或 `TODO(owner-decision)` 繼續。
+- 安全界線：不得因此自行決定價格、政策、會員權益、個資規則、付款行為、真實身分或正式供應商，也不得把 build-complete 說成 production-ready。
+
 ---
 
 ## Reserved
