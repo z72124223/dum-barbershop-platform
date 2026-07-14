@@ -37,7 +37,7 @@ The repository contains a **Blueprint build-complete local preview**. The public
 This is not production-ready. Build-complete means every safe Blueprint area has a working local preview; it does not mean that real content, policies, accounts, credentials or providers have been approved.
 
 - Implementation Issue: #20
-- Codex branch: `codex/20-blueprint-build-complete`
+- Merged implementation branch: `codex/20-blueprint-build-complete` via PR #21
 - Durable implementation log: `docs/workstreams/CODEX.md`
 - Original M1 delivery: Issue #14 / PR #17
 

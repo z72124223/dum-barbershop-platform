@@ -15,7 +15,7 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
-| Codex — Implementation | #20 | `codex/20-blueprint-build-complete` | IN_PROGRESS | Final PR / merge | `docs/workstreams/CODEX.md` | Blueprint local preview, tests, build and integration simulation |
+| Codex — Implementation | #20 | `codex/20-blueprint-build-complete` | DONE | `BLUEPRINT_BUILD_COMPLETE` | `docs/workstreams/CODEX.md` | Blueprint local preview, tests, build and integration simulation |
 
 Current completed gates:
 
@@ -23,7 +23,7 @@ Current completed gates:
 - `STAFF_OPERATIONS_COMPLETE`
 - `INTEGRATION_SIMULATION_COMPLETE`
 - `PUBLIC_EXPERIENCE_COMPLETE`
-- `BLUEPRINT_BUILD_COMPLETE` pending final PR / merge record
+- `BLUEPRINT_BUILD_COMPLETE`
 
 ## Historical M1 code handoff
 
@@ -77,7 +77,7 @@ The former Issue #5 branch contains only claim / journal setup and no applicatio
 - Secret / real-data scan: PASS
 - README / Roadmap / Task Log: updated
 - Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
-- Merge: pending final PR checks / Required-fix inspection
+- Merge: `234ffd1c0635e02c0008c681a54787ec360ec21c`
 
 ## GPT gates
 
@@ -100,11 +100,9 @@ The former Issue #5 branch contains only claim / journal setup and no applicatio
 
 ## Final work order
 
-1. Commit and push final documentation / validation evidence.
-2. Open the Issue #20 Draft PR.
-3. Confirm no unresolved Required review findings and merge the validated non-production PR.
-4. Record merge SHA and `BLUEPRINT_BUILD_COMPLETE` in Issue #20 and the Codex log.
-5. Continue only through future scope-limited Issues; production activation still requires approved decisions, accounts and credentials.
+Completed: Draft PR #21 was validated with no Required review findings and squash-merged to `main` at `234ffd1c0635e02c0008c681a54787ec360ec21c`.
+
+Next: continue only through future scope-limited Issues; production activation still requires approved decisions, accounts and credentials.
 
 ## Current Owner decisions blocking build-complete
 
