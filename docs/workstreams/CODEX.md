@@ -357,7 +357,7 @@ During merge conflicts:
 
 ## ISSUE_23_VISUAL_LOCALIZATION checkpoint
 
-- Status: `IMPLEMENTATION_COMPLETE`
+- Status: `PR_OPEN`
 - Completed at: `2026-07-14 18:40 +08:00`
 - Branch: `codex/23-zh-gangster-style`
 - Completed: public website, customer booking flow, booking management and Staff Mock workspace now use Traditional Chinese as the primary customer-facing language.
@@ -368,6 +368,8 @@ During merge conflicts:
 - Checks: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint` and `pnpm build` PASS.
 - Browser evidence: desktop homepage and 390x844 mobile checks passed across public, booking and Staff routes; no horizontal overflow or browser console errors were observed.
 - Local comparison: baseline preserved at `http://127.0.0.1:3101/`; Issue #23 redesign available at `http://127.0.0.1:3102/` while the local preview processes remain active.
-- Draft PR: pending branch push.
+- Implementation commit: `05c9a6093e79b239daf3765a30a26bf8e1d5f07f`.
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/24
+- Exact next action: review the side-by-side local previews and Draft PR #24; any approved visual refinements stay on `codex/23-zh-gangster-style`.
 - Blockers: none.
 - Owner decision needed: none for this Mock visual/localization pass; all reserved production decisions remain deferred.
