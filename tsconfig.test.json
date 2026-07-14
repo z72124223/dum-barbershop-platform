@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "rootDir": "./src",
+    "outDir": "./.test-dist",
+    "noEmit": false,
+    "incremental": false,
+    "isolatedModules": false,
+    "types": ["node"],
+    "plugins": []
+  },
+  "include": [
+    "src/domain/**/*.ts",
+    "src/adapters/**/*.ts",
+    "src/data/mock/**/*.ts",
+    "src/features/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

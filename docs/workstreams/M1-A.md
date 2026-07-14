@@ -1,6 +1,6 @@
 # M1-A 工作日誌 — Superseded
 
-Status: SUPERSEDED  
+Status: SUPERSEDED
 Former Issue: #4
 
 Owner 已取消三工作軌模式。本工作日誌不再使用。
