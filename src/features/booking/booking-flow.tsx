@@ -8,7 +8,7 @@ import { DomainError, type Booking, type Customer, type IsoDate } from "../../do
 import { ANY_STAFF, calculateBookingOptions, type BookingSlotOption, type StaffChoice } from "./booking-logic";
 
 const steps = ["服務", "設計師", "日期", "時間", "資料", "確認"] as const;
-const demoDates: IsoDate[] = ["2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18"];
+const demoDates: IsoDate[] = ["2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19"];
 
 const emptyMessages = {
   staff_not_scheduled: "這天沒有安排值班，請換一天看看。",
@@ -32,10 +32,13 @@ function selectedFromQuery(value: string | null, validIds: string[]) {
 export function BookingFlow() {
   const searchParams = useSearchParams();
   const [platform] = useState(createMockPlatform);
+  const queriedService = selectedFromQuery(searchParams.get("service"), mockServices.map((service) => service.id));
+  const queriedStaff = selectedFromQuery(searchParams.get("staff"), mockStaff.map((staff) => staff.id));
+  const compatibleQueriedStaff = queriedStaff && (!queriedService || mockStaff.find((staff) => staff.id === queriedStaff)?.serviceIds.includes(queriedService)) ? queriedStaff : "";
 
   const [step, setStep] = useState(0);
-  const [serviceId, setServiceId] = useState(() => selectedFromQuery(searchParams.get("service"), mockServices.map((service) => service.id)));
-  const [staffChoice, setStaffChoice] = useState<StaffChoice | "">(() => selectedFromQuery(searchParams.get("staff"), mockStaff.map((staff) => staff.id)));
+  const [serviceId, setServiceId] = useState(queriedService);
+  const [staffChoice, setStaffChoice] = useState<StaffChoice | "">(compatibleQueriedStaff);
   const [date, setDate] = useState<IsoDate | "">("");
   const [slot, setSlot] = useState<BookingSlotOption | null>(null);
   const [name, setName] = useState("");

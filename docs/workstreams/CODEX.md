@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: Staff workspace checkpoint files until the next checkpoint commit
+- Uncommitted changes: final validation / README updates until the M1 validation commit
 
 ## Current objective
 
@@ -48,8 +48,6 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Not yet implemented
 
-- Final responsive evidence / full M1 validation
-- README final accuracy update
 - Draft PR
 
 ## Ordered implementation checkpoints
@@ -77,7 +75,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Exact next action
 
-Commit and push this completed Domain / Mock engine checkpoint, publish the pending `SCAFFOLD_MIGRATED` and `DOMAIN_READY` Issue #14 comments, then begin the customer booking flow.
+Commit and push `M1_VALIDATION_READY`, publish final Issue #14 evidence, then open the Draft PR for GPT Issue #13 review.
 
 ## Resume commands
 
@@ -103,12 +101,16 @@ During merge conflicts:
 
 - Inherited scaffold checks: PASS at `20004c615876c3beb7110bec2e0a97764c21735a`
 - Checks after current-main merge `4a7c263edc5d6e80e82386bd86f116271443a873`: install, typecheck, lint, test and production build PASS
-- Domain / adapter / booking option tests: 18 passed
+- Domain / adapter / booking / staff tests: 23 passed
 - Customer booking browser smoke: passed end-to-end through clear Mock confirmation
 - Staff logic tests: 5 passed; total automated tests: 23
 - Staff browser smoke: status chain, all-day view, block success / conflict, customer search passed
 - Mobile smoke: home navigation / fixed booking entry and `/booking` 390×844 viewport passed
-- Secret / real-data review after merge: not run
+- Final install, typecheck, lint, 23 tests and production build: PASS
+- All 10 application routes returned HTTP 200 from the local development server
+- Required, empty and adapter-conflict states: verified through browser and automated tests
+- Secret / real-data review: PASS; one lockfile, safe `.env.example`, no secret or unmasked phone / email pattern in source
+- README final route, safety and local-behavior documentation: updated
 
 ## Blockers
 
@@ -120,9 +122,9 @@ During merge conflicts:
 
 ## SCAFFOLD_MIGRATED checkpoint
 
-- Status: `IN_PROGRESS`
+- Status: `COMPLETE`
 - Base / last synced main SHA: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
-- Last good code commit: `4a7c263edc5d6e80e82386bd86f116271443a873`
+- Last good code commit: `5349656cb2094a895cacd3075514016bec938e14`
 - Last checkpoint time: `2026-07-12 22:51:33 +08:00`
 - Completed: latest governance merged from `origin/main`; conflicts resolved in favor of main governance while preserving the inherited Next.js scaffold and public-site code.
 - Checks passed: `pnpm install`, `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`.
@@ -182,7 +184,8 @@ During merge conflicts:
 
 ## BOOKING_STAFF_READY checkpoint
 
-- Status: `READY_TO_COMMIT`
+- Status: `COMPLETE`
+- Checkpoint commit: `b33b1be`
 - Completed at: `2026-07-14 13:54:58 +08:00`
 - Customer flow: already durable at `PUBLIC_SITE_READY` commit `0f17703` and retested end-to-end.
 - Staff workspace: added `/staff` with today metrics, next customer, staff filter, booking list / details, full-day timeline, customer search with fictional history, pending / waitlist placeholders, and explicit no-auth local-prototype warning.
@@ -191,6 +194,30 @@ During merge conflicts:
 - Tests: 23 passed, including staff filtering, next-customer selection, timeline ordering, same-staff block rejection and different-staff allowance.
 - Browser evidence: desktop status chain completed; full-day block creation and duplicate conflict were verified; fictional customer search returned one masked record; 390×844 today and full-day views have no horizontal overflow; no browser console errors.
 - Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed; `/staff` is statically generated.
-- Exact next action: commit and push `BOOKING_STAFF_READY`, publish Issue #14 checkpoint, then perform final clean install / route / mobile / secret / README validation and open the Draft PR.
+- Issue #14 checkpoint: `BOOKING_STAFF_READY` published.
+- Exact next action: perform final clean install / route / mobile / secret / README validation and open the Draft PR.
 - Blockers: none.
 - Owner decision needed: none for M1; authentication, production data, real notifications / calendar / payment and operational policies remain out of scope.
+
+## M1_VALIDATION_READY checkpoint
+
+- Status: `READY_TO_COMMIT`
+- Completed at: `2026-07-14 14:00:09 +08:00`
+- Install: `pnpm install --frozen-lockfile` PASS with pnpm 11.7.0; exactly one lockfile (`pnpm-lock.yaml`).
+- Typecheck: PASS.
+- Lint: PASS.
+- Tests: 23 / 23 PASS across Domain availability, status transitions, Mock repositories, customer booking options and Staff workspace logic.
+- Production build: PASS; `/`, `/about`, `/barbers`, `/booking`, `/contact`, `/membership`, `/policies`, `/services`, `/staff` and `/works` are statically generated.
+- HTTP smoke: all 10 application routes returned 200 from the local development server.
+- Customer browser smoke: complete happy path, required-field error, no-schedule empty state and explicit no-real-booking confirmation passed.
+- Staff browser smoke: status chain, audit count, next customer, full-day timeline, block success / conflict, customer search and masked history passed.
+- Responsive smoke: 390×844 home, booking and Staff views passed with no horizontal overflow; mobile navigation opened; fixed booking CTA did not cover booking / Staff controls.
+- Browser console: no errors or warnings during final workflow checks.
+- Loading / error readiness: shared application loading / error pages, booking Suspense fallback, empty / validation messages and adapter conflict handling are present.
+- Security / data: no secret patterns, unmasked phone or email patterns found in source; `.env.example` contains Mock-only public settings; no real customer data introduced.
+- README: install, routes, Mock behavior and safety boundaries updated.
+- UI evidence: equivalent detailed desktop / mobile browser smoke evidence recorded here and in Issue #14; no unapproved real or generated customer imagery used.
+- Reserved decisions: real prices, identities, policy text, authentication, booking provider, calendar synchronization, notifications, payment, membership and production deployment remain unimplemented.
+- Exact next action: commit / push this validation checkpoint, publish Issue #14 `M1_VALIDATION_READY`, then open one Draft PR against `main`.
+- Blockers: none.
+- Owner decision needed: none for M1 acceptance; all reserved production decisions remain deferred.
