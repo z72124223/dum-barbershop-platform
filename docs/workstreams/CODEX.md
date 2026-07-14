@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: Public Site / Booking checkpoint files until the next checkpoint commit
+- Uncommitted changes: none at the `PUBLIC_SITE_READY` checkpoint
 
 ## Current objective
 
@@ -165,7 +165,8 @@ During merge conflicts:
 
 ## PUBLIC_SITE_READY checkpoint
 
-- Status: `READY_TO_COMMIT`
+- Status: `COMPLETE`
+- Checkpoint commit: `0f17703`
 - Completed at: `2026-07-14 13:44:53 +08:00`
 - Completed: `/booking` route, six-screen customer flow, Domain-calculated multi-staff slot selection, no-preference actual staff assignment, customer details / notes, disabled-real-payment deposit placeholder, summary and explicit no-real-booking confirmation.
 - Public entries: desktop header, homepage hero, mobile fixed CTA, service-specific links and staff-specific links all converge on `/booking`.
@@ -174,6 +175,7 @@ During merge conflicts:
 - Tests: 18 passed, including no-preference staff assignment and duplicate-time collapse.
 - Browser evidence: desktop flow completed end-to-end; 390×844 home and booking views have no horizontal overflow; mobile navigation opens; booking confirmation clearly says no real booking was created.
 - Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed; `/booking` is statically generated.
-- Exact next action: commit and push `PUBLIC_SITE_READY`, publish the Issue #14 checkpoint, then build the `/staff` Mock workspace.
+- Issue #14 checkpoint: `PUBLIC_SITE_READY` published.
+- Exact next action: build the `/staff` Mock workspace.
 - Blockers: none.
 - Owner decision needed: none; real prices, providers, policies, customer data and payment remain absent.
