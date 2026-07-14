@@ -62,7 +62,7 @@ Continuity: `docs/CONTINUITY-PROTOCOL.md`
 - Existing Required review findings are resolved or tracked as scope-limited follow-up Issues
 - Validated non-production PR merges to `main` without requiring Owner manual review
 
-Status: **Active**
+Status: **Complete** (Issue #14 / PR #17)
 
 ## Phase 2 — Brand Content
 
@@ -71,12 +71,16 @@ Status: **Active**
 
 Starts after M1 validation and PR merge. GPT content / QA review may continue asynchronously and does not block safe placeholder implementation.
 
+Local preview status: **Complete** in Issue #20. Production content remains reserved until approved brand assets and facts are provided.
+
 ## Phase 3 — Booking Provider Evaluation and Integration
 
 - GPT compares providers against approved requirements
 - Owner selects provider
 - Codex implements provider adapter
 - Test booking, reschedule, cancellation, multi-staff availability and notifications
+
+Local preview status: **Complete** in Issue #20 with Booking Provider and Identity ports plus disabled / Mock operation simulation. Production provider selection remains reserved.
 
 ## Phase 4 — Calendar and Apple Ecosystem
 
@@ -86,14 +90,20 @@ Starts after M1 validation and PR merge. GPT content / QA review may continue as
 - Test iPhone and Apple Watch viewing
 - Prototype quick block actions
 
+Local preview status: **Complete** in Issue #20 with sync metadata, conflict / retry simulation and responsive quick actions. Real Google / Apple integration remains reserved.
+
 ## Phase 5 — Customer History
 
 - Add customer search, visit history, service notes, preferred barber and audit controls
 - Add authorization boundaries
 
+Local preview status: **Complete** in Issue #20 with masked fictional history, preferences, technical notes and role-aware UI. Production privacy and authorization remain reserved.
+
 ## Phase 6 — Membership
 
 Starts only after Owner approves the membership model.
+
+Local preview status: **Complete as a disabled placeholder**. Formal membership remains reserved.
 
 ## Phase 7 — Advanced Watch and Automation
 
@@ -102,6 +112,8 @@ Starts only after Owner approves the membership model.
 - Status updates
 - Customer lookup subject to privacy constraints
 
+Local preview status: **Complete as a responsive web preview**. Native watchOS work is not promised or enabled.
+
 ## Phase 8 — LINE and Growth Automation
 
 - LINE booking entry
@@ -109,15 +121,17 @@ Starts only after Owner approves the membership model.
 - Review requests
 - Return-visit campaigns
 
+Local preview status: **Complete as disabled delivery placeholders**. LINE registration, credentials, consent and outbound delivery remain reserved.
+
 ## Current milestone
 
-`M1: Local UI and domain framework with Mock Data — ACTIVE`
+`Blueprint local preview — BUILD-COMPLETE / NOT PRODUCTION-READY`
 
 Current execution sources:
 
 - Parent Epic: Issue #2
-- GPT work: Issue #13
-- Codex implementation: Issue #14
+- Original M1: Issue #14 / PR #17
+- Blueprint build-complete implementation: Issue #20 / `codex/20-blueprint-build-complete`
 - Task dashboard: `docs/TASK-LOG.md`
 
 Issues #4–#8 and the three-window plan are superseded historical records.

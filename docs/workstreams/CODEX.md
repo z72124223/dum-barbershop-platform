@@ -1,4 +1,4 @@
-# Codex Work Log — Complete M1 Local Implementation
+# Codex Work Log — Blueprint Build-Complete
 
 ## Identity
 
@@ -10,7 +10,7 @@
 
 ## Issue #20 current objective
 
-Continue from the merged M1 platform and complete every safe, local and non-production Blueprint preview. Work proceeds without an Owner review gate; production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`.
+All safe, local and non-production Blueprint previews are implemented. The remaining objective is to publish final evidence through the Issue #20 Draft PR, merge the validated branch and record the merge SHA. Production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`.
 
 ## Issue #20 ordered gates
 
@@ -25,7 +25,8 @@ Continue from the merged M1 platform and complete every safe, local and non-prod
 - Claimed Issue: https://github.com/z72124223/dum-barbershop-platform/issues/20
 - Base `main`: `cf418fb72e0bb7b18ce19cec0e9369b54e70a6d7`
 - Branch source: merged Issue #14 / M1 platform
-- Exact next action: implement booking lifecycle Domain rules, tests and provider-neutral integration operation models.
+- Last good implementation commit: `f217e2d95393da78e8f95b1fc1d4f01d9fc1eb65`
+- Exact next action: commit final README / Roadmap / Task Log validation evidence, push, open the Draft PR and record its URL.
 - Blockers: none.
 - Owner decision needed: none for local Mock implementation.
 
@@ -92,6 +93,25 @@ Continue from the merged M1 platform and complete every safe, local and non-prod
 - Exact next action: update README, run clean final validation and route smoke, open Draft PR, merge and record `BLUEPRINT_BUILD_COMPLETE`.
 - Blockers: none.
 - Owner decision needed: none for build-complete; production content and integrations remain explicitly reserved.
+
+## BLUEPRINT_BUILD_COMPLETE validation checkpoint
+
+- Status: `VALIDATED_PENDING_PR`
+- Completed at: `2026-07-14 18:35 +08:00`
+- Scope: public website, booking lifecycle, multi-staff operations, integration simulator and responsive quick-action preview are build-complete locally.
+- `pnpm install --frozen-lockfile`: PASS with pnpm 11.7.0.
+- `pnpm typecheck`: PASS.
+- `pnpm lint`: PASS.
+- `pnpm test`: PASS (36 / 36).
+- `pnpm build`: PASS; 14 application routes plus manifest, icon and not-found generated.
+- HTTP smoke: PASS (16 / 16 requested application / asset routes returned 200).
+- Browser: desktop and 390x844 target mobile workflows PASS; no console errors / warnings and no document-level overflow on tested routes.
+- Repository hygiene: exactly one lockfile; only `.env.example` tracked; secret signatures, unmasked phone and email scans PASS; `git diff --check` PASS.
+- Documentation: README, Roadmap, Task Log and Codex durable log synchronized with build-complete / not-production-ready status.
+- Reserved: real brand assets, prices, service facts, staff identities, location, hours, reviews, policies, privacy retention, providers, credentials, outbound delivery, deployment and native watchOS remain disabled or `TODO(owner-decision)`.
+- Blockers: none.
+- Owner decision needed: none for merge of this validated non-production preview.
+- Exact next action: commit and push this checkpoint, create the Issue #20 Draft PR, then update this log with the PR URL.
 
 ## Existing durable checkpoint
 
