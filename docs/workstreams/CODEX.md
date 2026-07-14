@@ -6,7 +6,7 @@
 - Issue: #20
 - Branch: `codex/20-blueprint-build-complete`
 - Primary responsibility: all application code, engine, tests, build and integration
-- Status: IN_PROGRESS
+- Status: PR_OPEN
 
 ## Issue #20 current objective
 
@@ -96,7 +96,7 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 
 ## BLUEPRINT_BUILD_COMPLETE validation checkpoint
 
-- Status: `VALIDATED_PENDING_PR`
+- Status: `PR_OPEN`
 - Completed at: `2026-07-14 18:35 +08:00`
 - Scope: public website, booking lifecycle, multi-staff operations, integration simulator and responsive quick-action preview are build-complete locally.
 - `pnpm install --frozen-lockfile`: PASS with pnpm 11.7.0.
@@ -111,7 +111,10 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 - Reserved: real brand assets, prices, service facts, staff identities, location, hours, reviews, policies, privacy retention, providers, credentials, outbound delivery, deployment and native watchOS remain disabled or `TODO(owner-decision)`.
 - Blockers: none.
 - Owner decision needed: none for merge of this validated non-production preview.
-- Exact next action: commit and push this checkpoint, create the Issue #20 Draft PR, then update this log with the PR URL.
+- Final validation commit: `68afefcea4f7586dbe4702cc5e1b3836a8671bfb`.
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
+- Uncommitted changes: none after this PR log update is committed.
+- Exact next action: push this PR record, inspect PR #21 checks / review findings, mark ready and merge when no Required fix remains.
 
 ## Existing durable checkpoint
 

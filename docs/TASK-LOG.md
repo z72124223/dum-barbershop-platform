@@ -76,7 +76,8 @@ The former Issue #5 branch contains only claim / journal setup and no applicatio
 - HTTP routes: 16 / 16 PASS including manifest and icon
 - Secret / real-data scan: PASS
 - README / Roadmap / Task Log: updated
-- Draft PR / merge: pending final checkpoint
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
+- Merge: pending final PR checks / Required-fix inspection
 
 ## GPT gates
 
