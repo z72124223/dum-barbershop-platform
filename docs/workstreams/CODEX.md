@@ -6,7 +6,7 @@
 - Issue: #14
 - Branch: `codex/14-m1-platform`
 - Primary responsibility: all application code, engine, tests, build and integration
-- Status: READY_FOR_GPT_REVIEW
+- Status: PR_OPEN
 
 ## Existing durable checkpoint
 
@@ -14,7 +14,7 @@
 - New consolidated branch: `codex/14-m1-platform`
 - Branch creation source HEAD: `f4bbed09fa905e079478b0b9fe07506aa0ea35b3`
 - Last good code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
-- Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
+- Latest governance `main` SHA merged: `1dba51eb0718d811534f06817ebb82cb2336512c`
 - Last checkpoint source: former Issue #4
 - Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/17
 - Uncommitted changes: none after this final PR log update is committed
@@ -75,7 +75,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Exact next action
 
-Wait for GPT Issue #13 review of Draft PR #17, then address any concrete required fixes on this same branch and re-run the affected checks.
+Push the latest-main merge and this validation record, mark Draft PR #17 ready, merge it under Decision D-016, then create the next scope-limited Blueprint implementation Issue and branch.
 
 ## Resume commands
 
@@ -111,6 +111,7 @@ During merge conflicts:
 - Required, empty and adapter-conflict states: verified through browser and automated tests
 - Secret / real-data review: PASS; one lockfile, safe `.env.example`, no secret or unmasked phone / email pattern in source
 - README final route, safety and local-behavior documentation: updated
+- Revalidation after governance Decision D-016 / `origin/main` `1dba51e`: install, typecheck, lint, 23 tests and production build PASS
 
 ## Blockers
 
@@ -224,3 +225,19 @@ During merge conflicts:
 - Exact next action: GPT Issue #13 reviews Draft PR #17; Codex addresses any required fixes on `codex/14-m1-platform`.
 - Blockers: none.
 - Owner decision needed: none for M1 acceptance; all reserved production decisions remain deferred.
+
+## CONTINUOUS_EXECUTION_REVALIDATION checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 16:30 +08:00`
+- Latest synced `origin/main`: `1dba51eb0718d811534f06817ebb82cb2336512c`
+- Merge commit: `611542f83e9a034278f5e849043fbe9b3297af02`
+- Decision applied: D-016 / Issue #18; Owner manual review is not a blocking gate for this validated non-production PR.
+- `pnpm install --frozen-lockfile`: PASS.
+- `pnpm typecheck`: PASS.
+- `pnpm lint`: PASS.
+- `pnpm test`: PASS (23/23).
+- `pnpm build`: PASS; all 10 application routes generated.
+- Review findings: none recorded on PR #17.
+- Exact next action: push, merge PR #17, then create the next Blueprint implementation Issue.
+- Reserved / production items: remain disabled, Mock or `TODO(owner-decision)`.
