@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: none at the `PUBLIC_SITE_READY` checkpoint
+- Uncommitted changes: Staff workspace checkpoint files until the next checkpoint commit
 
 ## Current objective
 
@@ -48,9 +48,8 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Not yet implemented
 
-- `/staff` workspace
-- Staff integration / UI tests
-- Responsive screenshots / full M1 validation
+- Final responsive evidence / full M1 validation
+- README final accuracy update
 - Draft PR
 
 ## Ordered implementation checkpoints
@@ -106,7 +105,8 @@ During merge conflicts:
 - Checks after current-main merge `4a7c263edc5d6e80e82386bd86f116271443a873`: install, typecheck, lint, test and production build PASS
 - Domain / adapter / booking option tests: 18 passed
 - Customer booking browser smoke: passed end-to-end through clear Mock confirmation
-- Staff UI tests: not run
+- Staff logic tests: 5 passed; total automated tests: 23
+- Staff browser smoke: status chain, all-day view, block success / conflict, customer search passed
 - Mobile smoke: home navigation / fixed booking entry and `/booking` 390×844 viewport passed
 - Secret / real-data review after merge: not run
 
@@ -179,3 +179,18 @@ During merge conflicts:
 - Exact next action: build the `/staff` Mock workspace.
 - Blockers: none.
 - Owner decision needed: none; real prices, providers, policies, customer data and payment remain absent.
+
+## BOOKING_STAFF_READY checkpoint
+
+- Status: `READY_TO_COMMIT`
+- Completed at: `2026-07-14 13:54:58 +08:00`
+- Customer flow: already durable at `PUBLIC_SITE_READY` commit `0f17703` and retested end-to-end.
+- Staff workspace: added `/staff` with today metrics, next customer, staff filter, booking list / details, full-day timeline, customer search with fictional history, pending / waitlist placeholders, and explicit no-auth local-prototype warning.
+- Status actions: confirmed → checked-in → in-service → completed flow uses the centralized Domain transition API and creates Mock audit events; pending can be confirmed through the same legal transition rules.
+- Block time: staff-specific 30 / 60 minute Mock blocks can be added; conflicts with the same staff's booking or block are rejected; different staff remain independent.
+- Tests: 23 passed, including staff filtering, next-customer selection, timeline ordering, same-staff block rejection and different-staff allowance.
+- Browser evidence: desktop status chain completed; full-day block creation and duplicate conflict were verified; fictional customer search returned one masked record; 390×844 today and full-day views have no horizontal overflow; no browser console errors.
+- Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed; `/staff` is statically generated.
+- Exact next action: commit and push `BOOKING_STAFF_READY`, publish Issue #14 checkpoint, then perform final clean install / route / mobile / secret / README validation and open the Draft PR.
+- Blockers: none.
+- Owner decision needed: none for M1; authentication, production data, real notifications / calendar / payment and operational policies remain out of scope.
