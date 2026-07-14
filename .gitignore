@@ -9,6 +9,7 @@
 /.next/
 /out/
 /build/
+/.test-dist/
 
 # local environment and logs
 .env

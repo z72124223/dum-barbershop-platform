@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: `next-env.d.ts` generated route type path plus this log update until checkpoint commit
+- Uncommitted changes: Domain / Mock engine checkpoint files listed in the latest checkpoint below
 
 ## Current objective
 
@@ -48,13 +48,9 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Not yet implemented
 
-- Multi-staff Domain models
-- Availability calculation
-- Booking status transition engine
-- Adapter ports and Mock repositories
 - `/booking` customer flow
 - `/staff` workspace
-- Domain / integration / UI tests for those features
+- Integration / UI tests for those features
 - Responsive screenshots / full M1 validation
 - Draft PR
 
@@ -83,7 +79,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Exact next action
 
-Create the multi-staff Domain models and barrel exports under `src/domain/**`, then add availability and booking-transition tests before publishing `DOMAIN_READY`.
+Commit and push this completed Domain / Mock engine checkpoint, publish the pending `SCAFFOLD_MIGRATED` and `DOMAIN_READY` Issue #14 comments, then begin the customer booking flow.
 
 ## Resume commands
 
@@ -109,8 +105,8 @@ During merge conflicts:
 
 - Inherited scaffold checks: PASS at `20004c615876c3beb7110bec2e0a97764c21735a`
 - Checks after current-main merge `4a7c263edc5d6e80e82386bd86f116271443a873`: install, typecheck, lint, test and production build PASS
-- Domain tests: not run
-- Booking / Staff tests: not run
+- Domain / adapter tests: 15 passed
+- Booking / Staff UI tests: not run
 - Mobile smoke: not run
 - Secret / real-data review after merge: not run
 
@@ -136,3 +132,32 @@ During merge conflicts:
 - Known blockers: none.
 - Owner decision needed: none for M1 Mock implementation.
 - Draft PR: none yet.
+
+## CHECKPOINT — PAUSED_QUOTA
+
+- Status: `PAUSED_QUOTA`
+- Last remote good commit: `5349656cb2094a895cacd3075514016bec938e14`
+- Last checkpoint time: `2026-07-12 23:02:32 +08:00`
+- Completed locally: multi-staff Domain models, availability calculation, booking transition engine with AuditEvent, provider-neutral ports, fictional Mock repositories/data, and 15 Domain/Adapter tests.
+- Checks passed locally: `pnpm typecheck`, `pnpm lint`, `pnpm test` (15/15), `pnpm build`.
+- In progress: `DOMAIN_READY` Commit/Push and Issue #14 checkpoint publication.
+- Exact next action: stage `.gitignore`, `package.json`, `tsconfig.test.json`, `src/domain/**`, `src/adapters/**`, `src/data/**`, and this log; commit as `checkpoint(#14): implement domain and mock engine`; push `codex/14-m1-platform`; then publish both pending Issue #14 checkpoint comments.
+- Resume steps: `git switch codex/14-m1-platform`; inspect `git status`; rerun `pnpm typecheck`; `pnpm lint`; `pnpm test`; `pnpm build`; then perform the exact next action.
+- Blocker: automatic approval review rejected Git Commit and GitHub comments because the account usage limit resets at `2026-07-13 03:12 +08:00`.
+- Owner decision needed: none.
+- Uncommitted changes: `.gitignore`, `package.json`, `tsconfig.test.json`, `src/domain/**`, `src/adapters/**`, `src/data/**`, `docs/workstreams/CODEX.md`.
+
+## DOMAIN_READY checkpoint
+
+- Status: `READY_TO_COMMIT`
+- Resumed at: `2026-07-14 13:31:06 +08:00`
+- Latest remote branch commit before this checkpoint: `5349656cb2094a895cacd3075514016bec938e14`
+- Latest synced `origin/main`: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
+- Completed: multi-staff Domain models, staff schedules and blocks, service duration and buffers, Domain-calculated availability, booking status transitions with audit events, deposit / booking status separation, provider-neutral ports and fictional Mock repositories.
+- Safety behavior: rejects overlapping bookings for the same staff, allows different staff at the same time, preserves idempotency, and does not implement any unresolved business policy.
+- Tests: 15 Domain / Adapter tests passed across availability, transition, booking repository and customer repository behavior.
+- Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed.
+- Exact next action: commit and push `DOMAIN_READY`, publish Issue #14 checkpoint evidence, then implement `/booking` and public booking entry refinements.
+- Blockers: none.
+- Owner decision needed: none for M1 Mock implementation.
+- Uncommitted changes: `.gitignore`, `eslint.config.mjs`, `package.json`, `tsconfig.test.json`, `src/domain/**`, `src/adapters/**`, `src/data/**`, `docs/workstreams/CODEX.md`.
