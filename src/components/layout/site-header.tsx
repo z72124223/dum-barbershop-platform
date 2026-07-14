@@ -18,6 +18,10 @@ export function SiteHeader() {
       <nav aria-label="主要導覽">
         {links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
       </nav>
+      <details className="mobile-menu">
+        <summary>選單</summary>
+        <div>{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</div>
+      </details>
       <ButtonLink href="/booking" compact>預約入口</ButtonLink>
     </header>
   );

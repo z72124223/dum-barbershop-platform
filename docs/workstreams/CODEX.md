@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: none at the `DOMAIN_READY` checkpoint
+- Uncommitted changes: Public Site / Booking checkpoint files until the next checkpoint commit
 
 ## Current objective
 
@@ -48,9 +48,8 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Not yet implemented
 
-- `/booking` customer flow
 - `/staff` workspace
-- Integration / UI tests for those features
+- Staff integration / UI tests
 - Responsive screenshots / full M1 validation
 - Draft PR
 
@@ -105,9 +104,10 @@ During merge conflicts:
 
 - Inherited scaffold checks: PASS at `20004c615876c3beb7110bec2e0a97764c21735a`
 - Checks after current-main merge `4a7c263edc5d6e80e82386bd86f116271443a873`: install, typecheck, lint, test and production build PASS
-- Domain / adapter tests: 15 passed
-- Booking / Staff UI tests: not run
-- Mobile smoke: not run
+- Domain / adapter / booking option tests: 18 passed
+- Customer booking browser smoke: passed end-to-end through clear Mock confirmation
+- Staff UI tests: not run
+- Mobile smoke: home navigation / fixed booking entry and `/booking` 390×844 viewport passed
 - Secret / real-data review after merge: not run
 
 ## Blockers
@@ -162,3 +162,18 @@ During merge conflicts:
 - Blockers: none.
 - Owner decision needed: none for M1 Mock implementation.
 - Uncommitted changes: none after this checkpoint log is committed.
+
+## PUBLIC_SITE_READY checkpoint
+
+- Status: `READY_TO_COMMIT`
+- Completed at: `2026-07-14 13:44:53 +08:00`
+- Completed: `/booking` route, six-screen customer flow, Domain-calculated multi-staff slot selection, no-preference actual staff assignment, customer details / notes, disabled-real-payment deposit placeholder, summary and explicit no-real-booking confirmation.
+- Public entries: desktop header, homepage hero, mobile fixed CTA, service-specific links and staff-specific links all converge on `/booking`.
+- Mobile navigation: accessible disclosure menu added; booking CTA is hidden inside `/booking` and future `/staff` so it cannot cover workflow controls.
+- Public refinements: service and staff pages now use fictional Mock records with contextual booking links and no invented formal price or identity.
+- Tests: 18 passed, including no-preference staff assignment and duplicate-time collapse.
+- Browser evidence: desktop flow completed end-to-end; 390×844 home and booking views have no horizontal overflow; mobile navigation opens; booking confirmation clearly says no real booking was created.
+- Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed; `/booking` is statically generated.
+- Exact next action: commit and push `PUBLIC_SITE_READY`, publish the Issue #14 checkpoint, then build the `/staff` Mock workspace.
+- Blockers: none.
+- Owner decision needed: none; real prices, providers, policies, customer data and payment remain absent.
