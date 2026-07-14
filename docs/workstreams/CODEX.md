@@ -3,10 +3,46 @@
 ## Identity
 
 - Role: Codex
-- Issue: #14
-- Branch: `codex/14-m1-platform`
+- Issue: #20
+- Branch: `codex/20-blueprint-build-complete`
 - Primary responsibility: all application code, engine, tests, build and integration
-- Status: PR_OPEN
+- Status: IN_PROGRESS
+
+## Issue #20 current objective
+
+Continue from the merged M1 platform and complete every safe, local and non-production Blueprint preview. Work proceeds without an Owner review gate; production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`.
+
+## Issue #20 ordered gates
+
+1. `PUBLIC_EXPERIENCE_COMPLETE`
+2. `BOOKING_LIFECYCLE_COMPLETE`
+3. `STAFF_OPERATIONS_COMPLETE`
+4. `INTEGRATION_SIMULATION_COMPLETE`
+5. `BLUEPRINT_BUILD_COMPLETE`
+
+## Issue #20 durable checkpoint
+
+- Claimed Issue: https://github.com/z72124223/dum-barbershop-platform/issues/20
+- Base `main`: `cf418fb72e0bb7b18ce19cec0e9369b54e70a6d7`
+- Branch source: merged Issue #14 / M1 platform
+- Exact next action: implement booking lifecycle Domain rules, tests and provider-neutral integration operation models.
+- Blockers: none.
+- Owner decision needed: none for local Mock implementation.
+
+## BOOKING_LIFECYCLE_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:10 +08:00`
+- Completed: customer-side local lookup, booking detail, cancellation request and reschedule preview at `/booking/manage`.
+- Domain safety: reschedule lineage links original and replacement records; all status changes use the central transition engine and emit audit records.
+- Queue safety: pending and waitlisted records can be ranked without modifying or displacing confirmed bookings.
+- Adapter safety: Booking Provider and Identity boundaries are explicit; production behavior remains disabled and Mock identity never claims real authentication.
+- Integration reliability model: idempotency, conflict, timeout, bounded retry and partial-failure states are represented and tested.
+- Privacy: locally entered phone values are masked before persistence to the session preview.
+- Checks: typecheck and scoped lint passed; lifecycle, integration and adapter tests passed.
+- Exact next action: expand the Staff workspace with day/week operations, leave/overtime blocks, safe pending/waitlist handling, customer notes and role-aware controls.
+- Blockers: none.
+- Owner decision needed: none; cancellation, refund, payment and production authentication rules remain disabled or `TODO(owner-decision)`.
 
 ## Existing durable checkpoint
 

@@ -32,6 +32,9 @@ export interface Booking {
   status: BookingStatus;
   depositStatus: DepositStatus;
   note?: string;
+  managementCodeMasked?: string;
+  rescheduledFromBookingId?: EntityId;
+  rescheduledToBookingId?: EntityId;
   createdAt: IsoInstant;
   updatedAt: IsoInstant;
   source: "mock_customer" | "mock_staff" | "mock_seed";

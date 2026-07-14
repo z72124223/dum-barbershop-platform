@@ -6,7 +6,8 @@ const links = [
   ["設計師", "/barbers"],
   ["作品", "/works"],
   ["關於", "/about"],
-  ["聯絡", "/contact"]
+  ["聯絡", "/contact"],
+  ["查詢預約", "/booking/manage"],
 ];
 
 export function SiteHeader() {

@@ -6,5 +6,6 @@ export * from "./calendar";
 export * from "./common";
 export * from "./customer";
 export * from "./membership";
+export * from "./integration";
 export * from "./service";
 export * from "./staff";

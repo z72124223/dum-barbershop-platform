@@ -151,6 +151,25 @@ h3 { margin: 0; font-size: 1.6rem; }
 .booking-confirmation h2 { font-size: clamp(2.5rem, 7vw, 5rem); }
 .booking-confirmation > p:not(.eyebrow) { max-width: 660px; color: var(--color-smoke); }
 .booking-confirmation .summary-list { margin-block: 2rem; }
+.booking-confirmation .button { margin: .5rem .5rem 0 0; }
+.booking-entry-nav { margin-bottom: 1rem; padding: .75rem 1rem; display: flex; justify-content: space-between; gap: 1rem; border: 1px solid var(--line); color: var(--color-smoke); }
+.booking-entry-nav a { color: var(--color-brass); font-weight: 800; }
+.management-shell { max-width: 1080px; margin-inline: auto; }
+.management-grid { display: grid; grid-template-columns: minmax(260px, .65fr) 1.35fr; gap: 1rem; align-items: start; }
+.management-lookup { position: sticky; top: 90px; padding: 1.35rem; display: grid; gap: 1rem; border: 1px solid var(--line); background: var(--color-coal); }
+.management-lookup h2 { font-size: clamp(2.4rem, 5vw, 4rem); }
+.management-lookup label { display: grid; gap: .4rem; color: var(--color-smoke); }
+.management-lookup input { width: 100%; padding: .8rem; border: 1px solid var(--line); background: #0b0b0b; color: var(--color-bone); }
+.demo-code { padding: .7rem; border: 1px dashed var(--color-brass); background: transparent; color: var(--color-brass); cursor: pointer; }
+.priority-preview { padding: .85rem; display: grid; gap: .3rem; background: rgba(168,138,87,.08); }
+.priority-preview span { color: var(--color-smoke); font-size: .8rem; }
+.management-result { display: grid; gap: 1rem; }
+.management-card { padding: clamp(1.2rem, 4vw, 2rem); border: 1px solid var(--color-brass); background: var(--color-coal); }
+.management-card-heading { margin-bottom: 1.5rem; display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.management-card-heading h2 { overflow-wrap: anywhere; font-size: clamp(2rem, 5vw, 3.5rem); }
+.status-chip { padding: .35rem .65rem; border: 1px solid var(--color-brass); color: var(--color-brass); font-size: .75rem; white-space: nowrap; }
+.management-actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .75rem; }
+.management-actions button:disabled { opacity: .35; cursor: not-allowed; transform: none; }
 
 .staff-shell { display: grid; gap: 1.25rem; }
 .staff-warning { padding: .9rem 1rem; display: flex; justify-content: space-between; gap: 1rem; border-left: 3px solid #b95454; background: rgba(185,84,84,.09); }
@@ -226,10 +245,10 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .staff-warning, .staff-toolbar { align-items: stretch; flex-direction: column; }
   .staff-tabs { display: grid; grid-template-columns: repeat(3, 1fr); }
   .staff-metrics { grid-template-columns: repeat(2, 1fr); }
-  .staff-dashboard, .schedule-layout, .customer-search-panel { grid-template-columns: 1fr; }
+  .staff-dashboard, .schedule-layout, .customer-search-panel, .management-grid { grid-template-columns: 1fr; }
   .booking-detail { grid-template-columns: 1fr 1fr; }
   .booking-detail .summary-list { grid-column: 1 / -1; grid-row: 2; }
-  .block-panel, .customer-search-panel > div:first-child { position: static; }
+  .block-panel, .customer-search-panel > div:first-child, .management-lookup { position: static; }
 }
 
 @media (max-width: 560px) {
@@ -253,6 +272,7 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .booking-detail .summary-list { grid-column: auto; grid-row: auto; }
   .timeline-item { grid-template-columns: 1fr; gap: .2rem; }
   .customer-results > article > div:first-child { flex-direction: column; }
+  .booking-entry-nav, .management-card-heading { flex-direction: column; }
 }
 
 @media (prefers-reduced-motion: reduce) {

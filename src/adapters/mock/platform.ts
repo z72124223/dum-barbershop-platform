@@ -8,6 +8,8 @@ import {
   type DepositPaymentPlaceholder,
   type EntityId,
   type MembershipPlaceholder,
+  type IntegrationOperation,
+  type StaffRole,
 } from "../../domain";
 import {
   mockBookings,
@@ -17,14 +19,19 @@ import {
 } from "../../data/mock";
 import type {
   AuditRepository,
+  BookingProvider,
   BookingRepository,
   CalendarProvider,
   CreateBookingInput,
   CustomerRepository,
+  IdentityProvider,
+  IntegrationQueue,
   MembershipProvider,
   NotificationProvider,
   NotificationReceipt,
   PaymentProvider,
+  PreviewIdentitySession,
+  ProviderBookingReceipt,
 } from "../ports";
 
 const clone = <T>(value: T): T => structuredClone(value);
@@ -153,6 +160,95 @@ export class MockNotificationProvider implements NotificationProvider {
       mode: "mock",
     };
   }
+
+  async previewTemplate(
+    template: "booking_confirmation" | "booking_reminder" | "review_request" | "return_campaign",
+    booking?: Booking,
+    customer?: Customer,
+  ): Promise<NotificationReceipt> {
+    return {
+      messageId: `disabled-${template}-${booking?.id ?? "no-booking"}-${customer?.id ?? "no-customer"}`,
+      mode: "disabled",
+    };
+  }
+}
+
+export class MockBookingProvider implements BookingProvider {
+  async createBooking(booking: Booking, idempotencyKey: string): Promise<ProviderBookingReceipt> {
+    return this.disabledReceipt(`create-${booking.id}-${idempotencyKey}`);
+  }
+
+  async cancelBooking(bookingId: EntityId, idempotencyKey: string): Promise<ProviderBookingReceipt> {
+    return this.disabledReceipt(`cancel-${bookingId}-${idempotencyKey}`);
+  }
+
+  async rescheduleBooking(
+    originalBookingId: EntityId,
+    replacement: Booking,
+    idempotencyKey: string,
+  ): Promise<ProviderBookingReceipt> {
+    return this.disabledReceipt(`reschedule-${originalBookingId}-${replacement.id}-${idempotencyKey}`);
+  }
+
+  private disabledReceipt(reference: string): ProviderBookingReceipt {
+    return { providerReference: `disabled-${reference}`, mode: "disabled", status: "disabled" };
+  }
+}
+
+const rolePermissions: Record<StaffRole, string[]> = {
+  owner: ["schedule:read", "booking:write", "customer:read", "integration:read", "settings:preview"],
+  manager: ["schedule:read", "booking:write", "customer:read", "integration:read"],
+  barber: ["schedule:read", "booking:write", "customer:read_assigned"],
+  reception: ["schedule:read", "booking:write", "customer:read"],
+  read_only: ["schedule:read"],
+};
+
+export class MockIdentityProvider implements IdentityProvider {
+  async getPreviewSession(role: StaffRole = "read_only"): Promise<PreviewIdentitySession> {
+    return {
+      mode: "mock",
+      authenticated: false,
+      previewRole: role,
+      permissions: [...rolePermissions[role]],
+    };
+  }
+}
+
+export class MockIntegrationQueue implements IntegrationQueue {
+  private records: IntegrationOperation[];
+  private readonly idempotency = new Map<string, EntityId>();
+
+  constructor(seed: IntegrationOperation[] = []) {
+    this.records = clone(seed);
+    seed.forEach((operation) => this.idempotency.set(operation.idempotencyKey, operation.id));
+  }
+
+  async list(): Promise<IntegrationOperation[]> {
+    return clone(this.records);
+  }
+
+  async findById(id: EntityId): Promise<IntegrationOperation | null> {
+    return clone(this.records.find((operation) => operation.id === id) ?? null);
+  }
+
+  async enqueue(operation: IntegrationOperation): Promise<IntegrationOperation> {
+    const existingId = this.idempotency.get(operation.idempotencyKey);
+    if (existingId) {
+      const existing = this.records.find((record) => record.id === existingId);
+      if (existing) return clone(existing);
+    }
+    this.records.push(clone(operation));
+    this.idempotency.set(operation.idempotencyKey, operation.id);
+    return clone(operation);
+  }
+
+  async save(operation: IntegrationOperation): Promise<IntegrationOperation> {
+    const index = this.records.findIndex((record) => record.id === operation.id);
+    if (index < 0) this.records.push(clone(operation));
+    else this.records[index] = clone(operation);
+    this.idempotency.set(operation.idempotencyKey, operation.id);
+    return clone(operation);
+  }
 }
 
 export class MockPaymentProvider implements PaymentProvider {
@@ -194,7 +290,10 @@ export class MockAuditRepository implements AuditRepository {
 export function createMockPlatform() {
   return {
     bookings: new MockBookingRepository(mockBookings),
+    bookingProvider: new MockBookingProvider(),
     customers: new MockCustomerRepository(mockCustomers),
+    identity: new MockIdentityProvider(),
+    integrations: new MockIntegrationQueue(),
     calendar: new MockCalendarProvider(mockCalendarBlocks),
     notifications: new MockNotificationProvider(),
     payments: new MockPaymentProvider(),
