@@ -6,7 +6,7 @@
 - Issue: #14
 - Branch: `codex/14-m1-platform`
 - Primary responsibility: all application code, engine, tests, build and integration
-- Status: IN_PROGRESS
+- Status: READY_FOR_GPT_REVIEW
 
 ## Existing durable checkpoint
 
@@ -16,8 +16,8 @@
 - Last good code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
-- Draft PR: none
-- Uncommitted changes: final validation / README updates until the M1 validation commit
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/17
+- Uncommitted changes: none after this final PR log update is committed
 
 ## Current objective
 
@@ -48,7 +48,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Not yet implemented
 
-- Draft PR
+- None for the Issue #14 M1 implementation scope. Any required review fixes will be handled on the same branch and Draft PR.
 
 ## Ordered implementation checkpoints
 
@@ -75,7 +75,7 @@ Previously reported checks at code commit `20004c615876c3beb7110bec2e0a97764c217
 
 ## Exact next action
 
-Commit and push `M1_VALIDATION_READY`, publish final Issue #14 evidence, then open the Draft PR for GPT Issue #13 review.
+Wait for GPT Issue #13 review of Draft PR #17, then address any concrete required fixes on this same branch and re-run the affected checks.
 
 ## Resume commands
 
@@ -201,7 +201,8 @@ During merge conflicts:
 
 ## M1_VALIDATION_READY checkpoint
 
-- Status: `READY_TO_COMMIT`
+- Status: `COMPLETE`
+- Checkpoint commit: `9e38ef4`
 - Completed at: `2026-07-14 14:00:09 +08:00`
 - Install: `pnpm install --frozen-lockfile` PASS with pnpm 11.7.0; exactly one lockfile (`pnpm-lock.yaml`).
 - Typecheck: PASS.
@@ -218,6 +219,8 @@ During merge conflicts:
 - README: install, routes, Mock behavior and safety boundaries updated.
 - UI evidence: equivalent detailed desktop / mobile browser smoke evidence recorded here and in Issue #14; no unapproved real or generated customer imagery used.
 - Reserved decisions: real prices, identities, policy text, authentication, booking provider, calendar synchronization, notifications, payment, membership and production deployment remain unimplemented.
-- Exact next action: commit / push this validation checkpoint, publish Issue #14 `M1_VALIDATION_READY`, then open one Draft PR against `main`.
+- Issue #14 checkpoint: `M1_VALIDATION_READY` published.
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/17
+- Exact next action: GPT Issue #13 reviews Draft PR #17; Codex addresses any required fixes on `codex/14-m1-platform`.
 - Blockers: none.
 - Owner decision needed: none for M1 acceptance; all reserved production decisions remain deferred.
