@@ -6,11 +6,11 @@
 - Issue: #20
 - Branch: `codex/20-blueprint-build-complete`
 - Primary responsibility: all application code, engine, tests, build and integration
-- Status: PR_OPEN
+- Status: DONE
 
 ## Issue #20 current objective
 
-All safe, local and non-production Blueprint previews are implemented. The remaining objective is to publish final evidence through the Issue #20 Draft PR, merge the validated branch and record the merge SHA. Production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`.
+All safe, local and non-production Blueprint previews are implemented, validated and merged. Production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`; any future work starts from a new scope-limited Issue.
 
 ## Issue #20 ordered gates
 
@@ -26,14 +26,16 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 - Base `main`: `cf418fb72e0bb7b18ce19cec0e9369b54e70a6d7`
 - Branch source: merged Issue #14 / M1 platform
 - Last good implementation commit: `f217e2d95393da78e8f95b1fc1d4f01d9fc1eb65`
-- Exact next action: commit final README / Roadmap / Task Log validation evidence, push, open the Draft PR and record its URL.
+- Final implementation PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
+- Final merge SHA: `234ffd1c0635e02c0008c681a54787ec360ec21c`
+- Exact next action: none for Issue #20; future production or content work requires a new GitHub Issue and the relevant approved decisions.
 - Blockers: none.
 - Owner decision needed: none for local Mock implementation.
 
 ## BOOKING_LIFECYCLE_COMPLETE checkpoint
 
 - Status: `COMPLETE`
-- Completed at: `2026-07-14 17:10 +08:00`
+- Completed at: `2026-07-14 16:44:53 +08:00`
 - Completed: customer-side local lookup, booking detail, cancellation request and reschedule preview at `/booking/manage`.
 - Domain safety: reschedule lineage links original and replacement records; all status changes use the central transition engine and emit audit records.
 - Queue safety: pending and waitlisted records can be ranked without modifying or displacing confirmed bookings.
@@ -48,7 +50,7 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 ## STAFF_OPERATIONS_COMPLETE checkpoint
 
 - Status: `COMPLETE`
-- Completed at: `2026-07-14 17:35 +08:00`
+- Completed at: `2026-07-14 16:51:53 +08:00`
 - New route: `/staff/operations` with day, seven-day week, safe queue, fictional customer record and configuration views.
 - Scheduling: local blocked-time, leave and overtime previews reject same-staff conflicts.
 - Booking operations: pending, waitlist, confirm, check-in, in-service, completed, shop-cancelled, no-show and reschedule actions use Domain rules; reschedule keeps lineage.
@@ -64,7 +66,7 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 ## INTEGRATION_SIMULATION_COMPLETE checkpoint
 
 - Status: `COMPLETE`
-- Completed at: `2026-07-14 17:55 +08:00`
+- Completed at: `2026-07-14 16:57:19 +08:00`
 - New routes: `/staff/integrations` and `/staff/quick-actions`.
 - Integration console: Booking Provider, Calendar, Notification, Payment, Membership, Identity and LINE are separated by provider-neutral boundaries.
 - Reliability simulation: queued, success, conflict, timeout, partial failure, bounded retry and terminal behavior with visible idempotency keys and local audit records.
@@ -80,7 +82,7 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 ## PUBLIC_EXPERIENCE_COMPLETE checkpoint
 
 - Status: `COMPLETE`
-- Completed at: `2026-07-14 18:20 +08:00`
+- Completed at: `2026-07-14 17:11:47 +08:00`
 - Homepage: complete Blueprint 5.1 preview with hero, booking, services, works, barbers, studio features, reviews, visit/map, contact channels and mobile fixed booking entry.
 - Public routes: service categories and booking entry, fictional barber profiles, ten Blueprint work categories, About structure, contact/transport/map placeholders and reserved policy disclosure.
 - Truthfulness: no real or generated customer imagery; brand story, photos, reviews, staff facts, prices, address, hours, social links and policies remain explicit placeholders.
@@ -96,8 +98,8 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 
 ## BLUEPRINT_BUILD_COMPLETE validation checkpoint
 
-- Status: `PR_OPEN`
-- Completed at: `2026-07-14 18:35 +08:00`
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:16:45 +08:00`
 - Scope: public website, booking lifecycle, multi-staff operations, integration simulator and responsive quick-action preview are build-complete locally.
 - `pnpm install --frozen-lockfile`: PASS with pnpm 11.7.0.
 - `pnpm typecheck`: PASS.
@@ -113,8 +115,11 @@ All safe, local and non-production Blueprint previews are implemented. The remai
 - Owner decision needed: none for merge of this validated non-production preview.
 - Final validation commit: `68afefcea4f7586dbe4702cc5e1b3836a8671bfb`.
 - Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
-- Uncommitted changes: none after this PR log update is committed.
-- Exact next action: push this PR record, inspect PR #21 checks / review findings, mark ready and merge when no Required fix remains.
+- Review findings: none; PR was clean and mergeable with no configured GitHub Actions checks.
+- Merge SHA: `234ffd1c0635e02c0008c681a54787ec360ec21c`.
+- Merged at: `2026-07-14 17:19:25 +08:00`.
+- Uncommitted changes: none after this final completion record is committed.
+- Exact next action: none for Issue #20. Resume only from a new scope-limited Issue based on Git authority.
 
 ## Existing durable checkpoint
 
