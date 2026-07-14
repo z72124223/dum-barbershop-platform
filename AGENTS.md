@@ -56,6 +56,8 @@ M1 不再拆成三個平行 Codex 工作軌。Codex 負責原 A、B、C 的完�
 - Work / Codex 是同一 Task 內的模式切換，不會自動建立第二個工作者。
 - 專案邏輯上只需要兩份工作：GPT 工作與 Codex 工作。
 - GPT 與 Codex 透過 Git 文件、Issues、Commit、PR 與 Review 交接，不依賴跨視窗記憶。
+- GPT / 產品 Review 是非同步品質輸入，不是 Owner 人工核准關卡；不得只因 Review 尚未開始就停止其他安全施工。
+- Codex 完成一個 Issue 並通過必要 checks 後，必須建立或更新 PR、處理已存在的 Required fixes，並繼續下一個已有 Git 依據的藍圖工作。
 
 ## 4. 不得擅自越權
 
@@ -80,6 +82,8 @@ M1 不再拆成三個平行 Codex 工作軌。Codex 負責原 A、B、C 的完�
 - PR 必須說明變更、影響、驗證、限制與未解決事項。
 - GPT 以 Review comments 或缺陷 Issues 要求程式修改，不直接建立平行程式版本。
 - 沒有 Issue 的功能不得自行實作。
+- 若 Blueprint / Roadmap 已有明確依據但尚無下一個 Issue，Codex 可建立範圍受限的執行 Issue，再使用新的 feature branch 施工。
+- 非正式上線、非真實資料、非外部不可逆操作的 PR，在必要 checks 通過且沒有未解決 Required fix 時，不需要 Owner 人工審核即可合併。
 
 ## 6. 使用量不足與續接
 
@@ -90,6 +94,7 @@ GPT 與 Codex 都必須遵守 `docs/CONTINUITY-PROTOCOL.md`：
 - 在自己的 Issue 留下 `CHECKPOINT`。
 - 記錄 Last good commit SHA、Exact next action、恢復步驟與 checks。
 - 新 Task 沿用同一個 Issue、branch、PR 與日誌，不另開平行實作。
+- Checkpoint 是恢復機制，不是終止整體藍圖施工的理由；恢復後必須從 Exact next action 繼續。
 
 ## 7. 本機引擎與安全
 
@@ -140,3 +145,11 @@ GPT 與 Codex 都必須遵守 `docs/CONTINUITY-PROTOCOL.md`：
 8. Exact next action
 9. PR 或 Commit
 10. Uncommitted changes 是否為 none
+
+## 11. 持續施工至 Blueprint Build-Complete
+
+- Codex 必須持續實作已接受 Blueprint 中所有技術上可完成的範圍，不得停在 Owner 人工審核等待點。
+- 人工 Review、帳號註冊、憑證、第三方服務或 Owner 決策，只能阻塞直接受影響的整合或政策；其他工作繼續。
+- 未決項目使用 Mock、disabled adapter 或 `TODO(owner-decision)` 建立可預覽結構，不得擅自填入正式商業規則。
+- `Build-complete` 代表藍圖中的可實作介面、Domain、流程、Adapter、錯誤狀態、測試與文件完成；不代表正式供應商、真實資料或 Production 已啟用。
+- Production 上線、真實付款、真實通知、真實客戶資料與不可逆外部操作仍必須具備對應決策、憑證與安全驗證。

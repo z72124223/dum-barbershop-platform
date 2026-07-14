@@ -1,6 +1,6 @@
 # DUM BARBERSHOP Platform — Execution Mode
 
-版本：2.0.0  
+版本：2.1.0
 狀態：Accepted
 
 ## 1. 兩個工作角色
@@ -11,6 +11,8 @@
 - **Codex 工作**：Issue #14，負責全部本機程式碼、引擎、測試、Build 與整合。
 
 詳細責任以 `docs/TWO-ROLE-WORK-MODEL.md` 為準。
+
+GPT Review 是非同步品質流程，不是 Owner 人工核准或 Codex 繼續施工的前置條件。
 
 ## 2. Work / Codex 不會建立新工作者
 
@@ -49,7 +51,8 @@ GPT 可持續從 Git 追蹤 Codex 的 Commit、PR、checks 與未解決問題。
 7. 執行 Typecheck、Lint、Tests 與 Production Build。
 8. 定期 Commit、Push 並更新 `docs/workstreams/CODEX.md`。
 9. 建立 Draft PR。
-10. 回應 GPT Review，直到驗收完成。
+10. 回應已存在的 GPT Required fixes；必要 checks 通過且沒有未解決 Required fix 時，可合併非 Production PR。
+11. 依 Blueprint / Roadmap 建立或接續下一個 Issue 與 feature branch，持續施工至 Blueprint build-complete。
 
 ## 5. Codex 不需回規劃聊天取得下一步
 
@@ -62,7 +65,7 @@ Codex 的下一步來源依序為：
 5. GPT 在 PR 的 Review comments 或新建缺陷 Issue
 6. `docs/workstreams/CODEX.md` 的 Exact next action
 
-沒有 Issue 或 Review 依據的功能不得自行增加。
+沒有 Git 文件依據的功能不得自行增加。Blueprint / Roadmap 已明確定義但尚無 Issue 時，Codex 可先建立範圍受限的 GitHub Issue，再開始實作。
 
 ## 6. Git 是唯一交接面
 
@@ -83,3 +86,10 @@ GPT 與 Codex 不依賴跨 Task 的隱性記憶。所有交接必須透過：
 - 真實 API Key、Token、付款資料與客戶個資不得提交。
 - M1 只使用 fictional Mock Data。
 - 正式預約、付款、Calendar、通知與會員供應商未核准前不得啟用。
+
+## 8. 持續施工與非阻塞原則
+
+- Owner 人工審核不是非 Production 施工、PR 或合併的必要關卡。
+- 完成一個 Issue 後，Codex 需保留 checks、Commit、Push、PR 與 durable log，再接續下一個 Blueprint 工作。
+- Review、第三方註冊、憑證與 Owner 決策只暫停直接受影響部分；其他工作使用 Mock、disabled 或 `TODO(owner-decision)` 繼續。
+- `Blueprint build-complete` 與 `production-ready` 必須分開標示。未取得正式決策、帳號、憑證或真實資料前，不得宣稱正式上線完成。

@@ -1,6 +1,6 @@
 # 工作中斷與額度恢復續接規則
 
-版本：2.0  
+版本：2.1
 狀態：Required
 
 本文件確保 GPT 或 Codex 在使用量不足、Task 關閉、模式切換、電腦重啟或換新 Task 後，都能只依 Git 順利接續。
@@ -15,6 +15,7 @@
 4. Codex 的可靠 checkpoint 必須包含 Commit、Push、日誌與 Issue comment。
 5. GPT 的可靠 checkpoint 必須包含已提交文件或可核對的 Issue / Review 更新、日誌與 Issue comment。
 6. 接手者不需要知道前一個聊天 Task 說過什麼。
+7. Checkpoint、換 Task、Review 等待或額度恢復都只是續接機制，不代表整體 Blueprint 施工可以永久停止。
 
 ## 2. 狀態代碼
 
@@ -171,6 +172,7 @@ git pull --ff-only
 - 更新 `docs/DECISIONS.md`。
 - 使用最保守、可逆、Mock 或 disabled 狀態。
 - 只停止受影響部分。
+- 不等待 Owner 人工審核其餘非 Production 工作；繼續下一個有 Git 依據的安全範圍。
 
 ### Codex 需要規格澄清
 
@@ -199,4 +201,8 @@ GPT 開始審查時：
 - 記錄 PR 與審查 Commit
 - 將所有要求正式放入 Review / Issues
 
-PR 合併且 GPT 驗收完成後，兩份日誌才可改為 `DONE`。
+PR 合併且對應 Issue 驗收與 checks 完成後，Codex 日誌可改為 `DONE`；GPT 日誌依其非同步 Review 進度獨立更新。
+
+非 Production 實作不需要 Owner 人工審核才可合併。必要 checks 通過、沒有未解決 Required fix、資料與秘密檢查通過後，Codex 可合併並繼續下一個 Blueprint Issue；GPT Review 與里程碑文件可非同步補充。
+
+`DONE` 只代表該 Issue 或里程碑完成。Codex 必須繼續到 Blueprint build-complete；Production 專屬的決策、帳號、憑證與不可逆操作需明確列為尚未啟用，不得拿來阻止其餘施工或誤報為已完成。
