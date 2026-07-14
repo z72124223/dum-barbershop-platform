@@ -17,7 +17,7 @@
 - Latest governance `main` SHA merged: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Last checkpoint source: former Issue #4
 - Draft PR: none
-- Uncommitted changes: Domain / Mock engine checkpoint files listed in the latest checkpoint below
+- Uncommitted changes: none at the `DOMAIN_READY` checkpoint
 
 ## Current objective
 
@@ -149,15 +149,16 @@ During merge conflicts:
 
 ## DOMAIN_READY checkpoint
 
-- Status: `READY_TO_COMMIT`
+- Status: `COMPLETE`
 - Resumed at: `2026-07-14 13:31:06 +08:00`
-- Latest remote branch commit before this checkpoint: `5349656cb2094a895cacd3075514016bec938e14`
+- Checkpoint commit: `8804fac`
 - Latest synced `origin/main`: `9958ab47f91df9aecafdd1e7fc33ea519b070600`
 - Completed: multi-staff Domain models, staff schedules and blocks, service duration and buffers, Domain-calculated availability, booking status transitions with audit events, deposit / booking status separation, provider-neutral ports and fictional Mock repositories.
 - Safety behavior: rejects overlapping bookings for the same staff, allows different staff at the same time, preserves idempotency, and does not implement any unresolved business policy.
 - Tests: 15 Domain / Adapter tests passed across availability, transition, booking repository and customer repository behavior.
 - Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` and `pnpm build` passed.
-- Exact next action: commit and push `DOMAIN_READY`, publish Issue #14 checkpoint evidence, then implement `/booking` and public booking entry refinements.
+- Issue #14 checkpoint comments: `SCAFFOLD_MIGRATED` and `DOMAIN_READY` published.
+- Exact next action: implement `/booking` and public booking entry refinements.
 - Blockers: none.
 - Owner decision needed: none for M1 Mock implementation.
-- Uncommitted changes: `.gitignore`, `eslint.config.mjs`, `package.json`, `tsconfig.test.json`, `src/domain/**`, `src/adapters/**`, `src/data/**`, `docs/workstreams/CODEX.md`.
+- Uncommitted changes: none after this checkpoint log is committed.
