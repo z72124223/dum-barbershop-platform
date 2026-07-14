@@ -1,6 +1,6 @@
 # DUM BARBERSHOP Platform — GPT / Codex Work Protocol
 
-版本：2.0  
+版本：2.1
 狀態：Required
 
 本文件規範 Owner、GPT 與 Codex 如何透過 Git 共同完成專案。
@@ -21,6 +21,7 @@
 - 將程式修改要求寫成 Review comments 或缺陷 Issues。
 - 維護 GPT durable log 與里程碑 Task Log。
 - 不直接建立平行程式版本。
+- Review 可非同步進行，不作為 Owner 人工核准或 Codex 持續施工的阻塞關卡。
 
 ### Codex — Issue #14
 
@@ -64,7 +65,9 @@
 5. 依 checkpoint 順序完成 Scaffold、Domain、Public Site、Booking / Staff、Validation。
 6. 定期 Commit、Push、更新 Codex 日誌與 Issue comment。
 7. 建立 Draft PR，列出 checks、限制與待決策項目。
-8. 回應 GPT Review 並重新驗證。
+8. 回應已存在的 GPT Required fixes 並重新驗證。
+9. 必要 checks 通過且沒有未解決 Required fix 時，可合併非 Production PR，不等待 Owner 人工審核。
+10. 從 Blueprint / Roadmap 建立或接續下一個 Issue 與 feature branch，繼續施工。
 
 ## 5. Branch 與 Worktree
 
@@ -128,23 +131,27 @@ Codex 必須：
 - 回覆每個 Required fix。
 - 修改後重跑相關 checks。
 - 不得用刪除有效功能或繞過測試來消除錯誤。
+- Review 尚未開始或尚未回覆時，Codex 可繼續其他不相依的安全工作；後續 Required fix 仍必須追蹤處理。
 
 ## 9. 阻塞與決策
 
 - 需要 Owner 決策時，GPT 更新 `docs/DECISIONS.md` 與 Issue。
 - Codex 使用 Mock、disabled 或 `TODO(owner-decision)`，繼續其他工作。
+- 帳號註冊、憑證或外部服務不可用時，也只停止該 Adapter 的正式啟用，不停止其餘藍圖施工。
 - 技術阻塞由 Codex 記錄重現方式、錯誤、已嘗試方法與 Exact next action。
 - GPT 不以聊天中的模糊建議取代正式 Issue / Review。
 
-## 10. 完成與合併
+## 10. 完成、合併與持續施工
 
-M1 PR 合併前：
+非 Production PR 合併前：
 
-- Codex Issue #14 驗收與 checks 完整。
-- GPT 完成對 Constitution、Decisions、Blueprint、Architecture 與 Issue 的 Review。
-- Required fixes 已解決。
+- 對應 Issue 驗收與 checks 完整。
+- Codex 已自我核對 Constitution、Decisions、Blueprint、Architecture 與 Issue。
+- 已存在的 Required fixes 已解決，或已明確轉成只阻塞受影響部分的 Issue。
 - 無秘密、真實客戶資料或未核准正式整合。
 - README 與 durable logs 更新。
-- GPT 在 Issue #13 記錄接受或明確剩餘阻塞。
+- 不需要 Owner 人工核准；GPT 可在合併前後非同步留下 Review、缺陷與文件更新。
 
-PR 合併後，GPT 更新 Roadmap、Task Log 與下一階段 Issues。
+PR 合併後，Codex 依 Blueprint / Roadmap 建立或接續下一個範圍受限的 Issue 與 branch。GPT 可非同步更新 Roadmap、Task Log 與品質紀錄。
+
+Codex 只有在 Blueprint 中所有技術上可實作的介面、Domain、流程、Adapter、狀態、測試與文件均達 build-complete 時，才可停止整體施工。尚未決定或需外部帳號的 Production 項目必須清楚列為 disabled / Mock / `TODO(owner-decision)`，不得被誤報為正式啟用。
