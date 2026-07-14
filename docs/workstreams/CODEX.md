@@ -44,6 +44,22 @@ Continue from the merged M1 platform and complete every safe, local and non-prod
 - Blockers: none.
 - Owner decision needed: none; cancellation, refund, payment and production authentication rules remain disabled or `TODO(owner-decision)`.
 
+## STAFF_OPERATIONS_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:35 +08:00`
+- New route: `/staff/operations` with day, seven-day week, safe queue, fictional customer record and configuration views.
+- Scheduling: local blocked-time, leave and overtime previews reject same-staff conflicts.
+- Booking operations: pending, waitlist, confirm, check-in, in-service, completed, shop-cancelled, no-show and reschedule actions use Domain rules; reschedule keeps lineage.
+- Queue behavior: only pending and waitlisted records are ranked; confirmed bookings are never displaced automatically.
+- Customer preview: masked fictional identity, preferences, service history and technical notes with local audit display.
+- Configuration preview: staff roles, capabilities, service duration and schedule coverage; formal prices remain `TODO(owner-decision)`.
+- Permission preview: Owner, Manager, barber, reception and read-only UI scopes are enforced locally; the screen explicitly states there is no production authentication.
+- Checks: typecheck PASS, lint PASS, 34/34 tests PASS, production build PASS with 12 application routes plus not-found.
+- Exact next action: build the integration operations console and Apple-style quick-action preview with disabled external delivery.
+- Blockers: none.
+- Owner decision needed: none for the Mock preview; production identity and staff authorization policy remain reserved.
+
 ## Existing durable checkpoint
 
 - Source branch inherited: `work/4-platform-public`

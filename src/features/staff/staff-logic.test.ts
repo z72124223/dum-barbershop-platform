@@ -2,7 +2,15 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { mockBookings, mockBranch, mockCalendarBlocks } from "../../data/mock";
 import type { CalendarBlock } from "../../domain";
-import { ALL_STAFF, buildTimeline, canPlaceBlock, filterBookings, findNextBooking } from "./staff-logic";
+import {
+  ALL_STAFF,
+  buildTimeline,
+  buildWeekDays,
+  canPlaceBlock,
+  canStaffRole,
+  filterBookings,
+  findNextBooking,
+} from "./staff-logic";
 
 function block(overrides: Partial<CalendarBlock> = {}): CalendarBlock {
   return {
@@ -42,5 +50,19 @@ describe("staff workspace logic", () => {
     const result = buildTimeline(mockBookings, mockCalendarBlocks, ALL_STAFF);
     assert.ok(result.some((item) => item.kind === "block"));
     assert.equal(result[0]?.startsAt, "2026-07-14T03:00:00.000Z");
+  });
+
+  it("groups a seven-day schedule without leaking other weeks", () => {
+    const result = buildWeekDays("2026-07-14", mockBookings, mockCalendarBlocks, ALL_STAFF);
+    assert.equal(result.length, 7);
+    assert.equal(result[0]?.bookings.length, 4);
+    assert.equal(result[1]?.bookings.length, 0);
+  });
+
+  it("enforces local role-preview permissions", () => {
+    assert.equal(canStaffRole("barber", "booking:write"), true);
+    assert.equal(canStaffRole("barber", "settings:preview"), false);
+    assert.equal(canStaffRole("read_only", "booking:write"), false);
+    assert.equal(canStaffRole("owner", "integration:read"), true);
   });
 });
