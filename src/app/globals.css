@@ -83,6 +83,33 @@ h3 { margin: 0; font-size: 1.6rem; }
 .card-facts div { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .55rem; border-bottom: 1px solid var(--line); }
 .card-facts dt { color: var(--color-smoke); }
 .card-facts dd { margin: 0; text-align: right; }
+.section-link { margin-top: 1.5rem; display: flex; justify-content: flex-end; }
+.home-booking-band { padding: clamp(1rem, 3vw, 2rem); display: grid; grid-template-columns: repeat(3, 1fr) auto; align-items: center; gap: 1rem; border: 1px solid var(--color-brass); background: rgba(168,138,87,.07); }
+.home-booking-band > div { display: grid; }
+.home-booking-band strong { color: var(--color-brass); font: clamp(2.5rem, 6vw, 4.5rem)/1 Impact, sans-serif; }
+.home-booking-band span { color: var(--color-smoke); }
+.work-preview-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+.work-preview-strip article { min-height: 270px; padding: 1rem; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); background: linear-gradient(155deg, rgba(168,138,87,.2), transparent 45%), repeating-linear-gradient(135deg, transparent, transparent 16px, rgba(255,255,255,.025) 17px); }
+.work-preview-strip article span { margin-bottom: auto; color: var(--color-brass); }
+.work-preview-strip article strong { font: clamp(1.5rem, 3vw, 2.5rem)/1 Impact, sans-serif; }
+.work-preview-strip article small { margin-top: .5rem; color: var(--color-smoke); }
+.crew-preview { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.crew-preview > article { padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.crew-preview h3 { margin: .2rem 0 .6rem; font-size: clamp(2rem, 4vw, 3.2rem); }
+.crew-preview > article > p:not(.eyebrow) { min-height: 3.2rem; color: var(--color-smoke); }
+.portrait-placeholder { min-height: 340px; margin-bottom: 1rem; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--line); background: radial-gradient(circle at 60% 25%, rgba(168,138,87,.22), transparent 20%), linear-gradient(145deg, #1c1c1a, #0a0a0a); overflow: hidden; }
+.portrait-placeholder span { color: rgba(238,233,223,.12); font: 9rem/.8 Impact, sans-serif; }
+.portrait-placeholder small { color: var(--color-smoke); letter-spacing: .12em; }
+.visit-grid { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: .75rem; }
+.visit-grid article, .map-placeholder { min-height: 240px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); background: var(--panel); }
+.visit-grid article span, .map-placeholder span { margin-bottom: auto; color: var(--color-brass); font-size: .7rem; letter-spacing: .14em; }
+.visit-grid article p { color: var(--color-smoke); }
+.map-placeholder { background: repeating-linear-gradient(45deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 2px, transparent 2px, transparent 18px), var(--color-coal); }
+.map-placeholder strong { font: 2rem/1 Impact, sans-serif; }
+.contact-channel-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; }
+.contact-channel-grid article { min-height: 150px; padding: 1rem; display: grid; align-content: space-between; border: 1px solid var(--line); }
+.contact-channel-grid span { color: var(--color-brass); font-size: .7rem; letter-spacing: .14em; }
+.contact-channel-grid small { color: var(--color-smoke); }
 .page-hero { padding-block: 6rem 3rem; border-bottom: 1px solid var(--line); background: linear-gradient(120deg, rgba(86,26,28,.18), transparent 50%); }
 .page-hero h1 { max-width: 1000px; font-size: clamp(3rem, 8vw, 7rem); }
 .page-intro { max-width: 720px; margin-top: 1.5rem; color: var(--color-smoke); font-size: 1.1rem; }
@@ -94,6 +121,37 @@ h3 { margin: 0; font-size: 1.6rem; }
 .empty-state { padding: 2rem; border: 1px dashed rgba(168,138,87,.45); background: rgba(168,138,87,.06); }
 .empty-state h3 { margin-bottom: .75rem; }
 .empty-state p:last-child { max-width: 680px; color: var(--color-smoke); }
+.about-statement { margin-bottom: 2rem; padding: clamp(1.5rem, 5vw, 4rem); border-left: 3px solid var(--color-brass); background: rgba(168,138,87,.06); }
+.about-statement h2 { max-width: 900px; font-size: clamp(2.6rem, 7vw, 6rem); }
+.about-statement > p:last-child { max-width: 720px; color: var(--color-smoke); }
+.about-facts { margin-top: 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+.about-facts article { min-height: 180px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); }
+.about-facts span { margin-bottom: auto; color: var(--color-brass); font-size: .7rem; letter-spacing: .14em; }
+.about-facts p { color: var(--color-smoke); }
+.barber-profile-card { min-height: 680px; }
+.barber-profile-card .portrait-placeholder { min-height: 250px; margin: -1.4rem -1.4rem 1.2rem; border: 0; border-bottom: 1px solid var(--line); }
+.barber-profile-card .portrait-placeholder span { font-size: 7rem; }
+.barber-profile-card h3 { margin-top: 1.2rem; }
+.service-category-strip { margin-bottom: 1.5rem; display: flex; flex-wrap: wrap; gap: .4rem; }
+.service-category-strip span { padding: .45rem .7rem; border: 1px solid var(--line); color: var(--color-smoke); font-size: .76rem; }
+.service-reserved, .works-empty { margin-top: 1.5rem; }
+.works-gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+.works-gallery > article { padding: 1rem; border: 1px solid var(--line); background: var(--panel); }
+.works-gallery > article:nth-child(3n+1) { grid-row: span 2; }
+.work-art-placeholder { min-height: 340px; margin-bottom: 1rem; padding: 1rem; display: flex; justify-content: space-between; align-items: flex-end; border: 1px solid var(--line); background: radial-gradient(circle at 30% 25%, rgba(86,26,28,.34), transparent 22%), linear-gradient(145deg, rgba(168,138,87,.17), transparent 45%), #0c0c0c; }
+.works-gallery > article:nth-child(3n+1) .work-art-placeholder { min-height: 620px; }
+.work-art-placeholder span { color: rgba(238,233,223,.16); font: 7rem/.8 Impact, sans-serif; }
+.work-art-placeholder small { color: var(--color-smoke); }
+.works-gallery h3 { margin: .4rem 0; font-size: clamp(2rem, 4vw, 3.2rem); }
+.works-gallery > article > p:last-child { color: var(--color-smoke); }
+.contact-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1rem; align-items: start; }
+.contact-map-placeholder { position: sticky; top: 90px; min-height: 420px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: flex-end; border: 1px solid var(--line); background: repeating-linear-gradient(45deg, rgba(255,255,255,.025), rgba(255,255,255,.025) 2px, transparent 2px, transparent 18px), var(--color-coal); }
+.contact-map-placeholder > span { margin-bottom: auto; color: var(--color-brass); font-size: .7rem; letter-spacing: .14em; }
+.contact-map-placeholder strong { font: 2.5rem/1 Impact, sans-serif; }
+.contact-map-placeholder p { color: var(--color-smoke); }
+.contact-map-placeholder button { padding: .7rem; border: 1px solid var(--line); background: transparent; color: var(--color-smoke); }
+.policy-warning { margin-bottom: 1.5rem; padding: 1rem; display: flex; justify-content: space-between; gap: 1rem; border-left: 3px solid #b57c6f; background: rgba(181,124,111,.08); }
+.policy-warning span { max-width: 680px; color: var(--color-smoke); }
 
 .site-footer { padding: 3rem max(1rem, calc((100vw - 1180px) / 2)); display: grid; grid-template-columns: 1.6fr .7fr .7fr 1fr; gap: 2rem; background: #070707; border-top: 1px solid var(--line); }
 .site-footer p { margin: .5rem 0 0; }
@@ -359,6 +417,11 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .site-header { gap: 1rem; }
   .mobile-menu { display: block; }
   .grid-3 { grid-template-columns: 1fr 1fr; }
+  .home-booking-band { grid-template-columns: repeat(3, 1fr); }
+  .home-booking-band .button { grid-column: 1 / -1; }
+  .work-preview-strip, .contact-channel-grid { grid-template-columns: repeat(2, 1fr); }
+  .crew-preview, .visit-grid { grid-template-columns: 1fr 1fr; }
+  .map-placeholder { grid-column: 1 / -1; }
   .section-heading { align-items: start; flex-direction: column; }
   .site-footer { grid-template-columns: 1fr 1fr; padding-bottom: 6.5rem; }
   .mobile-booking-cta { display: flex; position: fixed; z-index: 60; left: 1rem; right: 1rem; bottom: 1rem; min-height: 52px; align-items: center; justify-content: center; border: 1px solid var(--color-brass); border-radius: var(--radius-sm); background: var(--color-brass); color: var(--color-ink); font-weight: 900; letter-spacing: .1em; box-shadow: var(--shadow-panel); }
@@ -378,15 +441,23 @@ button.timeline-item:hover { background: rgba(168,138,87,.07); }
   .delivery-preview { grid-template-columns: 1fr 1fr; }
   .delivery-preview > div { grid-column: 1 / -1; grid-row: auto; }
   .quick-action-layout { grid-template-columns: 1fr; }
-  .staff-dashboard, .schedule-layout, .customer-search-panel, .management-grid, .operations-two-column, .configuration-grid { grid-template-columns: 1fr; }
+  .staff-dashboard, .schedule-layout, .customer-search-panel, .management-grid, .operations-two-column, .configuration-grid, .contact-layout { grid-template-columns: 1fr; }
   .booking-detail { grid-template-columns: 1fr 1fr; }
   .booking-detail .summary-list { grid-column: 1 / -1; grid-row: 2; }
-  .block-panel, .customer-search-panel > div:first-child, .management-lookup, .schedule-editor { position: static; }
+  .block-panel, .customer-search-panel > div:first-child, .management-lookup, .schedule-editor, .contact-map-placeholder { position: static; }
 }
 
 @media (max-width: 560px) {
   .hero-content { padding-block: 5rem 6rem; }
   .grid-3 { grid-template-columns: 1fr; }
+  .home-booking-band, .crew-preview, .visit-grid, .about-facts, .works-gallery { grid-template-columns: 1fr; }
+  .home-booking-band .button, .map-placeholder { grid-column: auto; }
+  .work-preview-strip, .contact-channel-grid { grid-template-columns: 1fr; }
+  .work-preview-strip article { min-height: 210px; }
+  .portrait-placeholder { min-height: 280px; }
+  .works-gallery > article:nth-child(3n+1) { grid-row: auto; }
+  .works-gallery > article:nth-child(3n+1) .work-art-placeholder, .work-art-placeholder { min-height: 320px; }
+  .policy-warning { flex-direction: column; }
   .info-row { grid-template-columns: 45px 1fr; }
   .info-row > :last-child { grid-column: 2; }
   .site-footer { grid-template-columns: 1fr; }

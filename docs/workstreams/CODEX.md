@@ -76,6 +76,23 @@ Continue from the merged M1 platform and complete every safe, local and non-prod
 - Blockers: none.
 - Owner decision needed: none for the Mock simulation; all production providers and outbound policies remain reserved.
 
+## PUBLIC_EXPERIENCE_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 18:20 +08:00`
+- Homepage: complete Blueprint 5.1 preview with hero, booking, services, works, barbers, studio features, reviews, visit/map, contact channels and mobile fixed booking entry.
+- Public routes: service categories and booking entry, fictional barber profiles, ten Blueprint work categories, About structure, contact/transport/map placeholders and reserved policy disclosure.
+- Truthfulness: no real or generated customer imagery; brand story, photos, reviews, staff facts, prices, address, hours, social links and policies remain explicit placeholders.
+- Installable metadata: local manifest, theme metadata, standalone display settings and code-native SVG icon require no external registration.
+- States: application loading/error pages, booking Suspense, empty content states, validation messages, disabled controls and integration failure states are visible and truthful.
+- Browser desktop: homepage, ten-category works, booking lookup/reschedule, Staff role/weekly view, integration success/retry and quick actions passed; console errors/warnings: none.
+- Browser mobile: 390x844 target tested across homepage, booking management, Staff operations, integrations, quick actions and works; no document-level horizontal overflow.
+- Mobile safety: fixed booking CTA is visible on public pages and absent from booking/Staff workflows.
+- Checks: typecheck PASS, lint PASS, 36/36 tests PASS, production build PASS with manifest and icon routes.
+- Exact next action: update README, run clean final validation and route smoke, open Draft PR, merge and record `BLUEPRINT_BUILD_COMPLETE`.
+- Blockers: none.
+- Owner decision needed: none for build-complete; production content and integrations remain explicitly reserved.
+
 ## Existing durable checkpoint
 
 - Source branch inherited: `work/4-platform-public`
