@@ -354,3 +354,20 @@ During merge conflicts:
 - Review findings: none recorded on PR #17.
 - Exact next action: push, merge PR #17, then create the next Blueprint implementation Issue.
 - Reserved / production items: remain disabled, Mock or `TODO(owner-decision)`.
+
+## ISSUE_23_VISUAL_LOCALIZATION checkpoint
+
+- Status: `IMPLEMENTATION_COMPLETE`
+- Completed at: `2026-07-14 18:40 +08:00`
+- Branch: `codex/23-zh-gangster-style`
+- Completed: public website, customer booking flow, booking management and Staff Mock workspace now use Traditional Chinese as the primary customer-facing language.
+- Visual system: introduced a fictional American noir / gangster-inspired presentation with near-black, oxblood red, antique brass, bone white, serif display type, double-line frames, stamped labels and restrained paper-grain treatment.
+- Regional presentation: customer-facing copy now describes service for a Traditional Chinese-speaking local audience; all store, staff, service, customer and policy details remain explicitly fictional or undecided.
+- Safety boundary: no weapons, violent content, real identities, real prices, real policies, production providers or customer data were introduced.
+- Tests: `pnpm test` PASS (36/36).
+- Checks: `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint` and `pnpm build` PASS.
+- Browser evidence: desktop homepage and 390x844 mobile checks passed across public, booking and Staff routes; no horizontal overflow or browser console errors were observed.
+- Local comparison: baseline preserved at `http://127.0.0.1:3101/`; Issue #23 redesign available at `http://127.0.0.1:3102/` while the local preview processes remain active.
+- Draft PR: pending branch push.
+- Blockers: none.
+- Owner decision needed: none for this Mock visual/localization pass; all reserved production decisions remain deferred.

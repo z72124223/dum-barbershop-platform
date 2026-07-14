@@ -61,7 +61,7 @@ describe("MockBookingRepository", () => {
 describe("MockCustomerRepository", () => {
   it("searches only fictional local fixtures", async () => {
     const repository = new MockCustomerRepository(mockCustomers);
-    const results = await repository.search("Mock Customer Two");
+    const results = await repository.search("二號示範客人");
     assert.equal(results.length, 1);
     assert.ok(results[0]?.phoneMasked.includes("••"));
   });

@@ -108,7 +108,7 @@ export function BookingManagement() {
       setMessage("已完成本機取消請求。正式取消期限、退款與費用仍待店家決定，這裡沒有套用任何真實政策。");
       setError("");
     } catch (caught) {
-      setError(caught instanceof DomainError ? "這個狀態不能由客人自行取消。" : "Mock 取消暫時無法完成。");
+      setError(caught instanceof DomainError ? "這個狀態不能由客人自行取消。" : "示範取消暫時無法完成。");
     }
   }
 
@@ -139,7 +139,7 @@ export function BookingManagement() {
       setMessage("已建立隔日同時段的本機改期示範，舊預約與新預約彼此有紀錄可追查。正式改期規則仍待店家決定。");
       setError("");
     } catch (caught) {
-      setError(caught instanceof DomainError ? "只有已確認的預約可以在這個示範中改期。" : "Mock 改期暫時無法完成。");
+      setError(caught instanceof DomainError ? "只有已確認的預約可以在這個示範中改期。" : "示範改期暫時無法完成。");
     }
   }
 
@@ -149,13 +149,13 @@ export function BookingManagement() {
         <strong>本機查詢示範</strong>
         <span>不會連到真實店家，也不會套用取消、改期、退款或插單政策。</span>
       </div>
-      <div className="booking-entry-nav"><Link href="/booking">← 建立新的 Mock 預約</Link><span>查詢／改期／取消示範</span></div>
+      <div className="booking-entry-nav"><Link href="/booking">← 建立新的示範預約</Link><span>查詢／改期／取消示範</span></div>
       <div className="management-grid">
         <aside className="management-lookup">
-          <p className="eyebrow">FIND A BOOKING</p>
+          <p className="eyebrow">查詢預約</p>
           <h2>輸入示範編號</h2>
           <label><span>預約編號或虛構客人名稱</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="DUM-MOCK-1100" /></label>
-          <button className="button" type="button" onClick={lookup}>查詢 Mock 預約</button>
+          <button className="button" type="button" onClick={lookup}>查詢示範預約</button>
           <button className="demo-code" type="button" onClick={() => setQuery("DUM-MOCK-1100")}>使用測試編號：DUM-MOCK-1100</button>
           <div className="priority-preview"><strong>安全候補排序</strong><span>{rankedWaitlist.length} 筆只在候補／待確認範圍內排序，不會取代已確認預約。</span></div>
         </aside>
@@ -165,14 +165,14 @@ export function BookingManagement() {
           {message ? <p className="staff-message" role="status">{message}</p> : null}
           {selected ? (
             <article className="management-card">
-              <div className="management-card-heading"><div><p className="eyebrow">LOCAL BOOKING DETAIL</p><h2>{selected.managementCodeMasked}</h2></div><span className={`status-chip status-${selected.status}`}>{labels[selected.status]}</span></div>
+              <div className="management-card-heading"><div><p className="eyebrow">本機預約明細</p><h2>{selected.managementCodeMasked}</h2></div><span className={`status-chip status-${selected.status}`}>{labels[selected.status]}</span></div>
               <dl className="summary-list">
                 <div><dt>客人</dt><dd>{customer?.name} · {customer?.phoneMasked}</dd></div>
                 <div><dt>服務</dt><dd>{mockServices.find((item) => item.id === selected.serviceId)?.name}</dd></div>
                 <div><dt>設計師</dt><dd>{mockStaff.find((item) => item.id === selected.staffId)?.displayName}</dd></div>
                 <div><dt>時間</dt><dd>{formatDateTime(selected.startsAt)}－{formatDateTime(selected.endsAt)}</dd></div>
                 <div><dt>訂金</dt><dd>{selected.depositStatus}（無真實金額或付款）</dd></div>
-                <div><dt>稽核紀錄</dt><dd>本次操作新增 {auditCount} 筆 Mock 紀錄</dd></div>
+                <div><dt>稽核紀錄</dt><dd>本次操作新增 {auditCount} 筆示範紀錄</dd></div>
                 {selected.rescheduledFromBookingId ? <div><dt>改期來源</dt><dd>{selected.rescheduledFromBookingId}</dd></div> : null}
               </dl>
               <div className="management-actions">

@@ -8,12 +8,14 @@ import { buildQuickActionSnapshot } from "./quick-action-logic";
 type QuickView = "today" | "next" | "blocks" | "checked_in" | "completed";
 
 const viewLabels: Record<QuickView, string> = {
-  today: "Today",
-  next: "Next",
-  blocks: "Blocks",
-  checked_in: "Checked In",
-  completed: "Completed",
+  today: "今日",
+  next: "下一位",
+  blocks: "封鎖時間",
+  checked_in: "已報到",
+  completed: "已完成",
 };
+
+const blockKindLabels = { blocked: "封鎖", leave: "休假", overtime: "加班" } as const;
 
 const statusLabels: Record<BookingStatus, string> = {
   pending: "待確認",
@@ -52,18 +54,18 @@ export function QuickActionPreview() {
 
   return (
     <section className="quick-action-shell">
-      <div className="staff-warning" role="note"><strong>APPLE-STYLE QUICK ACTION PREVIEW</strong><span>這是響應式網頁畫面，不是 watchOS App，也不需要 Apple 開發者帳號。</span></div>
+      <div className="staff-warning" role="note"><strong>Apple 風格行動捷徑預覽</strong><span>這是響應式網頁畫面，不是 watchOS App，也不需要 Apple 開發者帳號。</span></div>
       <div className="quick-action-layout">
         <div className="watch-frame" aria-label="行動裝置捷徑預覽">
           <div className="watch-screen">
-            <header><span>DUM / MOCK</span><strong>{viewLabels[view]}</strong></header>
+            <header><span>DUM · 示範資料</span><strong>{viewLabels[view]}</strong></header>
             <QuickActionContent view={view} snapshot={snapshot} />
-            <small>Local data · No sync</small>
+            <small>本機資料 · 尚未同步</small>
           </div>
           <span className="watch-crown" />
         </div>
         <div className="quick-action-menu">
-          <div><p className="eyebrow">QUICK ACTIONS</p><h2>一眼看懂現場</h2><p>同一套預約資料可縮成行動捷徑；目前只做網頁預覽，不聲稱已安裝到任何 Apple 裝置。</p></div>
+          <div><p className="eyebrow">行動捷徑</p><h2>一眼看懂現場</h2><p>同一套預約資料可縮成行動捷徑；目前只做網頁預覽，不聲稱已安裝到任何 Apple 裝置。</p></div>
           {(["today", "next", "blocks", "checked_in", "completed"] as QuickView[]).map((item) => <button key={item} type="button" aria-pressed={view === item} onClick={() => setView(item)}><span>{viewLabels[item]}</span><strong>{counts[item]}</strong></button>)}
         </div>
       </div>
@@ -72,7 +74,7 @@ export function QuickActionPreview() {
 }
 
 function QuickActionContent({ view, snapshot }: { view: QuickView; snapshot: ReturnType<typeof buildQuickActionSnapshot> }) {
-  if (view === "blocks") return <div className="watch-list">{snapshot.blocks.map((block) => <article key={block.id}><time>{formatTime(block.startsAt)}</time><strong>{block.kind}</strong><span>{mockStaff.find((staff) => staff.id === block.staffId)?.displayName}</span></article>)}</div>;
+  if (view === "blocks") return <div className="watch-list">{snapshot.blocks.map((block) => <article key={block.id}><time>{formatTime(block.startsAt)}</time><strong>{blockKindLabels[block.kind]}</strong><span>{mockStaff.find((staff) => staff.id === block.staffId)?.displayName}</span></article>)}</div>;
   if (view === "next") return snapshot.next ? <WatchBooking booking={snapshot.next} featured /> : <WatchEmpty />;
   const records = view === "today" ? snapshot.today : view === "checked_in" ? snapshot.checkedIn : snapshot.completed;
   return records.length ? <div className="watch-list">{records.map((booking) => <WatchBooking key={booking.id} booking={booking} />)}</div> : <WatchEmpty />;
@@ -83,5 +85,5 @@ function WatchBooking({ booking, featured = false }: { booking: Booking; feature
 }
 
 function WatchEmpty() {
-  return <div className="watch-empty"><strong>All clear</strong><span>目前沒有項目</span></div>;
+  return <div className="watch-empty"><strong>目前清空</strong><span>沒有待處理項目</span></div>;
 }
