@@ -131,6 +131,8 @@ export const mockCustomers: Customer[] = [
     createdAt: "2026-06-01T02:00:00.000Z",
     lastVisitAt: "2026-07-01T03:00:00.000Z",
     notes: ["Fictional preference: keep top length"],
+    preferences: ["Mock 偏好：保留頂部長度", "Mock 偏好：低維護造型"],
+    technicalNotes: [{ id: "technical-mock-one", createdAt: "2026-07-01T03:00:00.000Z", authorLabel: "Mock Barber Alpha", content: "虛構技術紀錄：側邊示範刻度 A。" }],
     history: [
       {
         id: "history-mock-one",
@@ -150,6 +152,8 @@ export const mockCustomers: Customer[] = [
     createdAt: "2026-06-05T02:00:00.000Z",
     lastVisitAt: "2026-06-20T06:00:00.000Z",
     notes: ["Fictional preference: low-maintenance texture"],
+    preferences: ["Mock 偏好：自然紋理"],
+    technicalNotes: [],
     history: [],
   },
   {
@@ -159,6 +163,8 @@ export const mockCustomers: Customer[] = [
     preferredStaffId: "staff-mock-charlie",
     createdAt: "2026-06-08T02:00:00.000Z",
     notes: ["Fictional note: confirm skin comfort before shave"],
+    preferences: ["Mock 偏好：服務前再次確認舒適度"],
+    technicalNotes: [{ id: "technical-mock-three", createdAt: "2026-06-08T02:00:00.000Z", authorLabel: "Mock Barber Charlie", content: "虛構技術紀錄：先做局部舒適度確認。" }],
     history: [],
   },
 ];
@@ -175,6 +181,7 @@ export const mockBookings: Booking[] = [
     status: "confirmed",
     depositStatus: "not_required",
     note: "Fictional booking used for availability tests.",
+    managementCodeMasked: "DUM-MOCK-1100",
     createdAt: "2026-07-10T02:00:00.000Z",
     updatedAt: "2026-07-10T02:00:00.000Z",
     source: "mock_seed",
@@ -190,6 +197,7 @@ export const mockBookings: Booking[] = [
     status: "confirmed",
     depositStatus: "unpaid",
     note: "Same time as another staff member to prove multi-staff concurrency.",
+    managementCodeMasked: "DUM-MOCK-B1100",
     createdAt: "2026-07-10T02:05:00.000Z",
     updatedAt: "2026-07-10T02:05:00.000Z",
     source: "mock_seed",
@@ -205,6 +213,7 @@ export const mockBookings: Booking[] = [
     status: "pending",
     depositStatus: "not_required",
     note: "Fictional pending placeholder.",
+    managementCodeMasked: "DUM-MOCK-PENDING",
     createdAt: "2026-07-10T02:10:00.000Z",
     updatedAt: "2026-07-10T02:10:00.000Z",
     source: "mock_seed",
@@ -220,6 +229,7 @@ export const mockBookings: Booking[] = [
     status: "waitlisted",
     depositStatus: "not_required",
     note: "Fictional waitlist placeholder; does not block availability.",
+    managementCodeMasked: "DUM-MOCK-WAIT",
     createdAt: "2026-07-10T02:15:00.000Z",
     updatedAt: "2026-07-10T02:15:00.000Z",
     source: "mock_seed",

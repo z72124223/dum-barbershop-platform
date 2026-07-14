@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="DUM BARBERSHOP">
+  <rect width="512" height="512" rx="72" fill="#090909"/>
+  <path d="M72 92h214c96 0 154 63 154 164s-58 164-154 164H72V92zm96 76v176h106c52 0 82-31 82-88s-30-88-82-88H168z" fill="#eee9df"/>
+  <path d="M72 420h368" stroke="#a88a57" stroke-width="18"/>
+</svg>

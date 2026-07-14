@@ -6,7 +6,7 @@ export interface CalendarBlock {
   staffId: EntityId;
   startsAt: IsoInstant;
   endsAt: IsoInstant;
-  kind: "blocked" | "leave";
+  kind: "blocked" | "leave" | "overtime";
   reason: string;
   source: "mock_staff_action" | "mock_calendar" | "mock_seed";
 }

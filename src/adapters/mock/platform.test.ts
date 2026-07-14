@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { DomainError, type Booking } from "../../domain";
-import { MockBookingRepository, MockCustomerRepository } from "./platform";
+import {
+  MockBookingProvider,
+  MockBookingRepository,
+  MockCustomerRepository,
+  MockIdentityProvider,
+  MockIntegrationQueue,
+} from "./platform";
 import { mockBookings, mockCustomers } from "../../data/mock";
 
 function candidate(overrides: Partial<Booking> = {}): Booking {
@@ -58,5 +64,41 @@ describe("MockCustomerRepository", () => {
     const results = await repository.search("Mock Customer Two");
     assert.equal(results.length, 1);
     assert.ok(results[0]?.phoneMasked.includes("••"));
+  });
+});
+
+describe("provider-neutral Mock adapters", () => {
+  it("keeps the production booking provider explicitly disabled", async () => {
+    const provider = new MockBookingProvider();
+    const receipt = await provider.createBooking(candidate(), "preview-create");
+    assert.equal(receipt.mode, "disabled");
+    assert.equal(receipt.status, "disabled");
+  });
+
+  it("exposes role previews without claiming authentication", async () => {
+    const identity = new MockIdentityProvider();
+    const session = await identity.getPreviewSession("barber");
+    assert.equal(session.authenticated, false);
+    assert.ok(session.permissions.includes("customer:read_assigned"));
+  });
+
+  it("deduplicates queued work by idempotency key", async () => {
+    const queue = new MockIntegrationQueue();
+    const operation = {
+      id: "integration-test-one",
+      provider: "calendar" as const,
+      mode: "mock" as const,
+      action: "upsert_event",
+      idempotencyKey: "calendar-booking-one-r1",
+      attempt: 1,
+      maxAttempts: 2,
+      status: "queued" as const,
+      createdAt: "2026-07-14T02:00:00.000Z",
+      updatedAt: "2026-07-14T02:00:00.000Z",
+    };
+    await queue.enqueue(operation);
+    const duplicate = await queue.enqueue({ ...operation, id: "integration-test-two" });
+    assert.equal(duplicate.id, "integration-test-one");
+    assert.equal((await queue.list()).length, 1);
   });
 });

@@ -1,22 +1,31 @@
 # DUM BARBERSHOP Platform — Task Log
 
-最後更新：2026-07-12（Asia/Taipei）  
-目前 Milestone：M1 — Local Framework with Mock Data  
+最後更新：2026-07-14（Asia/Taipei）
+目前 Milestone：Blueprint local preview — Build-Complete validation
 父任務：Issue #2
+目前實作：Issue #20
 
 本檔案是里程碑級儀表板。詳細續接資訊位於角色日誌：
 
 - GPT：`docs/workstreams/GPT.md`
 - Codex：`docs/workstreams/CODEX.md`
 
-## M1 Dashboard
+## Current Dashboard
 
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
-| GPT — Planning & QA | #13 | documentation / review branch as needed | READY | `GPT_BASELINE_READY` pending | `docs/workstreams/GPT.md` | Specs, content, Issues, QA, PR review |
-| Codex — Implementation | #14 | `codex/14-m1-platform` | READY | Existing scaffold imported; `SCAFFOLD_MIGRATED` pending | `docs/workstreams/CODEX.md` | Complete code, engine, UI, tests and integration |
+| GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
+| Codex — Implementation | #20 | `codex/20-blueprint-build-complete` | IN_PROGRESS | Final PR / merge | `docs/workstreams/CODEX.md` | Blueprint local preview, tests, build and integration simulation |
 
-## Existing Codex code handoff
+Current completed gates:
+
+- `BOOKING_LIFECYCLE_COMPLETE`
+- `STAFF_OPERATIONS_COMPLETE`
+- `INTEGRATION_SIMULATION_COMPLETE`
+- `PUBLIC_EXPERIENCE_COMPLETE`
+- `BLUEPRINT_BUILD_COMPLETE` pending final PR / merge record
+
+## Historical M1 code handoff
 
 The former Issue #4 branch produced valid code before the two-role model replaced the three-window workflow.
 
@@ -31,57 +40,44 @@ The former Issue #4 branch produced valid code before the two-role model replace
 
 The former Issue #5 branch contains only claim / journal setup and no application or Domain code. Issue #6 did not begin. There is no additional code to migrate from them.
 
-## Codex implementation gates
+## Issue #20 implementation gates
 
-### 0. SCAFFOLD_MIGRATED
+### BOOKING_LIFECYCLE_COMPLETE
 
-- Source code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
-- Consolidated branch: `codex/14-m1-platform`
-- Latest governance main to merge: `2e0f1f0eb95c713f92e456f76cfa4ae69d68cfd0`
-- Merge commit:
-- Install after merge:
-- Typecheck after merge:
-- Lint after merge:
-- Tests after merge:
-- Build after merge:
+- Commit: `dce490d`
+- Customer lookup, cancellation request and reschedule preview
+- Two-way reschedule lineage, safe waitlist ranking and provider-neutral Booking / Identity boundaries
 
-### 1. DOMAIN_READY
+### STAFF_OPERATIONS_COMPLETE
 
-- Commit SHA:
-- Models exported:
-- Availability engine:
-- Status transition API:
-- Adapter ports / Mock repositories:
-- Tests:
+- Commit: `48cbec0`
+- Day / week, queue, customer, schedule and role previews
+- Domain-controlled manual status, no-show, cancel and reschedule operations
 
-### 2. PUBLIC_SITE_READY
+### INTEGRATION_SIMULATION_COMPLETE
 
-- Inherited public code commit: `20004c615876c3beb7110bec2e0a97764c21735a`
-- Verification / refinement commit:
-- Public routes:
-- Shared UI / tokens:
-- Mobile navigation:
+- Commit: `e4b6dfa`
+- Provider health, idempotency, conflict, timeout, partial failure and bounded retry
+- Calendar sync metadata, disabled outbound delivery and Apple-style quick actions
 
-### 3. BOOKING_STAFF_READY
+### PUBLIC_EXPERIENCE_COMPLETE
 
-- Commit SHA:
-- Booking flow:
-- Staff Prototype:
-- Domain integration:
-- Error / empty / loading states:
+- Commit: `f217e2d`
+- Complete homepage information architecture and public route previews
+- Desktop / mobile browser checks with no console errors or document overflow
 
-### 4. M1_VALIDATION_READY
+### BLUEPRINT_BUILD_COMPLETE
 
-- Integration commit:
-- Final Draft PR:
-- Typecheck:
-- Lint:
-- Tests:
-- Production build:
-- Mobile smoke:
-- Secret / real-data check:
-- README updated:
-- Remaining limitations:
+- Frozen install: PASS
+- Typecheck: PASS
+- Lint: PASS
+- Tests: 36 / 36 PASS
+- Production build: PASS
+- HTTP routes: 16 / 16 PASS including manifest and icon
+- Secret / real-data scan: PASS
+- README / Roadmap / Task Log: updated
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
+- Merge: pending final PR checks / Required-fix inspection
 
 ## GPT gates
 
@@ -102,28 +98,23 @@ The former Issue #5 branch contains only claim / journal setup and no applicatio
 - Required fixes resolved:
 - Acceptance recommendation:
 
-## Work order
+## Final work order
 
-1. Codex merges current `main` into the inherited `codex/14-m1-platform` branch and records `SCAFFOLD_MIGRATED`.
-2. GPT confirms the implementation baseline and QA checklist in Issue #13.
-3. Codex completes Domain, Booking / Staff and full M1 validation in Issue #14.
-4. Codex opens a Draft PR and records evidence.
-5. GPT reviews the PR and creates concrete review comments / defects.
-6. Codex resolves findings and re-runs checks.
-7. GPT records acceptance and updates Roadmap / Task Log.
-8. Approved PR merges into `main`.
+1. Commit and push final documentation / validation evidence.
+2. Open the Issue #20 Draft PR.
+3. Confirm no unresolved Required review findings and merge the validated non-production PR.
+4. Record merge SHA and `BLUEPRINT_BUILD_COMPLETE` in Issue #20 and the Codex log.
+5. Continue only through future scope-limited Issues; production activation still requires approved decisions, accounts and credentials.
 
-GPT work does not need to block Codex migration or implementation when Git requirements are already sufficient.
+## Current Owner decisions blocking build-complete
 
-## Current Owner decisions blocking M1
-
-None. M1 uses fictional Mock Data and disabled placeholders for unresolved business policies.
+None. Real content, policies, providers, credentials and deployment block only production activation; the local preview uses fictional, Mock or disabled behavior.
 
 ## Durable progress rules
 
 - A status without a Git Commit, pushed branch, Issue checkpoint or PR is not durable progress.
 - GPT updates its own log and Issue #13.
-- Codex updates its own log and Issue #14.
+- Codex updates its own log and active implementation Issue (#20 for this milestone).
 - Before quota exhaustion or task closure, record Last good commit, Exact next action, resume steps and checks.
 - Chat messages never override this file or GitHub Issues.
 

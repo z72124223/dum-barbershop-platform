@@ -1,12 +1,120 @@
-# Codex Work Log — Complete M1 Local Implementation
+# Codex Work Log — Blueprint Build-Complete
 
 ## Identity
 
 - Role: Codex
-- Issue: #14
-- Branch: `codex/14-m1-platform`
+- Issue: #20
+- Branch: `codex/20-blueprint-build-complete`
 - Primary responsibility: all application code, engine, tests, build and integration
 - Status: PR_OPEN
+
+## Issue #20 current objective
+
+All safe, local and non-production Blueprint previews are implemented. The remaining objective is to publish final evidence through the Issue #20 Draft PR, merge the validated branch and record the merge SHA. Production credentials, real business facts and unresolved policies remain Mock, disabled or `TODO(owner-decision)`.
+
+## Issue #20 ordered gates
+
+1. `PUBLIC_EXPERIENCE_COMPLETE`
+2. `BOOKING_LIFECYCLE_COMPLETE`
+3. `STAFF_OPERATIONS_COMPLETE`
+4. `INTEGRATION_SIMULATION_COMPLETE`
+5. `BLUEPRINT_BUILD_COMPLETE`
+
+## Issue #20 durable checkpoint
+
+- Claimed Issue: https://github.com/z72124223/dum-barbershop-platform/issues/20
+- Base `main`: `cf418fb72e0bb7b18ce19cec0e9369b54e70a6d7`
+- Branch source: merged Issue #14 / M1 platform
+- Last good implementation commit: `f217e2d95393da78e8f95b1fc1d4f01d9fc1eb65`
+- Exact next action: commit final README / Roadmap / Task Log validation evidence, push, open the Draft PR and record its URL.
+- Blockers: none.
+- Owner decision needed: none for local Mock implementation.
+
+## BOOKING_LIFECYCLE_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:10 +08:00`
+- Completed: customer-side local lookup, booking detail, cancellation request and reschedule preview at `/booking/manage`.
+- Domain safety: reschedule lineage links original and replacement records; all status changes use the central transition engine and emit audit records.
+- Queue safety: pending and waitlisted records can be ranked without modifying or displacing confirmed bookings.
+- Adapter safety: Booking Provider and Identity boundaries are explicit; production behavior remains disabled and Mock identity never claims real authentication.
+- Integration reliability model: idempotency, conflict, timeout, bounded retry and partial-failure states are represented and tested.
+- Privacy: locally entered phone values are masked before persistence to the session preview.
+- Checks: typecheck and scoped lint passed; lifecycle, integration and adapter tests passed.
+- Exact next action: expand the Staff workspace with day/week operations, leave/overtime blocks, safe pending/waitlist handling, customer notes and role-aware controls.
+- Blockers: none.
+- Owner decision needed: none; cancellation, refund, payment and production authentication rules remain disabled or `TODO(owner-decision)`.
+
+## STAFF_OPERATIONS_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:35 +08:00`
+- New route: `/staff/operations` with day, seven-day week, safe queue, fictional customer record and configuration views.
+- Scheduling: local blocked-time, leave and overtime previews reject same-staff conflicts.
+- Booking operations: pending, waitlist, confirm, check-in, in-service, completed, shop-cancelled, no-show and reschedule actions use Domain rules; reschedule keeps lineage.
+- Queue behavior: only pending and waitlisted records are ranked; confirmed bookings are never displaced automatically.
+- Customer preview: masked fictional identity, preferences, service history and technical notes with local audit display.
+- Configuration preview: staff roles, capabilities, service duration and schedule coverage; formal prices remain `TODO(owner-decision)`.
+- Permission preview: Owner, Manager, barber, reception and read-only UI scopes are enforced locally; the screen explicitly states there is no production authentication.
+- Checks: typecheck PASS, lint PASS, 34/34 tests PASS, production build PASS with 12 application routes plus not-found.
+- Exact next action: build the integration operations console and Apple-style quick-action preview with disabled external delivery.
+- Blockers: none.
+- Owner decision needed: none for the Mock preview; production identity and staff authorization policy remain reserved.
+
+## INTEGRATION_SIMULATION_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 17:55 +08:00`
+- New routes: `/staff/integrations` and `/staff/quick-actions`.
+- Integration console: Booking Provider, Calendar, Notification, Payment, Membership, Identity and LINE are separated by provider-neutral boundaries.
+- Reliability simulation: queued, success, conflict, timeout, partial failure, bounded retry and terminal behavior with visible idempotency keys and local audit records.
+- Calendar: bidirectional sync direction, external Mock event reference, revision, last-sync time and conflict status are visible.
+- Delivery safety: reminders, review requests, return campaigns and LINE delivery are present only as disabled previews; zero external messages are sent.
+- Apple-style quick actions: Today, Next, Blocks, Checked In and Completed are available as responsive web previews; this is explicitly not a watchOS application.
+- Provider safety: formal booking, payment, membership and LINE integrations remain disabled; no registration, API Key or credential is required.
+- Checks: typecheck PASS, lint PASS, 36/36 tests PASS, production build PASS with 14 application routes plus not-found.
+- Exact next action: complete the public-site information architecture, responsive content previews, installable metadata and page-level empty/loading/error readiness.
+- Blockers: none.
+- Owner decision needed: none for the Mock simulation; all production providers and outbound policies remain reserved.
+
+## PUBLIC_EXPERIENCE_COMPLETE checkpoint
+
+- Status: `COMPLETE`
+- Completed at: `2026-07-14 18:20 +08:00`
+- Homepage: complete Blueprint 5.1 preview with hero, booking, services, works, barbers, studio features, reviews, visit/map, contact channels and mobile fixed booking entry.
+- Public routes: service categories and booking entry, fictional barber profiles, ten Blueprint work categories, About structure, contact/transport/map placeholders and reserved policy disclosure.
+- Truthfulness: no real or generated customer imagery; brand story, photos, reviews, staff facts, prices, address, hours, social links and policies remain explicit placeholders.
+- Installable metadata: local manifest, theme metadata, standalone display settings and code-native SVG icon require no external registration.
+- States: application loading/error pages, booking Suspense, empty content states, validation messages, disabled controls and integration failure states are visible and truthful.
+- Browser desktop: homepage, ten-category works, booking lookup/reschedule, Staff role/weekly view, integration success/retry and quick actions passed; console errors/warnings: none.
+- Browser mobile: 390x844 target tested across homepage, booking management, Staff operations, integrations, quick actions and works; no document-level horizontal overflow.
+- Mobile safety: fixed booking CTA is visible on public pages and absent from booking/Staff workflows.
+- Checks: typecheck PASS, lint PASS, 36/36 tests PASS, production build PASS with manifest and icon routes.
+- Exact next action: update README, run clean final validation and route smoke, open Draft PR, merge and record `BLUEPRINT_BUILD_COMPLETE`.
+- Blockers: none.
+- Owner decision needed: none for build-complete; production content and integrations remain explicitly reserved.
+
+## BLUEPRINT_BUILD_COMPLETE validation checkpoint
+
+- Status: `PR_OPEN`
+- Completed at: `2026-07-14 18:35 +08:00`
+- Scope: public website, booking lifecycle, multi-staff operations, integration simulator and responsive quick-action preview are build-complete locally.
+- `pnpm install --frozen-lockfile`: PASS with pnpm 11.7.0.
+- `pnpm typecheck`: PASS.
+- `pnpm lint`: PASS.
+- `pnpm test`: PASS (36 / 36).
+- `pnpm build`: PASS; 14 application routes plus manifest, icon and not-found generated.
+- HTTP smoke: PASS (16 / 16 requested application / asset routes returned 200).
+- Browser: desktop and 390x844 target mobile workflows PASS; no console errors / warnings and no document-level overflow on tested routes.
+- Repository hygiene: exactly one lockfile; only `.env.example` tracked; secret signatures, unmasked phone and email scans PASS; `git diff --check` PASS.
+- Documentation: README, Roadmap, Task Log and Codex durable log synchronized with build-complete / not-production-ready status.
+- Reserved: real brand assets, prices, service facts, staff identities, location, hours, reviews, policies, privacy retention, providers, credentials, outbound delivery, deployment and native watchOS remain disabled or `TODO(owner-decision)`.
+- Blockers: none.
+- Owner decision needed: none for merge of this validated non-production preview.
+- Final validation commit: `68afefcea4f7586dbe4702cc5e1b3836a8671bfb`.
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/21
+- Uncommitted changes: none after this PR log update is committed.
+- Exact next action: push this PR record, inspect PR #21 checks / review findings, mark ready and merge when no Required fix remains.
 
 ## Existing durable checkpoint
 

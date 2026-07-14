@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createMockPlatform } from "../../adapters";
 import { mockBookings, mockBranch, mockCalendarBlocks, mockServices, mockStaff } from "../../data/mock";
@@ -27,6 +28,11 @@ function dateLabel(date: IsoDate) {
 
 function selectedFromQuery(value: string | null, validIds: string[]) {
   return value && validIds.includes(value) ? value : "";
+}
+
+function maskDemoPhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 3 ? `09•••••${digits.slice(-3)}` : "09••••••••";
 }
 
 export function BookingFlow() {
@@ -111,7 +117,7 @@ export function BookingFlow() {
     const customer: Customer = {
       id: `customer-local-${suffix}`,
       name: name.trim(),
-      phoneMasked: phone.trim(),
+      phoneMasked: maskDemoPhone(phone),
       createdAt: now,
       notes: notes.trim() ? [notes.trim()] : [],
       history: [],
@@ -130,13 +136,18 @@ export function BookingFlow() {
       createdAt: now,
       updatedAt: now,
       source: "mock_customer",
+      managementCodeMasked: `DUM-MOCK-${suffix.slice(-6)}`,
     };
 
     try {
       await platform.customers.save(customer);
       const created = await platform.bookings.create({ booking, idempotencyKey: booking.id });
       await platform.notifications.sendBookingConfirmation(created, customer);
-      setConfirmationCode(created.id.replace("booking-local-", "DUM-MOCK-"));
+      setConfirmationCode(created.managementCodeMasked ?? created.id.replace("booking-local-", "DUM-MOCK-"));
+      window.sessionStorage.setItem(
+        "dum-booking-preview",
+        JSON.stringify({ booking: created, customer: { ...customer, name: "Local Preview Customer" } }),
+      );
     } catch (caught) {
       setError(caught instanceof DomainError && caught.code === "BOOKING_CONFLICT"
         ? "這個時段剛好被占用了，請返回重新選擇。"
@@ -159,6 +170,7 @@ export function BookingFlow() {
           <div><dt>時間</dt><dd>{date ? dateLabel(date) : ""} {slot?.label}</dd></div>
         </dl>
         <button className="button" type="button" onClick={() => window.location.assign("/booking")}>重新體驗</button>
+        <Link className="button button-secondary" href="/booking/manage">查詢這筆示範預約</Link>
       </section>
     );
   }
@@ -169,6 +181,7 @@ export function BookingFlow() {
         <strong>本機 Mock 體驗</strong>
         <span>請勿輸入真實姓名或電話；重新整理後資料就會消失。</span>
       </div>
+      <div className="booking-entry-nav"><span>建立新的 Mock 預約</span><Link href="/booking/manage">已有示範編號？查詢／改期／取消</Link></div>
       <ol className="booking-progress" aria-label="預約進度">
         {steps.map((label, index) => (
           <li key={label} className={index === step ? "active" : index < step ? "done" : ""} aria-current={index === step ? "step" : undefined}>

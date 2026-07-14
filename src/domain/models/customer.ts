@@ -9,6 +9,13 @@ export interface CustomerHistoryEntry {
   summary: string;
 }
 
+export interface CustomerTechnicalNote {
+  id: EntityId;
+  createdAt: IsoInstant;
+  authorLabel: string;
+  content: string;
+}
+
 export interface Customer {
   id: EntityId;
   name: string;
@@ -18,5 +25,7 @@ export interface Customer {
   createdAt: IsoInstant;
   lastVisitAt?: IsoInstant;
   notes: string[];
+  preferences?: string[];
+  technicalNotes?: CustomerTechnicalNote[];
   history: CustomerHistoryEntry[];
 }
