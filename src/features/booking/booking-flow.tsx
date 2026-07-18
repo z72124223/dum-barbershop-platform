@@ -151,7 +151,7 @@ export function BookingFlow() {
     } catch (caught) {
       setError(caught instanceof DomainError && caught.code === "BOOKING_CONFLICT"
         ? "這個時段剛好被占用了，請返回重新選擇。"
-        : "Mock 預約暫時無法完成，請再試一次。");
+        : "預約示範暫時無法完成，請再試一次。");
     } finally {
       setSubmitting(false);
     }
@@ -160,7 +160,7 @@ export function BookingFlow() {
   if (confirmationCode) {
     return (
       <section className="booking-confirmation" role="status">
-        <p className="eyebrow">MOCK CONFIRMATION</p>
+        <p className="eyebrow">示範完成結果</p>
         <h2>流程完成，但沒有建立真實預約。</h2>
         <p>這是本機示範結果，不會傳送給店家、不會寄出通知，也不會收取費用。</p>
         <dl className="summary-list">
@@ -178,10 +178,10 @@ export function BookingFlow() {
   return (
     <section className="booking-shell" aria-labelledby="booking-flow-title">
       <div className="booking-notice" role="note">
-        <strong>本機 Mock 體驗</strong>
+        <strong>本機預約示範</strong>
         <span>請勿輸入真實姓名或電話；重新整理後資料就會消失。</span>
       </div>
-      <div className="booking-entry-nav"><span>建立新的 Mock 預約</span><Link href="/booking/manage">已有示範編號？查詢／改期／取消</Link></div>
+      <div className="booking-entry-nav"><span>建立新的示範預約</span><Link href="/booking/manage">已有示範編號？查詢／改期／取消</Link></div>
       <ol className="booking-progress" aria-label="預約進度">
         {steps.map((label, index) => (
           <li key={label} className={index === step ? "active" : index < step ? "done" : ""} aria-current={index === step ? "step" : undefined}>
@@ -192,7 +192,7 @@ export function BookingFlow() {
 
       <div className="booking-panel">
         <div className="booking-panel-heading">
-          <p className="eyebrow">STEP {step + 1} / {steps.length}</p>
+          <p className="eyebrow">第 {step + 1} 步，共 {steps.length} 步</p>
           <h2 id="booking-flow-title">{
             ["選擇示範服務", "選擇設計師", "選擇示範日期", "選擇可預約時段", "填寫聯絡資料", "確認內容"][step]
           }</h2>
@@ -202,9 +202,9 @@ export function BookingFlow() {
           <div className="choice-grid">
             {mockServices.map((service) => (
               <button key={service.id} type="button" className={`choice-card ${serviceId === service.id ? "selected" : ""}`} aria-pressed={serviceId === service.id} onClick={() => chooseService(service.id)}>
-                <span className="choice-kicker">{service.category.toUpperCase()}</span>
+                <span className="choice-kicker">示範服務</span>
                 <strong>{service.name}</strong>
-                <small>{service.durationMinutes} 分鐘 · 價格待 Owner 決策</small>
+                <small>{service.durationMinutes} 分鐘 · 價格待店主決策</small>
                 <span>{service.description}</span>
               </button>
             ))}
@@ -214,14 +214,14 @@ export function BookingFlow() {
         {step === 1 ? (
           <div className="choice-grid">
             <button type="button" className={`choice-card ${staffChoice === ANY_STAFF ? "selected" : ""}`} aria-pressed={staffChoice === ANY_STAFF} onClick={() => chooseStaff(ANY_STAFF)}>
-              <span className="choice-kicker">EARLIEST AVAILABLE</span>
+              <span className="choice-kicker">最早可預約</span>
               <strong>不指定設計師</strong>
               <small>系統會安排最早可用的一位</small>
               <span>最後仍會指派一位實際設計師，不會建立沒有負責人的預約。</span>
             </button>
             {mockStaff.filter((staff) => staff.serviceIds.includes(serviceId)).map((staff) => (
               <button key={staff.id} type="button" className={`choice-card ${staffChoice === staff.id ? "selected" : ""}`} aria-pressed={staffChoice === staff.id} onClick={() => chooseStaff(staff.id)}>
-                <span className="choice-kicker">FICTIONAL STAFF</span>
+                <span className="choice-kicker">虛構設計師</span>
                 <strong>{staff.displayName}</strong>
                 <small>{staff.title}</small>
                 <span>{staff.specialties.join(" · ")}</span>
@@ -279,7 +279,7 @@ export function BookingFlow() {
               <label><input type="radio" name="deposit" checked={depositChoice === "none"} onChange={() => setDepositChoice("none")} /> 本次不使用訂金</label>
               <label><input type="radio" name="deposit" checked={depositChoice === "interested"} onChange={() => setDepositChoice("interested")} /> 有興趣使用訂金（不設定金額、不收款）</label>
             </fieldset>
-            <label className="acknowledgement"><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} /> 我了解這只是 Mock 示範，不會建立真實預約。</label>
+            <label className="acknowledgement"><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} /> 我了解這只是本機示範，不會建立真實預約。</label>
           </div>
         ) : null}
 
@@ -288,7 +288,7 @@ export function BookingFlow() {
           {step > 0 ? <button className="button button-secondary" type="button" onClick={() => { setError(""); setStep((current) => current - 1); }}>上一步</button> : <span />}
           {step < steps.length - 1
             ? <button className="button" type="button" onClick={next}>下一步</button>
-            : <button className="button" type="button" disabled={!acknowledged || submitting} onClick={confirmBooking}>{submitting ? "正在建立 Mock…" : "完成 Mock 預約"}</button>}
+            : <button className="button" type="button" disabled={!acknowledged || submitting} onClick={confirmBooking}>{submitting ? "正在建立示範紀錄…" : "完成預約示範"}</button>}
         </div>
       </div>
     </section>

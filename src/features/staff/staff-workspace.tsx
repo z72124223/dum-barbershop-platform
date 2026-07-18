@@ -31,7 +31,7 @@ const statusLabels: Record<BookingStatus, string> = {
 };
 
 const primaryActions: Partial<Record<BookingStatus, { to: BookingStatus; label: string }>> = {
-  pending: { to: "confirmed", label: "確認 Mock 預約" },
+  pending: { to: "confirmed", label: "確認示範預約" },
   confirmed: { to: "checked_in", label: "標記已到店" },
   checked_in: { to: "in_service", label: "開始服務" },
   in_service: { to: "completed", label: "標記完成" },
@@ -100,7 +100,7 @@ export function StaffWorkspace() {
       await platform.audit.append(result.auditEvent);
       setBookings((current) => current.map((booking) => booking.id === result.booking.id ? result.booking : booking));
       setAuditCount((count) => count + 1);
-      setMessage(`已完成 Mock 狀態更新：${statusLabels[result.booking.status]}。`);
+      setMessage(`已完成示範狀態更新：${statusLabels[result.booking.status]}。`);
     } catch {
       setError("這個狀態目前不能這樣變更，畫面沒有修改資料。");
     } finally {
@@ -119,7 +119,7 @@ export function StaffWorkspace() {
       startsAt: startsAt.toISOString(),
       endsAt: addMinutes(startsAt, blockDuration).toISOString(),
       kind: "blocked",
-      reason: "Fictional block created in Staff Mock UI",
+      reason: "員工工作台建立的虛構封鎖時間",
       source: "mock_staff_action",
     };
     if (!canPlaceBlock(candidate, bookings, blocks)) {
@@ -128,7 +128,7 @@ export function StaffWorkspace() {
     }
     await platform.calendar.createBlock(candidate);
     setBlocks((current) => [...current, candidate]);
-    setMessage(`已替 ${mockStaff.find((staff) => staff.id === blockStaffId)?.displayName} 建立 ${blockDuration} 分鐘 Mock 封鎖。`);
+    setMessage(`已替 ${mockStaff.find((staff) => staff.id === blockStaffId)?.displayName} 建立 ${blockDuration} 分鐘示範封鎖。`);
   }
 
   function selectBooking(id: EntityId) {
@@ -146,7 +146,7 @@ export function StaffWorkspace() {
   return (
     <section className="staff-shell">
       <div className="staff-warning" role="note">
-        <strong>STAFF PROTOTYPE · 無登入保護</strong>
+        <strong>員工操作原型 · 無登入保護</strong>
         <span>僅供本機 M1 測試，不可拿來管理真實客人或門市行程。</span>
       </div>
 
@@ -156,7 +156,7 @@ export function StaffWorkspace() {
           <button type="button" role="tab" aria-selected={view === "schedule"} onClick={() => changeView("schedule")}>全日行程</button>
           <button type="button" role="tab" aria-selected={view === "customers"} onClick={() => changeView("customers")}>客戶搜尋</button>
         </div>
-        <label className="staff-filter"><span>設計師篩選</span><select value={staffFilter} onChange={(event) => setStaffFilter(event.target.value)}><option value={ALL_STAFF}>全店 Mock 行程</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
+        <label className="staff-filter"><span>設計師篩選</span><select value={staffFilter} onChange={(event) => setStaffFilter(event.target.value)}><option value={ALL_STAFF}>全店示範行程</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
       </div>
 
       {message ? <p className="staff-message" role="status">{message}</p> : null}
@@ -165,17 +165,17 @@ export function StaffWorkspace() {
       {view === "today" ? (
         <>
           <div className="staff-metrics">
-            <article><span>今日 Mock 預約</span><strong>{visibleBookings.filter((booking) => booking.status !== "waitlisted").length}</strong></article>
+            <article><span>今日示範預約</span><strong>{visibleBookings.filter((booking) => booking.status !== "waitlisted").length}</strong></article>
             <article><span>待確認</span><strong>{pendingCount}</strong></article>
             <article><span>等候名單</span><strong>{waitlistCount}</strong></article>
             <article><span>本次稽核紀錄</span><strong>{auditCount}</strong></article>
           </div>
           <div className="staff-dashboard">
             <article className="next-customer-card">
-              <p className="eyebrow">NEXT CUSTOMER / MOCK</p>
-              {nextBooking ? <><strong>{formatTime(nextBooking.startsAt)}</strong><h2>{nextCustomer?.name}</h2><p>{mockServices.find((service) => service.id === nextBooking.serviceId)?.name} · {mockStaff.find((staff) => staff.id === nextBooking.staffId)?.displayName}</p><button className="button button-secondary" type="button" onClick={() => selectBooking(nextBooking.id)}>查看預約</button></> : <p>目前沒有下一位 Mock 客人。</p>}
+              <p className="eyebrow">下一位客人 · 示範資料</p>
+              {nextBooking ? <><strong>{formatTime(nextBooking.startsAt)}</strong><h2>{nextCustomer?.name}</h2><p>{mockServices.find((service) => service.id === nextBooking.serviceId)?.name} · {mockStaff.find((staff) => staff.id === nextBooking.staffId)?.displayName}</p><button className="button button-secondary" type="button" onClick={() => selectBooking(nextBooking.id)}>查看預約</button></> : <p>目前沒有下一位示範客人。</p>}
             </article>
-            <div className="staff-booking-list" aria-label="今日 Mock 預約">
+            <div className="staff-booking-list" aria-label="今日示範預約">
               {visibleBookings.map((booking) => {
                 const customer = customerFor(booking);
                 const staff = mockStaff.find((member) => member.id === booking.staffId);
@@ -190,7 +190,7 @@ export function StaffWorkspace() {
       {view === "schedule" ? (
         <div className="schedule-layout">
           <div className="staff-timeline">
-            <div className="timeline-heading"><div><p className="eyebrow">FULL DAY / 2026-07-14</p><h2>全日 Mock 行程</h2></div><span>{timeline.length} 個項目</span></div>
+            <div className="timeline-heading"><div><p className="eyebrow">全日行程 · 2026-07-14</p><h2>全日示範行程</h2></div><span>{timeline.length} 個項目</span></div>
             {timeline.map((item) => {
               const staff = mockStaff.find((member) => member.id === item.staffId);
               if (item.kind === "block") return <article key={item.id} className="timeline-item block"><time>{formatTime(item.startsAt)}–{formatTime(item.endsAt)}</time><div><strong>封鎖時間</strong><span>{staff?.displayName} · {item.block.reason}</span></div></article>;
@@ -199,19 +199,19 @@ export function StaffWorkspace() {
             })}
           </div>
           <aside className="block-panel">
-            <p className="eyebrow">BLOCK TIME / MOCK</p><h3>建立封鎖時間</h3><p>只影響所選設計師；若已有預約或封鎖，系統會拒絕。</p>
+            <p className="eyebrow">封鎖時間 · 本機示範</p><h3>建立封鎖時間</h3><p>只影響所選設計師；若已有預約或封鎖，系統會拒絕。</p>
             <label><span>設計師</span><select value={blockStaffId} onChange={(event) => setBlockStaffId(event.target.value)}>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
             <label><span>開始時間</span><select value={blockStart} onChange={(event) => setBlockStart(event.target.value as LocalTime)}>{blockTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select></label>
             <label><span>長度</span><select value={blockDuration} onChange={(event) => setBlockDuration(Number(event.target.value) as 30 | 60)}><option value={30}>30 分鐘</option><option value={60}>60 分鐘</option></select></label>
-            <button className="button" type="button" onClick={createBlock}>建立 Mock 封鎖</button>
+            <button className="button" type="button" onClick={createBlock}>建立示範封鎖</button>
           </aside>
         </div>
       ) : null}
 
       {view === "customers" ? (
         <div className="customer-search-panel">
-          <div><p className="eyebrow">CUSTOMER SEARCH / FICTIONAL</p><h2>客戶 Mock 紀錄</h2><label className="search-field"><span>搜尋姓名或遮罩電話</span><input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="例如：Mock Customer Two" /></label></div>
-          <div className="customer-results">{customerResults.length > 0 ? customerResults.map((customer) => <article key={customer.id}><div><strong>{customer.name}</strong><span>{customer.phoneMasked}</span></div><p>上次到店：{customer.lastVisitAt ? new Intl.DateTimeFormat("zh-TW", {timeZone:"Asia/Taipei",dateStyle:"medium"}).format(new Date(customer.lastVisitAt)) : "無 Mock 紀錄"}</p><p>備註：{customer.notes.join("；") || "無"}</p><details><summary>查看歷史 ({customer.history.length})</summary>{customer.history.length > 0 ? customer.history.map((history) => <div key={history.id} className="history-row"><strong>{history.serviceLabel}</strong><span>{history.staffLabel} · {history.summary}</span></div>) : <p>目前沒有虛構歷史紀錄。</p>}</details></article>) : <div className="inline-state"><strong>找不到 Mock 客戶</strong><span>請更換姓名或遮罩電話關鍵字。</span></div>}</div>
+          <div><p className="eyebrow">客戶搜尋 · 虛構資料</p><h2>客戶示範紀錄</h2><label className="search-field"><span>搜尋姓名或遮罩電話</span><input value={customerQuery} onChange={(event) => setCustomerQuery(event.target.value)} placeholder="例如：二號示範客人" /></label></div>
+          <div className="customer-results">{customerResults.length > 0 ? customerResults.map((customer) => <article key={customer.id}><div><strong>{customer.name}</strong><span>{customer.phoneMasked}</span></div><p>上次到店：{customer.lastVisitAt ? new Intl.DateTimeFormat("zh-TW", {timeZone:"Asia/Taipei",dateStyle:"medium"}).format(new Date(customer.lastVisitAt)) : "無示範紀錄"}</p><p>備註：{customer.notes.join("；") || "無"}</p><details><summary>查看歷史 ({customer.history.length})</summary>{customer.history.length > 0 ? customer.history.map((history) => <div key={history.id} className="history-row"><strong>{history.serviceLabel}</strong><span>{history.staffLabel} · {history.summary}</span></div>) : <p>目前沒有虛構歷史紀錄。</p>}</details></article>) : <div className="inline-state"><strong>找不到示範客戶</strong><span>請更換姓名或遮罩電話關鍵字。</span></div>}</div>
         </div>
       ) : null}
     </section>
@@ -219,7 +219,7 @@ export function StaffWorkspace() {
 }
 
 function BookingDetail({ booking, customer, serviceLabel, staffLabel, busy, onAction }: { booking: Booking | null; customer?: Customer; serviceLabel?: string; staffLabel?: string; busy: boolean; onAction: () => void }) {
-  if (!booking) return <div className="inline-state"><strong>尚未選擇預約</strong><span>從今日行程選一位 Mock 客人查看。</span></div>;
+  if (!booking) return <div className="inline-state"><strong>尚未選擇預約</strong><span>從今日行程選一位示範客人查看。</span></div>;
   const action = primaryActions[booking.status];
-  return <article className="booking-detail"><div><p className="eyebrow">BOOKING DETAIL / MOCK</p><h2>{customer?.name}</h2><p>{customer?.phoneMasked} · {serviceLabel}</p></div><dl className="summary-list"><div><dt>時間</dt><dd>{formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}</dd></div><div><dt>設計師</dt><dd>{staffLabel}</dd></div><div><dt>狀態</dt><dd>{statusLabels[booking.status]}</dd></div><div><dt>訂金</dt><dd>{booking.depositStatus}（僅資料欄位）</dd></div><div><dt>備註</dt><dd>{booking.note || "無"}</dd></div></dl>{action ? <button className="button" type="button" disabled={busy} onClick={onAction}>{busy ? "更新中…" : action.label}</button> : <span className="status-terminal">此狀態目前沒有下一個日常操作。</span>}</article>;
+  return <article className="booking-detail"><div><p className="eyebrow">預約明細 · 示範資料</p><h2>{customer?.name}</h2><p>{customer?.phoneMasked} · {serviceLabel}</p></div><dl className="summary-list"><div><dt>時間</dt><dd>{formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}</dd></div><div><dt>設計師</dt><dd>{staffLabel}</dd></div><div><dt>狀態</dt><dd>{statusLabels[booking.status]}</dd></div><div><dt>訂金</dt><dd>{booking.depositStatus}（僅資料欄位）</dd></div><div><dt>備註</dt><dd>{booking.note || "無"}</dd></div></dl>{action ? <button className="button" type="button" disabled={busy} onClick={onAction}>{busy ? "更新中…" : action.label}</button> : <span className="status-terminal">此狀態目前沒有下一個日常操作。</span>}</article>;
 }
