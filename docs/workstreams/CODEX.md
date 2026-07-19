@@ -6,13 +6,15 @@
 - Issue: #25
 - Branch: `codex/25-staff-mock-auth`
 - Primary responsibility: Staff Mock identity, local Session, route protection, logout and role-aware access
-- Status: `READY_FOR_PR`
+- Status: `PR_OPEN`
 
 ## ISSUE_25_STAFF_MOCK_AUTH checkpoint
 
 - Status: `VALIDATED`
 - Updated at: `2026-07-19 +08:00`
 - Branch: `codex/25-staff-mock-auth`
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/26
+- Last validated implementation commit: `5e71f7e7c4a3591da06c021a8145dcc5d883e916`
 - Scope implemented: `/staff/login`, five fictional Staff identities, public demo code `DUM-DEMO`, eight-hour browser-local Session, server-side Staff route interception, logout flow and role-permission integration.
 - Mock role scope: the barber identity is linked to `staff-mock-bravo` and can only see or operate that fictional staff record's bookings, schedule blocks and assigned customer fixtures. This is a Mock acceptance boundary, not a formal employee-visibility policy.
 - Customer boundary: public website and customer booking remain login-free.
@@ -22,8 +24,9 @@
 - Mobile smoke: 390x844 target (375px content viewport) has no horizontal overflow; the login card starts first and the submit button is fully visible. Browser console errors: none.
 - Owner decision needed: none for this local Mock implementation; formal identity provider, account policy, credentials and production authorization remain reserved.
 - Blockers: none.
-- Exact next action: commit and push the validated implementation, open the Draft PR, then record the PR URL and final last-good commit in this log and Issue #25.
-- Uncommitted changes: validated implementation and documentation are ready to commit.
+- Exact next action: resume from PR #26, inspect any GPT/CI review feedback, fix only confirmed Issue #25 defects, rerun the affected checks and update the same branch/PR. If no Required fix exists, the PR is ready for non-production review/merge under project policy.
+- Resume command: `git fetch origin && git switch codex/25-staff-mock-auth && git pull --ff-only`
+- Uncommitted changes after this checkpoint commit: none.
 
 ## Identity
 
