@@ -29,9 +29,13 @@ import {
   buildWeekDays,
   canPlaceBlock,
   canStaffRole,
+  filterMockCustomersForIdentity,
   filterBookings,
+  isBookingInMockIdentityScope,
+  resolveMockStaffFilter,
   type StaffFilter,
 } from "./staff-logic";
+import { useStaffAuth } from "./staff-auth";
 
 type OperationsView = "day" | "week" | "queue" | "customers" | "configuration";
 type BlockKind = CalendarBlock["kind"];
@@ -39,8 +43,6 @@ type BlockKind = CalendarBlock["kind"];
 const MOCK_ACTION_TIME = "2026-07-14T09:30:00.000Z";
 const blockTimes: LocalTime[] = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
 const blockDurations = [30, 60, 120] as const;
-const roles: StaffRole[] = ["owner", "manager", "barber", "reception", "read_only"];
-
 const roleLabels: Record<StaffRole, string> = {
   owner: "店主角色預覽",
   manager: "管理者角色預覽",
@@ -95,11 +97,14 @@ function plusOneDay(value: string) {
 }
 
 export function OperationsWorkspace() {
+  const { session } = useStaffAuth();
+  const previewRole = session?.identity.role ?? "read_only";
+  const identityStaffId = session?.identity.staffId;
+  const isBarber = previewRole === "barber";
   const [platform] = useState(createMockPlatform);
   const [bookings, setBookings] = useState<Booking[]>(() => structuredClone(mockBookings));
   const [blocks, setBlocks] = useState<CalendarBlock[]>(() => structuredClone(mockCalendarBlocks));
   const [view, setView] = useState<OperationsView>("day");
-  const [previewRole, setPreviewRole] = useState<StaffRole>("manager");
   const [staffFilter, setStaffFilter] = useState<StaffFilter>(ALL_STAFF);
   const [blockKind, setBlockKind] = useState<BlockKind>("blocked");
   const [blockDate, setBlockDate] = useState("2026-07-14");
@@ -110,18 +115,31 @@ export function OperationsWorkspace() {
   const [error, setError] = useState("");
   const [auditLog, setAuditLog] = useState<string[]>([]);
 
-  const canWrite = canStaffRole(previewRole, "booking:write");
-  const canReadCustomers = canStaffRole(previewRole, "customer:read") || canStaffRole(previewRole, "customer:read_assigned");
-  const visibleBookings = useMemo(() => filterBookings(bookings, staffFilter), [bookings, staffFilter]);
-  const dayTimeline = useMemo(() => buildTimeline(bookings, blocks, staffFilter), [bookings, blocks, staffFilter]);
-  const weekDays = useMemo(() => buildWeekDays("2026-07-14", bookings, blocks, staffFilter), [bookings, blocks, staffFilter]);
+  const scopedStaffFilter = resolveMockStaffFilter(previewRole, identityStaffId, staffFilter);
+  const scopedBlockStaffId = isBarber ? identityStaffId ?? "" : blockStaffId;
+  const linkedStaff = isBarber ? mockStaff.find((staff) => staff.id === identityStaffId) : undefined;
+  const hasIdentityStaffScope = !isBarber || Boolean(linkedStaff);
+  const canWrite = canStaffRole(previewRole, "booking:write") && hasIdentityStaffScope;
+  const canReadCustomers = canStaffRole(previewRole, "customer:read") || (
+    canStaffRole(previewRole, "customer:read_assigned") && hasIdentityStaffScope
+  );
+  const visibleBookings = useMemo(
+    () => scopedStaffFilter === null ? [] : filterBookings(bookings, scopedStaffFilter),
+    [bookings, scopedStaffFilter],
+  );
+  const dayTimeline = useMemo(
+    () => scopedStaffFilter === null ? [] : buildTimeline(bookings, blocks, scopedStaffFilter),
+    [bookings, blocks, scopedStaffFilter],
+  );
+  const weekDays = useMemo(
+    () => scopedStaffFilter === null ? [] : buildWeekDays("2026-07-14", bookings, blocks, scopedStaffFilter),
+    [bookings, blocks, scopedStaffFilter],
+  );
   const queue = useMemo(() => rankSafeWaitlist(visibleBookings), [visibleBookings]);
   const visibleCustomers = useMemo(() => {
     if (!canReadCustomers) return [];
-    if (previewRole !== "barber") return mockCustomers;
-    const assignedStaffId = staffFilter === ALL_STAFF ? mockStaff[0]?.id : staffFilter;
-    return mockCustomers.filter((customer) => customer.preferredStaffId === assignedStaffId);
-  }, [canReadCustomers, previewRole, staffFilter]);
+    return filterMockCustomersForIdentity(mockCustomers, previewRole, identityStaffId);
+  }, [canReadCustomers, identityStaffId, previewRole]);
 
   function clearNotice() {
     setMessage("");
@@ -135,7 +153,11 @@ export function OperationsWorkspace() {
   async function changeStatus(booking: Booking, to: BookingStatus) {
     clearNotice();
     if (!canWrite) {
-      setError("目前是唯讀角色預覽，不能修改預約。");
+      setError("目前登入角色只有查看權限，不能修改預約。");
+      return;
+    }
+    if (!isBookingInMockIdentityScope(booking, previewRole, identityStaffId)) {
+      setError("此本機 Mock 設計師身份只能修改綁定給自己的預約。");
       return;
     }
     try {
@@ -154,6 +176,10 @@ export function OperationsWorkspace() {
     clearNotice();
     if (!canWrite) {
       setError("目前角色不能改期。");
+      return;
+    }
+    if (!isBookingInMockIdentityScope(booking, previewRole, identityStaffId)) {
+      setError("此本機 Mock 設計師身份只能替自己的預約改期。");
       return;
     }
     const replacement: Booking = {
@@ -188,11 +214,15 @@ export function OperationsWorkspace() {
       setError("目前角色不能修改行程。");
       return;
     }
+    if (!scopedBlockStaffId) {
+      setError("此本機 Mock 身份尚未綁定示範設計師，不能新增行程。");
+      return;
+    }
     const startsAt = toTaipeiInstant(blockDate as `${number}-${number}-${number}`, blockStart);
     const candidate: CalendarBlock = {
       id: `block-operations-${blocks.length + 1}`,
       branchId: mockBranch.id,
-      staffId: blockStaffId,
+      staffId: scopedBlockStaffId,
       startsAt: startsAt.toISOString(),
       endsAt: addMinutes(startsAt, blockDuration).toISOString(),
       kind: blockKind,
@@ -211,7 +241,7 @@ export function OperationsWorkspace() {
 
   return (
     <section className="operations-shell">
-      <div className="staff-warning" role="note"><strong>本機角色預覽 · 無正式登入</strong><span>切換角色只會改變畫面權限，不代表任何人已通過身分驗證。</span></div>
+      <div className="staff-warning" role="note"><strong>本機 Mock 登入 · 角色權限已套用</strong><span>{isBarber ? "設計師示範身份只顯示綁定設計師的假資料；這不是正式員工可見範圍政策。" : "目前操作會依登入身份限制。"} 這仍不是正式資安或正式員工帳號系統。</span></div>
       <div className="operations-toolbar">
         <div className="operations-tabs" role="tablist" aria-label="營運檢視">
           {(["day", "week", "queue", "customers", "configuration"] as OperationsView[]).map((item) => (
@@ -219,18 +249,18 @@ export function OperationsWorkspace() {
           ))}
         </div>
         <div className="operations-filters">
-          <label><span>角色預覽</span><select value={previewRole} onChange={(event) => setPreviewRole(event.target.value as StaffRole)}>{roles.map((role) => <option key={role} value={role}>{roleLabels[role]}</option>)}</select></label>
-          <label><span>設計師</span><select value={staffFilter} onChange={(event) => setStaffFilter(event.target.value)}><option value={ALL_STAFF}>全店</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
+          <div className="authenticated-role"><span>登入角色</span><strong>{roleLabels[previewRole]}</strong></div>
+          <label><span>設計師</span><select value={scopedStaffFilter ?? ""} disabled={isBarber} onChange={(event) => setStaffFilter(event.target.value)}>{isBarber ? <option value={identityStaffId ?? ""}>{linkedStaff?.displayName ?? "未綁定示範設計師"}</option> : <><option value={ALL_STAFF}>全店</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</>}</select></label>
         </div>
       </div>
-      <div className="permission-strip"><span>{roleLabels[previewRole]}</span><strong>{canWrite ? "可操作預約與行程" : "僅可查看行程"}</strong><small>本次稽核 {auditLog.length} 筆</small></div>
+      <div className="permission-strip"><span>{roleLabels[previewRole]}</span><strong>{isBarber && canWrite ? "本機 Mock 僅可操作綁定設計師資料" : canWrite ? "可操作預約與行程" : "僅可查看行程"}</strong><small>本次稽核 {auditLog.length} 筆</small></div>
       {message ? <p className="staff-message" role="status">{message}</p> : null}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
 
       {view === "day" ? (
         <div className="operations-two-column">
           <div className="operations-list"><div className="operations-heading"><div><p className="eyebrow">單日營運 · 2026-07-14</p><h2>日營運</h2></div><span>{dayTimeline.length} 個項目</span></div>{dayTimeline.map((item) => item.kind === "block" ? <article className={`operation-row block-${item.block.kind}`} key={item.id}><time>{formatTime(item.startsAt)}–{formatTime(item.endsAt)}</time><div><strong>{blockKindLabels[item.block.kind]}</strong><span>{mockStaff.find((staff) => staff.id === item.staffId)?.displayName} · {item.block.reason}</span></div></article> : <BookingOperationRow key={item.id} booking={item.booking} canWrite={canWrite} onStatus={changeStatus} onReschedule={reschedule} />)}</div>
-          <ScheduleEditor kind={blockKind} setKind={setBlockKind} date={blockDate} setDate={setBlockDate} start={blockStart} setStart={setBlockStart} duration={blockDuration} setDuration={setBlockDuration} staffId={blockStaffId} setStaffId={setBlockStaffId} onCreate={createScheduleBlock} disabled={!canWrite} />
+          <ScheduleEditor kind={blockKind} setKind={setBlockKind} date={blockDate} setDate={setBlockDate} start={blockStart} setStart={setBlockStart} duration={blockDuration} setDuration={setBlockDuration} staffId={scopedBlockStaffId} setStaffId={setBlockStaffId} staffLocked={isBarber} onCreate={createScheduleBlock} disabled={!canWrite} />
         </div>
       ) : null}
 
@@ -238,7 +268,7 @@ export function OperationsWorkspace() {
 
       {view === "queue" ? <div className="queue-panel"><div className="operations-heading"><div><p className="eyebrow">安全候補排序</p><h2>待確認與候補</h2></div><span>不取代已確認預約</span></div>{queue.length ? queue.map((booking, index) => <article key={booking.id} className="queue-row"><span>#{index + 1}</span><div><strong>{mockCustomers.find((customer) => customer.id === booking.customerId)?.name}</strong><small>{statusLabels[booking.status]} · {booking.depositStatus === "paid" ? "示範已付欄位" : "無付款優先承諾"}</small></div><button type="button" disabled={!canWrite} onClick={() => changeStatus(booking, "confirmed")}>確認（遇衝突會拒絕）</button></article>) : <div className="inline-state"><strong>沒有待處理項目</strong><span>目前不需要人工處理。</span></div>}</div> : null}
 
-      {view === "customers" ? canReadCustomers ? <div className="customer-operations-grid">{visibleCustomers.map((customer) => <article key={customer.id}><header><div><strong>{customer.name}</strong><span>{customer.phoneMasked}</span></div><small>偏好設計師：{mockStaff.find((staff) => staff.id === customer.preferredStaffId)?.displayName ?? "無"}</small></header><section><h3>服務偏好</h3>{customer.preferences?.map((item) => <p key={item}>{item}</p>) ?? <p>無</p>}</section><section><h3>技術紀錄</h3>{customer.technicalNotes?.length ? customer.technicalNotes.map((note) => <div key={note.id}><strong>{note.authorLabel}</strong><span>{note.content}</span></div>) : <p>無示範技術紀錄</p>}</section><details><summary>歷史紀錄 {customer.history.length} 筆</summary>{customer.history.map((entry) => <p key={entry.id}>{entry.serviceLabel} · {entry.summary}</p>)}</details></article>)}</div> : <div className="inline-state"><strong>此角色不能查看客戶資料</strong><span>請切換店主、管理者、櫃台或設計師角色預覽。</span></div> : null}
+      {view === "customers" ? canReadCustomers ? <div className="customer-operations-grid">{visibleCustomers.map((customer) => <article key={customer.id}><header><div><strong>{customer.name}</strong><span>{customer.phoneMasked}</span></div><small>偏好設計師：{mockStaff.find((staff) => staff.id === customer.preferredStaffId)?.displayName ?? "無"}</small></header><section><h3>服務偏好</h3>{customer.preferences?.map((item) => <p key={item}>{item}</p>) ?? <p>無</p>}</section><section><h3>技術紀錄</h3>{customer.technicalNotes?.length ? customer.technicalNotes.map((note) => <div key={note.id}><strong>{note.authorLabel}</strong><span>{note.content}</span></div>) : <p>無示範技術紀錄</p>}</section><details><summary>歷史紀錄 {customer.history.length} 筆</summary>{customer.history.map((entry) => <p key={entry.id}>{entry.serviceLabel} · {entry.summary}</p>)}</details></article>)}</div> : <div className="inline-state"><strong>此角色不能查看客戶資料</strong><span>請登出後改用店主、管理者、櫃台或設計師示範身份。</span></div> : null}
 
       {view === "configuration" ? canStaffRole(previewRole, "settings:preview") ? <div className="configuration-grid"><section><p className="eyebrow">人員與角色</p><h2>人員與值班能力</h2>{mockStaff.map((staff) => <article key={staff.id}><div><strong>{staff.displayName}</strong><span>{staffRoleNames[staff.role]} · {staff.active ? "啟用" : "停用"}</span></div><p>{staff.specialties.join(" · ")}</p><small>可服務 {staff.serviceIds.length} 項 · 每週 {staff.schedule.days.length} 個排班日</small></article>)}</section><section><p className="eyebrow">服務能力設定</p><h2>服務設定預覽</h2>{mockServices.map((service) => <article key={service.id}><div><strong>{service.name}</strong><span>{service.durationMinutes} 分鐘</span></div><p>{service.description}</p><small>價格待店主決定 · 緩衝 {service.bufferBeforeMinutes}/{service.bufferAfterMinutes} 分鐘</small></article>)}</section></div> : <div className="inline-state"><strong>此角色不能查看設定預覽</strong><span>只有店主或管理者角色預覽可查看服務、人員與排班設定。</span></div> : null}
 
@@ -252,6 +282,7 @@ function BookingOperationRow({ booking, canWrite, onStatus, onReschedule }: { bo
   return <article className="operation-booking"><div><time>{formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}</time><strong>{mockCustomers.find((customer) => customer.id === booking.customerId)?.name}</strong><span>{mockStaff.find((staff) => staff.id === booking.staffId)?.displayName} · {statusLabels[booking.status]}</span></div><div className="operation-actions">{transitions.map((status) => <button key={status} type="button" disabled={!canWrite} onClick={() => onStatus(booking, status)}>{transitionLabels[status] ?? statusLabels[status]}</button>)}{booking.status === "confirmed" ? <button type="button" disabled={!canWrite} onClick={() => onReschedule(booking)}>改期＋保留紀錄</button> : null}</div></article>;
 }
 
-function ScheduleEditor({ kind, setKind, date, setDate, start, setStart, duration, setDuration, staffId, setStaffId, onCreate, disabled }: { kind: BlockKind; setKind: (value: BlockKind) => void; date: string; setDate: (value: string) => void; start: LocalTime; setStart: (value: LocalTime) => void; duration: (typeof blockDurations)[number]; setDuration: (value: (typeof blockDurations)[number]) => void; staffId: string; setStaffId: (value: string) => void; onCreate: () => void; disabled: boolean }) {
-  return <aside className="schedule-editor"><p className="eyebrow">排班編輯 · 本機示範</p><h3>新增行程</h3><p>可預覽一般封鎖、休假與加班；同人同時段衝突會被拒絕。</p><label><span>類型</span><select value={kind} onChange={(event) => setKind(event.target.value as BlockKind)}><option value="blocked">封鎖</option><option value="leave">休假</option><option value="overtime">加班</option></select></label><label><span>設計師</span><select value={staffId} onChange={(event) => setStaffId(event.target.value)}>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label><label><span>日期</span><select value={date} onChange={(event) => setDate(event.target.value)}>{["2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20"].map((item) => <option key={item} value={item}>{item}</option>)}</select></label><label><span>開始</span><select value={start} onChange={(event) => setStart(event.target.value as LocalTime)}>{blockTimes.map((item) => <option key={item} value={item}>{item}</option>)}</select></label><label><span>長度</span><select value={duration} onChange={(event) => setDuration(Number(event.target.value) as (typeof blockDurations)[number])}>{blockDurations.map((item) => <option key={item} value={item}>{item} 分鐘</option>)}</select></label><button className="button" type="button" disabled={disabled} onClick={onCreate}>新增本機行程</button></aside>;
+function ScheduleEditor({ kind, setKind, date, setDate, start, setStart, duration, setDuration, staffId, setStaffId, staffLocked, onCreate, disabled }: { kind: BlockKind; setKind: (value: BlockKind) => void; date: string; setDate: (value: string) => void; start: LocalTime; setStart: (value: LocalTime) => void; duration: (typeof blockDurations)[number]; setDuration: (value: (typeof blockDurations)[number]) => void; staffId: string; setStaffId: (value: string) => void; staffLocked: boolean; onCreate: () => void; disabled: boolean }) {
+  const selectedStaff = mockStaff.find((staff) => staff.id === staffId);
+  return <aside className="schedule-editor"><p className="eyebrow">排班編輯 · 本機示範</p><h3>新增行程</h3><p>可預覽一般封鎖、休假與加班；同人同時段衝突會被拒絕。</p><label><span>類型</span><select value={kind} onChange={(event) => setKind(event.target.value as BlockKind)}><option value="blocked">封鎖</option><option value="leave">休假</option><option value="overtime">加班</option></select></label><label><span>設計師</span><select value={staffId} disabled={staffLocked} onChange={(event) => setStaffId(event.target.value)}>{staffLocked ? <option value={staffId}>{selectedStaff?.displayName ?? "未綁定示範設計師"}</option> : mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label><label><span>日期</span><select value={date} onChange={(event) => setDate(event.target.value)}>{["2026-07-14", "2026-07-15", "2026-07-16", "2026-07-17", "2026-07-18", "2026-07-19", "2026-07-20"].map((item) => <option key={item} value={item}>{item}</option>)}</select></label><label><span>開始</span><select value={start} onChange={(event) => setStart(event.target.value as LocalTime)}>{blockTimes.map((item) => <option key={item} value={item}>{item}</option>)}</select></label><label><span>長度</span><select value={duration} onChange={(event) => setDuration(Number(event.target.value) as (typeof blockDurations)[number])}>{blockDurations.map((item) => <option key={item} value={item}>{item} 分鐘</option>)}</select></label><button className="button" type="button" disabled={disabled} onClick={onCreate}>新增本機行程</button></aside>;
 }

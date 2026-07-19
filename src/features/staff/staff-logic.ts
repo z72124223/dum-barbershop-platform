@@ -3,31 +3,40 @@ import {
   type Booking,
   type BookingStatus,
   type CalendarBlock,
+  type Customer,
   type EntityId,
   type StaffRole,
 } from "../../domain";
+export { canStaffRole } from "../../domain";
 
 export const ALL_STAFF = "all" as const;
 export type StaffFilter = EntityId | typeof ALL_STAFF;
 
-export type StaffPermission =
-  | "schedule:read"
-  | "booking:write"
-  | "customer:read"
-  | "customer:read_assigned"
-  | "settings:preview"
-  | "integration:read";
+export function resolveMockStaffFilter(
+  role: StaffRole,
+  identityStaffId: EntityId | undefined,
+  requestedFilter: StaffFilter,
+): StaffFilter | null {
+  if (role !== "barber") return requestedFilter;
+  return identityStaffId ?? null;
+}
 
-const ROLE_PERMISSIONS: Record<StaffRole, ReadonlySet<StaffPermission>> = {
-  owner: new Set(["schedule:read", "booking:write", "customer:read", "settings:preview", "integration:read"]),
-  manager: new Set(["schedule:read", "booking:write", "customer:read", "settings:preview", "integration:read"]),
-  barber: new Set(["schedule:read", "booking:write", "customer:read_assigned"]),
-  reception: new Set(["schedule:read", "booking:write", "customer:read"]),
-  read_only: new Set(["schedule:read"]),
-};
+export function isBookingInMockIdentityScope(
+  booking: Booking,
+  role: StaffRole,
+  identityStaffId: EntityId | undefined,
+): boolean {
+  return role !== "barber" || Boolean(identityStaffId && booking.staffId === identityStaffId);
+}
 
-export function canStaffRole(role: StaffRole, permission: StaffPermission): boolean {
-  return ROLE_PERMISSIONS[role].has(permission);
+export function filterMockCustomersForIdentity(
+  customers: Customer[],
+  role: StaffRole,
+  identityStaffId: EntityId | undefined,
+): Customer[] {
+  if (role !== "barber") return customers;
+  if (!identityStaffId) return [];
+  return customers.filter((customer) => customer.preferredStaffId === identityStaffId);
 }
 
 const NON_BLOCKING_STATUSES = new Set<BookingStatus>([

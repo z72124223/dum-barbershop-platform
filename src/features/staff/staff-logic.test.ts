@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { mockBookings, mockBranch, mockCalendarBlocks } from "../../data/mock";
+import { mockBookings, mockBranch, mockCalendarBlocks, mockCustomers } from "../../data/mock";
 import type { CalendarBlock } from "../../domain";
 import {
   ALL_STAFF,
@@ -8,8 +8,11 @@ import {
   buildWeekDays,
   canPlaceBlock,
   canStaffRole,
+  filterMockCustomersForIdentity,
   filterBookings,
   findNextBooking,
+  isBookingInMockIdentityScope,
+  resolveMockStaffFilter,
 } from "./staff-logic";
 
 function block(overrides: Partial<CalendarBlock> = {}): CalendarBlock {
@@ -64,5 +67,28 @@ describe("staff workspace logic", () => {
     assert.equal(canStaffRole("barber", "settings:preview"), false);
     assert.equal(canStaffRole("read_only", "booking:write"), false);
     assert.equal(canStaffRole("owner", "integration:read"), true);
+  });
+
+  it("locks the mock barber identity to its linked staff record", () => {
+    assert.equal(resolveMockStaffFilter("barber", "staff-mock-bravo", ALL_STAFF), "staff-mock-bravo");
+    assert.equal(resolveMockStaffFilter("barber", undefined, ALL_STAFF), null);
+    assert.equal(resolveMockStaffFilter("manager", undefined, "staff-mock-alpha"), "staff-mock-alpha");
+  });
+
+  it("keeps mock barber booking actions inside the linked staff scope", () => {
+    const alphaBooking = mockBookings.find((booking) => booking.staffId === "staff-mock-alpha");
+    const bravoBooking = mockBookings.find((booking) => booking.staffId === "staff-mock-bravo");
+    assert.ok(alphaBooking);
+    assert.ok(bravoBooking);
+    assert.equal(isBookingInMockIdentityScope(alphaBooking, "barber", "staff-mock-bravo"), false);
+    assert.equal(isBookingInMockIdentityScope(bravoBooking, "barber", "staff-mock-bravo"), true);
+    assert.equal(isBookingInMockIdentityScope(alphaBooking, "reception", undefined), true);
+  });
+
+  it("shows a mock barber only customers linked to that staff record", () => {
+    const barberCustomers = filterMockCustomersForIdentity(mockCustomers, "barber", "staff-mock-bravo");
+    assert.deepEqual(barberCustomers.map((customer) => customer.id), ["customer-mock-two"]);
+    assert.equal(filterMockCustomersForIdentity(mockCustomers, "barber", undefined).length, 0);
+    assert.equal(filterMockCustomersForIdentity(mockCustomers, "owner", "staff-mock-alpha").length, mockCustomers.length);
   });
 });

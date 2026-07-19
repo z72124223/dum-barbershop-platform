@@ -1,5 +1,30 @@
 # Codex Work Log — Blueprint Build-Complete
 
+## Active identity — Issue #25
+
+- Role: Codex
+- Issue: #25
+- Branch: `codex/25-staff-mock-auth`
+- Primary responsibility: Staff Mock identity, local Session, route protection, logout and role-aware access
+- Status: `READY_FOR_PR`
+
+## ISSUE_25_STAFF_MOCK_AUTH checkpoint
+
+- Status: `VALIDATED`
+- Updated at: `2026-07-19 +08:00`
+- Branch: `codex/25-staff-mock-auth`
+- Scope implemented: `/staff/login`, five fictional Staff identities, public demo code `DUM-DEMO`, eight-hour browser-local Session, server-side Staff route interception, logout flow and role-permission integration.
+- Mock role scope: the barber identity is linked to `staff-mock-bravo` and can only see or operate that fictional staff record's bookings, schedule blocks and assigned customer fixtures. This is a Mock acceptance boundary, not a formal employee-visibility policy.
+- Customer boundary: public website and customer booking remain login-free.
+- Security boundary: this is a local Mock identity implementation only. It is not production authentication; no real account, credential, provider or customer data was added.
+- Checks: `pnpm install --frozen-lockfile` PASS; `pnpm typecheck` PASS; `pnpm lint` PASS; `pnpm test` PASS (43 / 43); `pnpm build` PASS on Next.js 16.2.10 with Proxy middleware.
+- Browser smoke: PASS for invalid credentials, successful Owner login, reload Session restore, logout and protected-route redirect, Owner integration access, barber integration denial and barber-only schedule/customer scope.
+- Mobile smoke: 390x844 target (375px content viewport) has no horizontal overflow; the login card starts first and the submit button is fully visible. Browser console errors: none.
+- Owner decision needed: none for this local Mock implementation; formal identity provider, account policy, credentials and production authorization remain reserved.
+- Blockers: none.
+- Exact next action: commit and push the validated implementation, open the Draft PR, then record the PR URL and final last-good commit in this log and Issue #25.
+- Uncommitted changes: validated implementation and documentation are ready to commit.
+
 ## Identity
 
 - Role: Codex
@@ -357,7 +382,7 @@ During merge conflicts:
 
 ## ISSUE_23_VISUAL_LOCALIZATION checkpoint
 
-- Status: `PR_OPEN`
+- Status: `MERGED`
 - Completed at: `2026-07-14 18:40 +08:00`
 - Branch: `codex/23-zh-gangster-style`
 - Completed: public website, customer booking flow, booking management and Staff Mock workspace now use Traditional Chinese as the primary customer-facing language.
@@ -370,6 +395,7 @@ During merge conflicts:
 - Local comparison: baseline preserved at `http://127.0.0.1:3101/`; Issue #23 redesign available at `http://127.0.0.1:3102/` while the local preview processes remain active.
 - Implementation commit: `05c9a6093e79b239daf3765a30a26bf8e1d5f07f`.
 - Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/24
-- Exact next action: review the side-by-side local previews and Draft PR #24; any approved visual refinements stay on `codex/23-zh-gangster-style`.
+- Main merge commit: `c745226b3d0879daeb24616a64711c798bd271e2`.
+- Exact next action: none for Issue #23; subsequent implementation continues under its own scope-limited Issue and branch.
 - Blockers: none.
 - Owner decision needed: none for this Mock visual/localization pass; all reserved production decisions remain deferred.

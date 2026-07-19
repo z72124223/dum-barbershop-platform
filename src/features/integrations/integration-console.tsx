@@ -18,7 +18,7 @@ const providers: Array<{ key: IntegrationProvider; label: string; description: s
   { key: "notification", label: "通知服務", description: "只產生訊息預覽，不對外寄送。" },
   { key: "payment", label: "付款與訂金", description: "正式金流、金額與退款規則停用。" },
   { key: "membership", label: "會員服務", description: "會員權益尚待店主決策。" },
-  { key: "identity", label: "身分驗證", description: "只有本機角色預覽，沒有正式登入。" },
+  { key: "identity", label: "身分驗證", description: "已有本機 Mock 登入與角色保護，尚未選定正式供應商。" },
   { key: "line", label: "LINE", description: "未註冊、未綁定，也不會送訊息。" },
 ];
 

@@ -82,14 +82,24 @@ pnpm build
 - `/about` — brand/platform structure with reserved real story and imagery
 - `/contact` — safe address, phone, LINE, Instagram, map and transport placeholders
 - `/policies` — explicit Owner-decision placeholders
-- `/staff` — no-auth local Staff today/full-day workspace
+- `/staff/login` — Staff Mock 登入頁；提供 5 個虛構身份與公開示範通行碼 `DUM-DEMO`
+- `/staff` — 受 Mock 登入保護的今日／全日工作區
 - `/staff/operations` — day/week, queue, customer, schedule and role previews
 - `/staff/integrations` — provider health, idempotency, conflict, retry and delivery simulator
 - `/staff/quick-actions` — responsive Today, Next, Blocks, Checked In and Completed preview
 
 The customer booking flow uses fictional services, staff, dates, availability and customer details. Use only fictional form values. The confirmation explicitly states that no request was sent to the shop, no notification was delivered and no payment was collected.
 
-The Staff Prototype uses the fixed fictional operating date `2026-07-14` so schedule, conflict and status-transition tests remain reproducible. It supports day/week views, staff filtering, booking details, safe pending/waitlist handling, local block/leave/overtime previews, masked fictional customer history and Domain-controlled status actions. Role switching is only a permission UI preview; it has no authentication and must not be used for real operations.
+The Staff Prototype uses the fixed fictional operating date `2026-07-14` so schedule, conflict and status-transition tests remain reproducible. It supports day/week views, staff filtering, booking details, safe pending/waitlist handling, local block/leave/overtime previews, masked fictional customer history and Domain-controlled status actions.
+
+### Staff Mock 登入
+
+- `/staff` 與其子頁面現在會先檢查本機 Mock Session；未登入或 Session 失效時會導向 `/staff/login`。
+- 登入頁提供 5 個虛構身份：Owner、Manager、Barber、Reception 與 Read Only，公開示範通行碼皆為 `DUM-DEMO`。
+- Session 會存放在目前瀏覽器的 `localStorage`，並以同一份 Mock Cookie 讓伺服器入口先攔截匿名 Staff 請求；有效時間為 8 小時，登出會清除兩者。
+- 店主與管理者可查看整合預覽；設計師示範身份只會看見及操作綁定給自己的虛構行程與客戶，唯讀身份不能修改資料。這些只是假資料驗收範圍，不是正式員工權限政策。
+- 客人的網站與預約流程維持免登入，不受 Staff 登入影響。
+- 這只是本機 Mock 身份邊界，不是正式資安或 Production Authentication。正式身份供應商、帳號政策、憑證與個資權限仍待 Owner 決策，且必須透過 Identity Adapter 接入。
 
 ## Build-complete safety boundaries
 
@@ -99,7 +109,7 @@ The Staff Prototype uses the fixed fictional operating date `2026-07-14` so sche
 - LINE, reminders, review requests and return campaigns never send externally.
 - Integration scenarios show success, conflict, timeout, partial failure and bounded retry without contacting a provider.
 - The installable manifest and Apple-style quick actions are web previews; there is no native watchOS application or external registration.
-- Reloading the browser resets customer and Staff UI changes; no production database exists.
+- Reloading the browser resets customer and Staff operation changes; the Mock 登入 Session 會在同一瀏覽器保留最多 8 小時。No production database exists.
 - Do not enter secrets or real customer data into the repository or the local prototype.
 
 ## Validation evidence
@@ -108,7 +118,7 @@ The current build-complete baseline passes:
 
 - TypeScript typecheck
 - ESLint
-- 36 automated Domain, adapter, booking, Staff, integration and quick-action tests
+- 43 automated Domain, identity, adapter, booking, Staff, integration and quick-action tests
 - Next.js Production Build
 - Desktop and mobile browser smoke at the main customer and Staff routes
 

@@ -7,5 +7,6 @@ export * from "./common";
 export * from "./customer";
 export * from "./membership";
 export * from "./integration";
+export * from "./identity";
 export * from "./service";
 export * from "./staff";

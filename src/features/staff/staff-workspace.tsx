@@ -6,6 +6,7 @@ import { mockBookings, mockBranch, mockCalendarBlocks, mockCustomers, mockServic
 import {
   addMinutes,
   allowedBookingTransitions,
+  canStaffRole,
   toTaipeiInstant,
   transitionBooking,
   type Booking,
@@ -15,7 +16,18 @@ import {
   type EntityId,
   type LocalTime,
 } from "../../domain";
-import { ALL_STAFF, buildTimeline, canPlaceBlock, filterBookings, findNextBooking, type StaffFilter } from "./staff-logic";
+import {
+  ALL_STAFF,
+  buildTimeline,
+  canPlaceBlock,
+  filterBookings,
+  filterMockCustomersForIdentity,
+  findNextBooking,
+  isBookingInMockIdentityScope,
+  resolveMockStaffFilter,
+  type StaffFilter,
+} from "./staff-logic";
+import { useStaffAuth } from "./staff-auth";
 
 const statusLabels: Record<BookingStatus, string> = {
   pending: "待確認",
@@ -54,6 +66,10 @@ function customerFor(booking: Booking | null): Customer | undefined {
 }
 
 export function StaffWorkspace() {
+  const { session } = useStaffAuth();
+  const signedInRole = session?.identity.role ?? "read_only";
+  const identityStaffId = session?.identity.staffId;
+  const isBarber = signedInRole === "barber";
   const [platform] = useState(createMockPlatform);
   const [bookings, setBookings] = useState<Booking[]>(() => structuredClone(mockBookings));
   const [blocks, setBlocks] = useState<CalendarBlock[]>(() => structuredClone(mockCalendarBlocks));
@@ -69,10 +85,27 @@ export function StaffWorkspace() {
   const [auditCount, setAuditCount] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  const visibleBookings = useMemo(() => filterBookings(bookings, staffFilter), [bookings, staffFilter]);
-  const nextBooking = useMemo(() => findNextBooking(bookings, staffFilter, MOCK_NOW), [bookings, staffFilter]);
-  const timeline = useMemo(() => buildTimeline(bookings, blocks, staffFilter), [bookings, blocks, staffFilter]);
-  const selectedBooking = bookings.find((booking) => booking.id === selectedBookingId) ?? null;
+  const scopedStaffFilter = resolveMockStaffFilter(signedInRole, identityStaffId, staffFilter);
+  const scopedBlockStaffId = isBarber ? identityStaffId ?? "" : blockStaffId;
+  const linkedStaff = isBarber ? mockStaff.find((staff) => staff.id === identityStaffId) : undefined;
+  const hasIdentityStaffScope = !isBarber || Boolean(linkedStaff);
+  const canWrite = canStaffRole(signedInRole, "booking:write") && hasIdentityStaffScope;
+  const canReadCustomers = canStaffRole(signedInRole, "customer:read") || (
+    canStaffRole(signedInRole, "customer:read_assigned") && hasIdentityStaffScope
+  );
+  const visibleBookings = useMemo(
+    () => scopedStaffFilter === null ? [] : filterBookings(bookings, scopedStaffFilter),
+    [bookings, scopedStaffFilter],
+  );
+  const nextBooking = useMemo(
+    () => scopedStaffFilter === null ? null : findNextBooking(bookings, scopedStaffFilter, MOCK_NOW),
+    [bookings, scopedStaffFilter],
+  );
+  const timeline = useMemo(
+    () => scopedStaffFilter === null ? [] : buildTimeline(bookings, blocks, scopedStaffFilter),
+    [bookings, blocks, scopedStaffFilter],
+  );
+  const selectedBooking = visibleBookings.find((booking) => booking.id === selectedBookingId) ?? visibleBookings[0] ?? null;
   const selectedCustomer = customerFor(selectedBooking);
   const selectedService = selectedBooking ? mockServices.find((service) => service.id === selectedBooking.serviceId) : undefined;
   const selectedStaff = selectedBooking ? mockStaff.find((staff) => staff.id === selectedBooking.staffId) : undefined;
@@ -80,15 +113,25 @@ export function StaffWorkspace() {
   const pendingCount = visibleBookings.filter((booking) => booking.status === "pending").length;
   const waitlistCount = visibleBookings.filter((booking) => booking.status === "waitlisted").length;
   const customerResults = useMemo(() => {
+    if (!canReadCustomers) return [];
+    const scopedCustomers = filterMockCustomersForIdentity(mockCustomers, signedInRole, identityStaffId);
     const normalized = customerQuery.trim().toLocaleLowerCase("zh-TW");
-    if (!normalized) return mockCustomers;
-    return mockCustomers.filter((customer) =>
+    if (!normalized) return scopedCustomers;
+    return scopedCustomers.filter((customer) =>
       `${customer.name} ${customer.phoneMasked}`.toLocaleLowerCase("zh-TW").includes(normalized),
     );
-  }, [customerQuery]);
+  }, [canReadCustomers, customerQuery, identityStaffId, signedInRole]);
 
   async function applyPrimaryAction() {
     if (!selectedBooking) return;
+    if (!canWrite) {
+      setError("目前登入角色只有查看權限，不能修改預約狀態。");
+      return;
+    }
+    if (!isBookingInMockIdentityScope(selectedBooking, signedInRole, identityStaffId)) {
+      setError("此本機 Mock 設計師身份只能修改綁定給自己的預約。");
+      return;
+    }
     const action = primaryActions[selectedBooking.status];
     if (!action || !allowedBookingTransitions(selectedBooking.status).includes(action.to)) return;
     setBusy(true);
@@ -111,11 +154,19 @@ export function StaffWorkspace() {
   async function createBlock() {
     setError("");
     setMessage("");
+    if (!canWrite) {
+      setError("目前登入角色只有查看權限，不能建立封鎖時間。");
+      return;
+    }
+    if (!scopedBlockStaffId) {
+      setError("此本機 Mock 身份尚未綁定示範設計師，不能建立封鎖時間。");
+      return;
+    }
     const startsAt = toTaipeiInstant("2026-07-14", blockStart);
     const candidate: CalendarBlock = {
       id: `block-local-${Date.now()}`,
       branchId: mockBranch.id,
-      staffId: blockStaffId,
+      staffId: scopedBlockStaffId,
       startsAt: startsAt.toISOString(),
       endsAt: addMinutes(startsAt, blockDuration).toISOString(),
       kind: "blocked",
@@ -128,7 +179,7 @@ export function StaffWorkspace() {
     }
     await platform.calendar.createBlock(candidate);
     setBlocks((current) => [...current, candidate]);
-    setMessage(`已替 ${mockStaff.find((staff) => staff.id === blockStaffId)?.displayName} 建立 ${blockDuration} 分鐘示範封鎖。`);
+    setMessage(`已替 ${mockStaff.find((staff) => staff.id === scopedBlockStaffId)?.displayName} 建立 ${blockDuration} 分鐘示範封鎖。`);
   }
 
   function selectBooking(id: EntityId) {
@@ -146,17 +197,17 @@ export function StaffWorkspace() {
   return (
     <section className="staff-shell">
       <div className="staff-warning" role="note">
-        <strong>員工操作原型 · 無登入保護</strong>
-        <span>僅供本機 M1 測試，不可拿來管理真實客人或門市行程。</span>
+        <strong>員工操作原型 · 已套用 Mock 登入角色</strong>
+        <span>{isBarber ? "設計師示範身份只顯示綁定設計師的假資料；這不是正式員工可見範圍政策。" : canWrite ? "目前角色可操作本機假資料。" : "目前角色只有查看權限。"} 這仍不可拿來管理真實客人或門市行程。</span>
       </div>
 
       <div className="staff-toolbar">
         <div className="staff-tabs" role="tablist" aria-label="員工功能">
           <button type="button" role="tab" aria-selected={view === "today"} onClick={() => changeView("today")}>今日</button>
           <button type="button" role="tab" aria-selected={view === "schedule"} onClick={() => changeView("schedule")}>全日行程</button>
-          <button type="button" role="tab" aria-selected={view === "customers"} onClick={() => changeView("customers")}>客戶搜尋</button>
+          <button type="button" role="tab" aria-selected={view === "customers"} disabled={!canReadCustomers} onClick={() => changeView("customers")}>客戶搜尋</button>
         </div>
-        <label className="staff-filter"><span>設計師篩選</span><select value={staffFilter} onChange={(event) => setStaffFilter(event.target.value)}><option value={ALL_STAFF}>全店示範行程</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
+        <label className="staff-filter"><span>設計師篩選</span><select value={scopedStaffFilter ?? ""} disabled={isBarber} onChange={(event) => setStaffFilter(event.target.value)}>{isBarber ? <option value={identityStaffId ?? ""}>{linkedStaff?.displayName ?? "未綁定示範設計師"}</option> : <><option value={ALL_STAFF}>全店示範行程</option>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</>}</select></label>
       </div>
 
       {message ? <p className="staff-message" role="status">{message}</p> : null}
@@ -179,11 +230,11 @@ export function StaffWorkspace() {
               {visibleBookings.map((booking) => {
                 const customer = customerFor(booking);
                 const staff = mockStaff.find((member) => member.id === booking.staffId);
-                return <button key={booking.id} type="button" className={selectedBookingId === booking.id ? "selected" : ""} onClick={() => selectBooking(booking.id)}><span>{formatTime(booking.startsAt)}</span><strong>{customer?.name}</strong><small>{staff?.displayName} · {statusLabels[booking.status]}</small></button>;
+                return <button key={booking.id} type="button" className={selectedBooking?.id === booking.id ? "selected" : ""} onClick={() => selectBooking(booking.id)}><span>{formatTime(booking.startsAt)}</span><strong>{customer?.name}</strong><small>{staff?.displayName} · {statusLabels[booking.status]}</small></button>;
               })}
             </div>
           </div>
-          <BookingDetail booking={selectedBooking} customer={selectedCustomer} serviceLabel={selectedService?.name} staffLabel={selectedStaff?.displayName} busy={busy} onAction={applyPrimaryAction} />
+          <BookingDetail booking={selectedBooking} customer={selectedCustomer} serviceLabel={selectedService?.name} staffLabel={selectedStaff?.displayName} busy={busy} canWrite={canWrite} onAction={applyPrimaryAction} />
         </>
       ) : null}
 
@@ -200,10 +251,10 @@ export function StaffWorkspace() {
           </div>
           <aside className="block-panel">
             <p className="eyebrow">封鎖時間 · 本機示範</p><h3>建立封鎖時間</h3><p>只影響所選設計師；若已有預約或封鎖，系統會拒絕。</p>
-            <label><span>設計師</span><select value={blockStaffId} onChange={(event) => setBlockStaffId(event.target.value)}>{mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
+            <label><span>設計師</span><select value={scopedBlockStaffId} disabled={isBarber} onChange={(event) => setBlockStaffId(event.target.value)}>{isBarber ? <option value={identityStaffId ?? ""}>{linkedStaff?.displayName ?? "未綁定示範設計師"}</option> : mockStaff.map((staff) => <option key={staff.id} value={staff.id}>{staff.displayName}</option>)}</select></label>
             <label><span>開始時間</span><select value={blockStart} onChange={(event) => setBlockStart(event.target.value as LocalTime)}>{blockTimes.map((time) => <option key={time} value={time}>{time}</option>)}</select></label>
             <label><span>長度</span><select value={blockDuration} onChange={(event) => setBlockDuration(Number(event.target.value) as 30 | 60)}><option value={30}>30 分鐘</option><option value={60}>60 分鐘</option></select></label>
-            <button className="button" type="button" onClick={createBlock}>建立示範封鎖</button>
+            <button className="button" type="button" disabled={!canWrite} onClick={createBlock}>建立示範封鎖</button>
           </aside>
         </div>
       ) : null}
@@ -218,8 +269,8 @@ export function StaffWorkspace() {
   );
 }
 
-function BookingDetail({ booking, customer, serviceLabel, staffLabel, busy, onAction }: { booking: Booking | null; customer?: Customer; serviceLabel?: string; staffLabel?: string; busy: boolean; onAction: () => void }) {
+function BookingDetail({ booking, customer, serviceLabel, staffLabel, busy, canWrite, onAction }: { booking: Booking | null; customer?: Customer; serviceLabel?: string; staffLabel?: string; busy: boolean; canWrite: boolean; onAction: () => void }) {
   if (!booking) return <div className="inline-state"><strong>尚未選擇預約</strong><span>從今日行程選一位示範客人查看。</span></div>;
   const action = primaryActions[booking.status];
-  return <article className="booking-detail"><div><p className="eyebrow">預約明細 · 示範資料</p><h2>{customer?.name}</h2><p>{customer?.phoneMasked} · {serviceLabel}</p></div><dl className="summary-list"><div><dt>時間</dt><dd>{formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}</dd></div><div><dt>設計師</dt><dd>{staffLabel}</dd></div><div><dt>狀態</dt><dd>{statusLabels[booking.status]}</dd></div><div><dt>訂金</dt><dd>{booking.depositStatus}（僅資料欄位）</dd></div><div><dt>備註</dt><dd>{booking.note || "無"}</dd></div></dl>{action ? <button className="button" type="button" disabled={busy} onClick={onAction}>{busy ? "更新中…" : action.label}</button> : <span className="status-terminal">此狀態目前沒有下一個日常操作。</span>}</article>;
+  return <article className="booking-detail"><div><p className="eyebrow">預約明細 · 示範資料</p><h2>{customer?.name}</h2><p>{customer?.phoneMasked} · {serviceLabel}</p></div><dl className="summary-list"><div><dt>時間</dt><dd>{formatTime(booking.startsAt)}–{formatTime(booking.endsAt)}</dd></div><div><dt>設計師</dt><dd>{staffLabel}</dd></div><div><dt>狀態</dt><dd>{statusLabels[booking.status]}</dd></div><div><dt>訂金</dt><dd>{booking.depositStatus}（僅資料欄位）</dd></div><div><dt>備註</dt><dd>{booking.note || "無"}</dd></div></dl>{action ? <button className="button" type="button" disabled={busy || !canWrite} onClick={onAction}>{busy ? "更新中…" : canWrite ? action.label : "目前角色僅可查看"}</button> : <span className="status-terminal">此狀態目前沒有下一個日常操作。</span>}</article>;
 }
