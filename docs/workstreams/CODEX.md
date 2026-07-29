@@ -6,7 +6,7 @@
 - Issue: #27
 - Branch: `codex/27-first-mvp`
 - Primary responsibility: first MVP customer booking flow, two-role Staff login and unified schedule/notes workspace
-- Status: `VALIDATED`
+- Status: `PR_OPEN`
 
 ## ISSUE_27_FIRST_MVP checkpoint
 
@@ -14,6 +14,8 @@
 - Updated at: `2026-07-29 +08:00`
 - Branch: `codex/27-first-mvp`
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/27
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/28
+- Last validated implementation commit: `6a6c393473396a3488ca7b68c7948cc0d3944cfa`
 - Scope implemented: four focused routes only — `/`, `/booking`, `/staff/login` and `/staff`; Owner and Staff share one schedule/notes workspace.
 - Customer flow: choose date, time and staff; enter name, phone and optional note; confirm into the shared device-local schedule.
 - Staff flow: browse the combined agenda, filter by date/staff, and manually add either a booking or a free-text note.
