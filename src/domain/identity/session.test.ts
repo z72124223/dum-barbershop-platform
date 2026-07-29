@@ -12,7 +12,7 @@ import {
 
 const issuedAt = "2026-07-18T02:00:00.000Z";
 const session: StaffIdentitySession = {
-  version: 1,
+  version: 2,
   mode: "mock",
   authenticated: true,
   sessionId: "mock-session-owner",
@@ -27,6 +27,20 @@ describe("Staff identity session", () => {
     assert.deepEqual(parseStaffIdentitySession(session), session);
     assert.equal(parseStaffIdentitySession({ ...session, authenticated: false }), null);
     assert.equal(parseStaffIdentitySession({ ...session, permissions: ["root:all"] }), null);
+    assert.equal(parseStaffIdentitySession({ ...session, permissions: ["schedule:read"] }), null);
+  });
+
+  it("rejects v1 sessions and removed Staff roles", () => {
+    assert.equal(parseStaffIdentitySession({ ...session, version: 1 }), null);
+    for (const role of ["manager", "barber", "reception", "read_only"]) {
+      assert.equal(
+        parseStaffIdentitySession({
+          ...session,
+          identity: { ...session.identity, role },
+        }),
+        null,
+      );
+    }
   });
 
   it("accepts active sessions and rejects expired or future-issued sessions", () => {
@@ -36,9 +50,11 @@ describe("Staff identity session", () => {
   });
 
   it("keeps role permissions centralized", () => {
-    assert.equal(canStaffRole("manager", "integration:read"), true);
-    assert.equal(canStaffRole("barber", "customer:read_assigned"), true);
-    assert.equal(canStaffRole("read_only", "booking:write"), false);
+    const expected = ["schedule:read", "booking:write"];
+    assert.deepEqual(permissionsForStaffRole("owner"), expected);
+    assert.deepEqual(permissionsForStaffRole("staff"), expected);
+    assert.equal(canStaffRole("owner", "booking:write"), true);
+    assert.equal(canStaffRole("staff", "booking:write"), true);
   });
 
   it("only allows safe Staff return paths", () => {

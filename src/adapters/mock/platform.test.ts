@@ -77,16 +77,32 @@ describe("provider-neutral Mock adapters", () => {
 
   it("authenticates and restores only valid local demo sessions", async () => {
     const identity = new MockIdentityProvider();
-    const denied = await identity.signIn({ accountId: "barber.demo", accessCode: "wrong" }, "2026-07-18T02:00:00.000Z");
-    assert.deepEqual(denied, { ok: false, reason: "invalid_credentials" });
+    const accounts = await identity.listDemoAccounts();
+    assert.deepEqual(accounts.map((account) => account.accountId), ["owner.demo", "staff.demo"]);
 
-    const signedIn = await identity.signIn({ accountId: "barber.demo", accessCode: "DUM-DEMO" }, "2026-07-18T02:00:00.000Z");
+    const denied = await identity.signIn({ accountId: "staff.demo", accessCode: "wrong" }, "2026-07-18T02:00:00.000Z");
+    assert.deepEqual(denied, { ok: false, reason: "invalid_credentials" });
+    assert.deepEqual(
+      await identity.signIn({ accountId: "barber.demo", accessCode: "DUM-DEMO" }, "2026-07-18T02:00:00.000Z"),
+      { ok: false, reason: "invalid_credentials" },
+    );
+
+    const signedIn = await identity.signIn({ accountId: "staff.demo", accessCode: "DUM-DEMO" }, "2026-07-18T02:00:00.000Z");
     assert.equal(signedIn.ok, true);
     if (!signedIn.ok) return;
+    assert.equal(signedIn.session.version, 2);
     assert.equal(signedIn.session.authenticated, true);
+    assert.equal(signedIn.session.identity.role, "staff");
     assert.equal(signedIn.session.identity.staffId, "staff-mock-bravo");
-    assert.ok(signedIn.session.permissions.includes("customer:read_assigned"));
+    assert.deepEqual(signedIn.session.permissions, ["schedule:read", "booking:write"]);
     assert.ok(await identity.restoreSession(signedIn.session, "2026-07-18T03:00:00.000Z"));
+    assert.equal(
+      await identity.restoreSession(
+        { ...signedIn.session, version: 1 } as unknown as typeof signedIn.session,
+        "2026-07-18T03:00:00.000Z",
+      ),
+      null,
+    );
     assert.equal(
       await identity.restoreSession(
         { ...signedIn.session, identity: { ...signedIn.session.identity, staffId: "staff-mock-alpha" } },

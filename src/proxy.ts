@@ -30,14 +30,6 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  if (pathname.startsWith("/staff/integrations") && !session.permissions.includes("integration:read")) {
-    const fallbackUrl = request.nextUrl.clone();
-    fallbackUrl.pathname = "/staff";
-    fallbackUrl.search = "";
-    fallbackUrl.searchParams.set("notice", "integration-denied");
-    return NextResponse.redirect(fallbackUrl);
-  }
-
   return NextResponse.next();
 }
 

@@ -5,24 +5,17 @@ import type {
 } from "../models";
 
 export const STAFF_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
-export const STAFF_SESSION_COOKIE_NAME = "dum_staff_mock_session_v1";
+export const STAFF_SESSION_COOKIE_NAME = "dum_staff_mock_session_v2";
 
-const STAFF_ROLES: StaffRole[] = ["owner", "manager", "barber", "reception", "read_only"];
+const STAFF_ROLES: StaffRole[] = ["owner", "staff"];
 const STAFF_PERMISSIONS: StaffPermission[] = [
   "schedule:read",
   "booking:write",
-  "customer:read",
-  "customer:read_assigned",
-  "settings:preview",
-  "integration:read",
 ];
 
 const ROLE_PERMISSIONS: Record<StaffRole, readonly StaffPermission[]> = {
-  owner: ["schedule:read", "booking:write", "customer:read", "settings:preview", "integration:read"],
-  manager: ["schedule:read", "booking:write", "customer:read", "settings:preview", "integration:read"],
-  barber: ["schedule:read", "booking:write", "customer:read_assigned"],
-  reception: ["schedule:read", "booking:write", "customer:read"],
-  read_only: ["schedule:read"],
+  owner: ["schedule:read", "booking:write"],
+  staff: ["schedule:read", "booking:write"],
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -46,7 +39,7 @@ export function canStaffRole(role: StaffRole, permission: StaffPermission): bool
 }
 
 export function parseStaffIdentitySession(value: unknown): StaffIdentitySession | null {
-  if (!isRecord(value) || value.version !== 1 || value.mode !== "mock" || value.authenticated !== true) {
+  if (!isRecord(value) || value.version !== 2 || value.mode !== "mock" || value.authenticated !== true) {
     return null;
   }
   if (
@@ -65,8 +58,18 @@ export function parseStaffIdentitySession(value: unknown): StaffIdentitySession 
     return null;
   }
 
+  const role = value.identity.role;
+  const permissions = value.permissions as StaffPermission[];
+  const expectedPermissions = ROLE_PERMISSIONS[role];
+  if (
+    permissions.length !== expectedPermissions.length ||
+    expectedPermissions.some((permission) => !permissions.includes(permission))
+  ) {
+    return null;
+  }
+
   return {
-    version: 1,
+    version: 2,
     mode: "mock",
     authenticated: true,
     sessionId: value.sessionId,
@@ -74,10 +77,10 @@ export function parseStaffIdentitySession(value: unknown): StaffIdentitySession 
       id: value.identity.id,
       accountId: value.identity.accountId,
       displayName: value.identity.displayName,
-      role: value.identity.role,
+      role,
       ...(typeof value.identity.staffId === "string" ? { staffId: value.identity.staffId } : {}),
     },
-    permissions: [...value.permissions],
+    permissions: [...permissions],
     issuedAt: value.issuedAt,
     expiresAt: value.expiresAt,
   };

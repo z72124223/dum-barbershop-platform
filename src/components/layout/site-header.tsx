@@ -1,13 +1,9 @@
 import Link from "next/link";
-import { ButtonLink } from "@/components/ui/button";
 
 const links = [
-  ["服務", "/services"],
-  ["設計師", "/barbers"],
-  ["作品", "/works"],
-  ["關於", "/about"],
-  ["聯絡", "/contact"],
-  ["查詢預約", "/booking/manage"],
+  ["首頁", "/"],
+  ["預約", "/booking"],
+  ["員工", "/staff/login"],
 ];
 
 export function SiteHeader() {
@@ -23,7 +19,6 @@ export function SiteHeader() {
         <summary>選單</summary>
         <div>{links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}</div>
       </details>
-      <ButtonLink href="/booking" compact>預約入口</ButtonLink>
     </header>
   );
 }

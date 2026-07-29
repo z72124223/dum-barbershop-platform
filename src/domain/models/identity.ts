@@ -3,11 +3,7 @@ import type { StaffRole } from "./staff";
 
 export type StaffPermission =
   | "schedule:read"
-  | "booking:write"
-  | "customer:read"
-  | "customer:read_assigned"
-  | "settings:preview"
-  | "integration:read";
+  | "booking:write";
 
 export interface StaffIdentity {
   id: EntityId;
@@ -18,7 +14,7 @@ export interface StaffIdentity {
 }
 
 export interface StaffIdentitySession {
-  version: 1;
+  version: 2;
   mode: "mock";
   authenticated: true;
   sessionId: string;

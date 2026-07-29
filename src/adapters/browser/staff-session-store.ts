@@ -6,7 +6,7 @@ import {
 } from "../../domain";
 import type { StaffSessionStore } from "../ports";
 
-export const STAFF_SESSION_STORAGE_KEY = "dum.staff.mock-session.v1";
+export const STAFF_SESSION_STORAGE_KEY = "dum.staff.mock-session.v2";
 
 export class BrowserStaffSessionStore implements StaffSessionStore {
   load(): StaffIdentitySession | null {

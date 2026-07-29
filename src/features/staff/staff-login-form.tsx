@@ -6,11 +6,8 @@ import type { StaffRole } from "../../domain";
 import { useStaffAuth } from "./staff-auth";
 
 const roleLabels: Record<StaffRole, string> = {
-  owner: "店主",
-  manager: "管理者",
-  barber: "設計師",
-  reception: "櫃台",
-  read_only: "唯讀",
+  owner: "老闆",
+  staff: "職員",
 };
 
 const errorMessages = {
@@ -49,13 +46,13 @@ export function StaffLoginForm({ nextPath }: { nextPath: string }) {
   return (
     <section className="staff-login-shell">
       <div className="staff-login-copy">
-        <span className="auth-stamp">MEMBERS ONLY · MOCK</span>
-        <p className="eyebrow">員工後台 · 本機示範</p>
-        <h1>先報上名號，<br />再進工作台。</h1>
-        <p>這道門只保護員工示範後台。客人看網站、選服務與預約，完全不需要登入。</p>
+        <span className="auth-stamp">STAFF · MOCK</span>
+        <p className="eyebrow">員工後台</p>
+        <h1>員工登入</h1>
+        <p>老闆與職員登入後，都可以查看及更新預約時段。</p>
         <div className="staff-login-warning" role="note">
-          <strong>不是正式資安系統</strong>
-          <span>帳號與通行碼都是公開假資料，只用來測試登入、Session 與角色權限。請勿輸入真實密碼。</span>
+          <strong>本機 Mock 登入</strong>
+          <span>請使用頁面提供的示範帳號與通行碼，不要輸入真實密碼。</span>
         </div>
       </div>
 
@@ -87,7 +84,7 @@ export function StaffLoginForm({ nextPath }: { nextPath: string }) {
             <div className="staff-login-heading">
               <p className="eyebrow">DEMO SIGN IN</p>
               <h2>員工登入</h2>
-              <span>選一個虛構身份測試不同權限。</span>
+              <span>選擇老闆或職員身份。</span>
             </div>
             <fieldset className="demo-account-list" disabled={busy || accounts.length === 0}>
               <legend>示範身份</legend>

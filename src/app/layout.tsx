@@ -1,20 +1,42 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
-import { MobileBookingCta } from "@/components/layout/mobile-booking-cta";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
 
-export const metadata: Metadata = {
-  title: { default: "DUM BARBERSHOP", template: "%s — DUM BARBERSHOP" },
-  description: "DUM BARBERSHOP 官方網站、線上預約與多人工作室營運平台——本機示範版。",
-  applicationName: "DUM BARBERSHOP",
-  manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "DUM BARBERSHOP", statusBarStyle: "black-translucent" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
-};
+const description = "DUM BARBERSHOP 客戶預約與員工工作台第一版靜態 MVP。";
 
-export const viewport: Viewport = { themeColor: "#100b0b", colorScheme: "dark" };
+export async function generateMetadata(): Promise<Metadata> {
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const origin = `${protocol}://${host}`;
+  const socialImage = new URL("/og.png", origin).toString();
+
+  return {
+    metadataBase: new URL(origin),
+    title: { default: "DUM BARBERSHOP", template: "%s — DUM BARBERSHOP" },
+    description,
+    applicationName: "DUM BARBERSHOP",
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, title: "DUM BARBERSHOP", statusBarStyle: "black-translucent" },
+    icons: { icon: "/icon.svg", apple: "/icon.svg" },
+    openGraph: {
+      type: "website",
+      title: "DUM BARBERSHOP",
+      description,
+      url: origin,
+      images: [{ url: socialImage, width: 1792, height: 939, alt: "DUM BARBERSHOP 第一版 MVP" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "DUM BARBERSHOP",
+      description,
+      images: [socialImage],
+    },
+  };
+}
+
+export const viewport: Viewport = { themeColor: "#0b0b0b", colorScheme: "dark" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="zh-Hant"><body><SiteHeader />{children}<SiteFooter /><MobileBookingCta /></body></html>;
+  return <html lang="zh-Hant"><body>{children}</body></html>;
 }

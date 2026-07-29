@@ -2,23 +2,11 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { StaffRole } from "../../domain";
 import { useStaffAuth } from "../../features/staff/staff-auth";
 
 const links = [
-  ["今日工作台", "/staff"],
-  ["營運模擬", "/staff/operations"],
-  ["整合狀態", "/staff/integrations"],
-  ["行動捷徑", "/staff/quick-actions"],
+  ["工作台", "/staff"],
 ];
-
-const roleLabels: Record<StaffRole, string> = {
-  owner: "店主",
-  manager: "管理者",
-  barber: "設計師",
-  reception: "櫃台",
-  read_only: "唯讀",
-};
 
 export function StaffSectionNav() {
   const router = useRouter();
@@ -33,9 +21,8 @@ export function StaffSectionNav() {
     <div className="staff-navigation-shell">
       <div className="staff-session-bar">
         <div>
-          <span>目前身份</span>
-          <strong>{session?.identity.displayName ?? "正在讀取"}</strong>
-          {session ? <small>{roleLabels[session.identity.role]}角色 · 本機 Mock Session</small> : null}
+          <span>角色</span>
+          <strong>{session ? (session.identity.role === "owner" ? "老闆" : "職員") : "讀取中"}</strong>
         </div>
         <button type="button" onClick={handleSignOut}>登出</button>
       </div>

@@ -224,7 +224,7 @@ export class MockIdentityProvider implements IdentityProvider {
 
     const issuedAt = new Date(now);
     const session: StaffIdentitySession = {
-      version: 1,
+      version: 2,
       mode: "mock",
       authenticated: true,
       sessionId: `mock-session-${account.id}-${issuedAt.getTime()}`,
@@ -246,7 +246,7 @@ export class MockIdentityProvider implements IdentityProvider {
     session: StaffIdentitySession,
     now: IsoInstant = new Date().toISOString(),
   ): Promise<StaffIdentitySession | null> {
-    if (!isStaffSessionActive(session, now)) return null;
+    if (session.version !== 2 || !isStaffSessionActive(session, now)) return null;
     const account = mockStaffIdentityAccounts.find((item) => item.id === session.identity.id && item.active);
     if (
       !account ||

@@ -1,6 +1,6 @@
 import type { EntityId, LocalTime } from "./common";
 
-export type StaffRole = "owner" | "manager" | "barber" | "reception" | "read_only";
+export type StaffRole = "owner" | "staff";
 
 export interface ScheduleInterval {
   start: LocalTime;

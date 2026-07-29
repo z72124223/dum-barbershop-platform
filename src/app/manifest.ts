@@ -2,13 +2,13 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "DUM BARBERSHOP 平台預覽",
+    name: "DUM BARBERSHOP MVP",
     short_name: "DUM",
-    description: "DUM 官方網站、線上預約與多人工作室營運平台的本機示範版。",
+    description: "客戶預約與員工工作台第一版靜態 MVP。",
     start_url: "/",
     display: "standalone",
-    background_color: "#100b0b",
-    theme_color: "#100b0b",
+    background_color: "#0b0b0b",
+    theme_color: "#0b0b0b",
     lang: "zh-Hant",
     icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
   };

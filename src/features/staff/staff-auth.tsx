@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -17,7 +16,6 @@ import {
 import type {
   StaffDemoAccount,
   StaffIdentitySession,
-  StaffPermission,
 } from "../../domain";
 
 type StaffAuthStatus = "checking" | "authenticated" | "unauthenticated";
@@ -120,11 +118,6 @@ export function useStaffAuth(): StaffAuthContextValue {
   return value;
 }
 
-function requiredPermission(pathname: string): StaffPermission {
-  if (pathname.startsWith("/staff/integrations")) return "integration:read";
-  return "schedule:read";
-}
-
 function AuthLoading({ message }: { message: string }) {
   return (
     <main className="staff-auth-state" aria-live="polite">
@@ -154,23 +147,6 @@ function StaffRouteGuard({ children }: { children: ReactNode }) {
   if (status === "checking") return <AuthLoading message="正在讀取這台裝置上的本機示範 Session。" />;
   if (status === "unauthenticated" || !session) return <AuthLoading message="尚未登入，正在帶你前往員工登入頁。" />;
 
-  const permission = requiredPermission(pathname);
-  if (!session.permissions.includes(permission)) {
-    return (
-      <main className="staff-auth-state">
-        <div className="staff-auth-state-card denied">
-          <span className="auth-stamp">ACCESS DENIED</span>
-          <p className="eyebrow">角色權限保護</p>
-          <h1>這個示範角色不能進入</h1>
-          <p>目前登入的是「{session.identity.displayName}」。整合狀態只開放店主與管理者示範角色。</p>
-          <div className="hero-actions">
-            <Link className="button" href="/staff">回員工工作台</Link>
-            <Link className="button button-secondary" href="/staff/login">切換示範身份</Link>
-          </div>
-        </div>
-      </main>
-    );
-  }
   return children;
 }
 

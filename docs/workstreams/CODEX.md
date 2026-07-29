@@ -1,12 +1,30 @@
 # Codex Work Log — Blueprint Build-Complete
 
-## Active identity — Issue #25
+## Active identity — Issue #27
 
 - Role: Codex
-- Issue: #25
-- Branch: `codex/25-staff-mock-auth`
-- Primary responsibility: Staff Mock identity, local Session, route protection, logout and role-aware access
-- Status: `PR_OPEN`
+- Issue: #27
+- Branch: `codex/27-first-mvp`
+- Primary responsibility: first MVP customer booking flow, two-role Staff login and unified schedule/notes workspace
+- Status: `VALIDATED`
+
+## ISSUE_27_FIRST_MVP checkpoint
+
+- Status: `VALIDATED`
+- Updated at: `2026-07-29 +08:00`
+- Branch: `codex/27-first-mvp`
+- Issue: https://github.com/z72124223/dum-barbershop-platform/issues/27
+- Scope implemented: four focused routes only — `/`, `/booking`, `/staff/login` and `/staff`; Owner and Staff share one schedule/notes workspace.
+- Customer flow: choose date, time and staff; enter name, phone and optional note; confirm into the shared device-local schedule.
+- Staff flow: browse the combined agenda, filter by date/staff, and manually add either a booking or a free-text note.
+- Persistence boundary: booking entries, notes and Mock Session remain on this browser/device only; no API, production identity, external provider or real customer database is present.
+- Explicit exclusions: photos, portfolio/works, LINE, finance/payment, membership, AI and API integrations are not exposed in this MVP.
+- Checks: `pnpm typecheck` PASS; `pnpm lint` PASS; `pnpm test` PASS (35 / 35); `pnpm build` PASS on Next.js 16.2.10.
+- HTTP smoke: `/`, `/booking` and `/staff/login` return 200; protected `/staff` redirects to login; removed `/works` returns 404; `/og.png` returns `image/png`.
+- Visual browser QA: not separately claimed in this checkpoint; the production preview was opened for owner inspection after automated checks.
+- Owner decision needed: none for this local Mock MVP; real authentication, shared persistence and production hosting remain future work.
+- Blockers: none for local MVP review.
+- Exact next action: review the Draft PR and continue only through a new or updated Issue when the next MVP requirement is provided.
 
 ## ISSUE_25_STAFF_MOCK_AUTH checkpoint
 
