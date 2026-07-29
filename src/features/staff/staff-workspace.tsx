@@ -40,7 +40,13 @@ function maskPhone(value: string): string {
 }
 
 export function StaffWorkspace() {
-  const { entries, ready, failure, addEntry } = useMvpSchedule();
+  const {
+    entries,
+    ready,
+    failure,
+    addEntry,
+    updateEntry,
+  } = useMvpSchedule();
   const now = useTaipeiClock();
   const currentTaipeiDate = taipeiToday(now);
   const [initialSlot] = useState(() => nextMvpScheduleSlot());
@@ -77,6 +83,27 @@ export function StaffWorkspace() {
     setPhone("");
     setTitle("");
     setNote("");
+  }
+
+  function saveEntryNote(
+    entry: MvpScheduleEntry,
+    nextNote: string,
+  ): string | null {
+    setMessage("");
+    setError("");
+
+    const result = updateEntry({
+      ...entry,
+      note: nextNote,
+    });
+    if (!result.ok) {
+      return result.reason === "invalid_entry"
+        ? "註記內容格式無效，請檢查後再試。"
+        : "註記無法保存，請確認瀏覽器允許本機儲存。";
+    }
+
+    setMessage("註記已更新。");
+    return null;
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -229,7 +256,11 @@ export function StaffWorkspace() {
             ) : null}
             <div className="agenda-list">
               {visibleEntries.map((entry) => (
-                <ScheduleEntryCard key={entry.id} entry={entry} />
+                <ScheduleEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onSaveNote={saveEntryNote}
+                />
               ))}
             </div>
           </div>

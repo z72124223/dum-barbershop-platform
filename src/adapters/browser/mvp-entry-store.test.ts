@@ -138,6 +138,66 @@ describe("BrowserMvpEntryStore", () => {
     assert.deepEqual(store.remove(booking.id), { ok: false, reason: "not_found" });
   });
 
+  it("updates standalone note content while preserving the remaining fields", () => {
+    const storage = new MemoryStorage();
+    const target = new EventTarget();
+    const details: MvpEntryStoreChangedDetail[] = [];
+    target.addEventListener(MVP_SCHEDULE_ENTRIES_CHANGED_EVENT, (event) => {
+      details.push((event as CustomEvent<MvpEntryStoreChangedDetail>).detail);
+    });
+    const store = new BrowserMvpEntryStore({ storage, eventTarget: target });
+    assert.equal(store.add(note).ok, true);
+    details.length = 0;
+
+    const updated = store.update({
+      ...note,
+      note: " 更新後現場提醒 ",
+    });
+
+    assert.deepEqual(updated, {
+      ok: true,
+      value: {
+        ...note,
+        note: "更新後現場提醒",
+      },
+    });
+    assert.deepEqual(store.list(), {
+      ok: true,
+      value: [{
+        ...note,
+        note: "更新後現場提醒",
+      }],
+    });
+    assert.deepEqual(details, [{
+      key: MVP_SCHEDULE_ENTRIES_STORAGE_KEY,
+      operation: "update",
+      entryId: note.id,
+    }]);
+  });
+
+  it("allows clearing booking notes but rejects blank standalone notes", () => {
+    const storage = new MemoryStorage();
+    const store = new BrowserMvpEntryStore({ storage });
+    assert.equal(store.add(booking).ok, true);
+    assert.equal(store.add(note).ok, true);
+
+    const clearedBooking = store.update({ ...booking, note: "   " });
+    assert.equal(clearedBooking.ok, true);
+    if (clearedBooking.ok) assert.equal(clearedBooking.value.note, "");
+
+    assert.deepEqual(
+      store.update({ ...note, note: "   " }),
+      { ok: false, reason: "invalid_entry" },
+    );
+    const listed = store.list();
+    assert.equal(listed.ok, true);
+    if (!listed.ok) return;
+    assert.equal(
+      listed.value.find((entry) => entry.id === note.id)?.note,
+      note.note,
+    );
+  });
+
   it("reports write failures and does not emit an event", () => {
     const storage = new MemoryStorage();
     storage.failSet = true;

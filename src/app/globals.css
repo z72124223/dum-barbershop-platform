@@ -818,7 +818,7 @@ textarea:focus {
   min-width: 0;
 }
 
-.entry-content > div {
+.entry-heading {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -831,10 +831,68 @@ textarea:focus {
   font-size: 0.78rem;
 }
 
-.entry-content p {
-  margin: 10px 0 0;
+.entry-note-display {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.entry-note-display p {
+  flex: 1;
+  margin: 0;
   color: #c9c3ba;
   overflow-wrap: anywhere;
+}
+
+.entry-edit-button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 4px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: #ddd6cc;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.entry-edit-button:hover {
+  border-color: #9f4943;
+  color: var(--text);
+}
+
+.entry-note-editor {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0 0;
+  padding: 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #0e0e0e;
+}
+
+.entry-note-editor label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.entry-note-editor textarea {
+  min-height: 96px;
+}
+
+.entry-note-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.entry-note-error {
+  margin: 0;
+  color: #ffc0bb;
+  font-size: 0.78rem;
 }
 
 .timezone-note {
@@ -1201,10 +1259,29 @@ textarea:focus {
     padding-left: 0;
   }
 
-  .entry-content > div {
+  .entry-heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 3px;
+  }
+
+  .entry-note-display {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .entry-edit-button {
+    align-self: flex-start;
+  }
+
+  .entry-note-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .entry-note-actions .button {
+    width: 100%;
   }
 
   .staff-login-page,
