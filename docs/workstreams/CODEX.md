@@ -6,7 +6,7 @@
 - Issue: #29
 - Branch: `codex/29-mvp2-history-taipei`
 - Primary responsibility: MVP2 past schedule/note lookup and automatic Asia/Taipei alignment
-- Status: `IN_PROGRESS`
+- Status: `PR_OPEN`
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
 
@@ -15,6 +15,8 @@
 - Branch: `codex/29-mvp2-history-taipei`
 - Base: `codex/27-first-mvp` / Draft PR #28
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/29
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/30
+- Last validated implementation commit: `5b241ea2f696f6b71a44394a91ff62425ca5662d`
 - Scope implemented: `/staff` adds a history tab with inclusive start/end dates plus Staff and booking/note filters; each result shows its Taipei date/time and the original booking note or independent manual note.
 - Time boundary: all Taipei date, calendar shift, formatting and elapsed-slot logic now comes from one pure `Asia/Taipei` module; the browser clock refreshes every minute and on focus/visibility return.
 - Customer safety: elapsed Taipei slots are disabled and confirmation rechecks the slot before saving.
@@ -25,7 +27,7 @@
 - Visual browser QA: not separately claimed; the rebuilt local preview is running at `http://localhost:3100`.
 - Owner decision needed: none for this device-local Mock MVP2.
 - Blockers: none for local review; production identity, shared persistence and hosting remain outside this Issue.
-- Exact next action: commit, push and open a stacked Draft PR against `codex/27-first-mvp`.
+- Exact next action: review Draft PR #30; after PR #28 merges, retarget #30 from `codex/27-first-mvp` to `main` and verify the resulting diff/checks.
 
 ## ISSUE_27_FIRST_MVP checkpoint
 
