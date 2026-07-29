@@ -1,6 +1,10 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import {
+  useMemo,
+  useState,
+  type FormEvent,
+} from "react";
 import type {
   MvpBookingScheduleEntry,
   MvpNoteScheduleEntry,
@@ -10,12 +14,15 @@ import {
   MVP_STAFF_OPTIONS,
   MVP_TIME_OPTIONS,
   formatMvpDate,
-  staffLabel,
+  nextMvpScheduleSlot,
   taipeiToday,
 } from "@/features/schedule/mvp-schedule-config";
 import { useMvpSchedule } from "@/features/schedule/use-mvp-schedule";
+import { useTaipeiClock } from "@/features/schedule/use-taipei-clock";
+import { ScheduleEntryCard } from "@/features/staff/schedule-entry-card";
+import { ScheduleHistoryPanel } from "@/features/staff/schedule-history-panel";
 
-type WorkspaceTab = "agenda" | "add";
+type WorkspaceTab = "agenda" | "history" | "add";
 type EntryKind = MvpScheduleEntry["kind"];
 type StaffFilter = "all" | string;
 
@@ -34,12 +41,15 @@ function maskPhone(value: string): string {
 
 export function StaffWorkspace() {
   const { entries, ready, failure, addEntry } = useMvpSchedule();
+  const now = useTaipeiClock();
+  const currentTaipeiDate = taipeiToday(now);
+  const [initialSlot] = useState(() => nextMvpScheduleSlot());
   const [tab, setTab] = useState<WorkspaceTab>("agenda");
-  const [selectedDate, setSelectedDate] = useState(taipeiToday);
+  const [selectedDate, setSelectedDate] = useState(currentTaipeiDate);
   const [staffFilter, setStaffFilter] = useState<StaffFilter>("all");
   const [kind, setKind] = useState<EntryKind>("booking");
-  const [formDate, setFormDate] = useState(taipeiToday);
-  const [startTime, setStartTime] = useState<string>(MVP_TIME_OPTIONS[0]);
+  const [formDate, setFormDate] = useState(initialSlot.date);
+  const [startTime, setStartTime] = useState<string>(initialSlot.time);
   const [staffId, setStaffId] = useState<string>(MVP_STAFF_OPTIONS[0].id);
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
@@ -130,8 +140,8 @@ export function StaffWorkspace() {
   return (
     <section className="staff-workspace">
       <div className="local-notice" role="note">
-        <strong>本機靜態工作台</strong>
-        <span>客戶預約與手動註記共用同一份本機資料，只在目前瀏覽器有效。</span>
+        <strong>台灣台北時間 · 本機工作台</strong>
+        <span>時段自動依 Asia/Taipei 對齊；預約與註記仍只在目前瀏覽器有效。</span>
       </div>
 
       <div className="workspace-tabs" role="tablist" aria-label="員工工作台分頁">
@@ -142,6 +152,14 @@ export function StaffWorkspace() {
           onClick={() => selectTab("agenda")}
         >
           時段與註記
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "history"}
+          onClick={() => selectTab("history")}
+        >
+          歷史查詢
         </button>
         <button
           type="button"
@@ -196,8 +214,8 @@ export function StaffWorkspace() {
           <div className="agenda-panel">
             <header>
               <div>
-                <p className="eyebrow">{selectedDate}</p>
-                <h2>{formatMvpDate(selectedDate)}</h2>
+                <p className="eyebrow">{selectedDate || "未選日期"}</p>
+                <h2>{selectedDate ? formatMvpDate(selectedDate) : "請選擇日期"}</h2>
               </div>
               <span>{visibleEntries.length} 筆</span>
             </header>
@@ -211,11 +229,15 @@ export function StaffWorkspace() {
             ) : null}
             <div className="agenda-list">
               {visibleEntries.map((entry) => (
-                <AgendaEntry key={entry.id} entry={entry} />
+                <ScheduleEntryCard key={entry.id} entry={entry} />
               ))}
             </div>
           </div>
         </div>
+      ) : null}
+
+      {tab === "history" ? (
+        <ScheduleHistoryPanel entries={entries} now={now} ready={ready} />
       ) : null}
 
       {tab === "add" ? (
@@ -328,24 +350,5 @@ export function StaffWorkspace() {
         </form>
       ) : null}
     </section>
-  );
-}
-
-function AgendaEntry({ entry }: { entry: MvpScheduleEntry }) {
-  return (
-    <article className={`agenda-entry ${entry.kind}`}>
-      <time>{entry.startTime}</time>
-      <div className="entry-type">
-        <span>{entry.kind === "booking" ? "預約" : "註記"}</span>
-      </div>
-      <div className="entry-content">
-        <div>
-          <strong>{entry.kind === "booking" ? entry.customerName : entry.title}</strong>
-          <small>{staffLabel(entry.staffId)}</small>
-        </div>
-        {entry.kind === "booking" ? <span>{entry.phone}</span> : null}
-        <p>{entry.note || "無備註"}</p>
-      </div>
-    </article>
   );
 }

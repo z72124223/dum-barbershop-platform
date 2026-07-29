@@ -1,12 +1,31 @@
 # Codex Work Log — Blueprint Build-Complete
 
-## Active identity — Issue #27
+## Active identity — Issue #29
 
 - Role: Codex
-- Issue: #27
-- Branch: `codex/27-first-mvp`
-- Primary responsibility: first MVP customer booking flow, two-role Staff login and unified schedule/notes workspace
-- Status: `PR_OPEN`
+- Issue: #29
+- Branch: `codex/29-mvp2-history-taipei`
+- Primary responsibility: MVP2 past schedule/note lookup and automatic Asia/Taipei alignment
+- Status: `IN_PROGRESS`
+
+## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
+
+- Status: `VALIDATED`
+- Updated at: `2026-07-29 +08:00`
+- Branch: `codex/29-mvp2-history-taipei`
+- Base: `codex/27-first-mvp` / Draft PR #28
+- Issue: https://github.com/z72124223/dum-barbershop-platform/issues/29
+- Scope implemented: `/staff` adds a history tab with inclusive start/end dates plus Staff and booking/note filters; each result shows its Taipei date/time and the original booking note or independent manual note.
+- Time boundary: all Taipei date, calendar shift, formatting and elapsed-slot logic now comes from one pure `Asia/Taipei` module; the browser clock refreshes every minute and on focus/visibility return.
+- Customer safety: elapsed Taipei slots are disabled and confirmation rechecks the slot before saving.
+- Persistence boundary: the existing `dum_mvp_schedule_entries_v1` browser data shape and key are unchanged; no API, database, cross-device sync or external provider was added.
+- Explicit exclusions retained: photos, portfolio/works, LINE, finance/payment, membership and AI remain out of scope.
+- Checks: `pnpm typecheck` PASS; `pnpm lint` PASS; `pnpm test` PASS (48 / 48); `pnpm build` PASS on Next.js 16.2.10.
+- HTTP smoke: `/`, `/booking` and `/staff/login` return 200; anonymous `/staff` returns 307 to `/staff/login?next=%2Fstaff`.
+- Visual browser QA: not separately claimed; the rebuilt local preview is running at `http://localhost:3100`.
+- Owner decision needed: none for this device-local Mock MVP2.
+- Blockers: none for local review; production identity, shared persistence and hosting remain outside this Issue.
+- Exact next action: commit, push and open a stacked Draft PR against `codex/27-first-mvp`.
 
 ## ISSUE_27_FIRST_MVP checkpoint
 

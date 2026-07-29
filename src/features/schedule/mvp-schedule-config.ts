@@ -1,3 +1,11 @@
+import {
+  addTaipeiCalendarDays,
+  formatTaipeiDate,
+  isTaipeiSlotPast,
+  taipeiToday,
+  upcomingTaipeiDates,
+} from "@/domain";
+
 export const MVP_STAFF_OPTIONS = [
   {
     id: "staff-mock-alpha",
@@ -23,36 +31,26 @@ export const MVP_TIME_OPTIONS = [
   "18:00",
 ] as const;
 
-export function taipeiToday(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Taipei",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
-
-export function upcomingTaipeiDates(count = 7, from = taipeiToday()): string[] {
-  const start = new Date(`${from}T12:00:00+08:00`);
-  return Array.from({ length: count }, (_, index) => {
-    const date = new Date(start);
-    date.setUTCDate(start.getUTCDate() + index);
-    return new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Taipei",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(date);
-  });
-}
+export { isTaipeiSlotPast, taipeiToday, upcomingTaipeiDates };
 
 export function formatMvpDate(date: string): string {
-  return new Intl.DateTimeFormat("zh-TW", {
-    timeZone: "Asia/Taipei",
-    month: "numeric",
-    day: "numeric",
-    weekday: "short",
-  }).format(new Date(`${date}T12:00:00+08:00`));
+  return formatTaipeiDate(date);
+}
+
+export function nextMvpScheduleSlot(now = new Date()): {
+  date: string;
+  time: string;
+} {
+  const today = taipeiToday(now);
+  const availableToday = MVP_TIME_OPTIONS.find(
+    (time) => !isTaipeiSlotPast(today, time, now),
+  );
+
+  if (availableToday) return { date: today, time: availableToday };
+  return {
+    date: addTaipeiCalendarDays(today, 1),
+    time: MVP_TIME_OPTIONS[0],
+  };
 }
 
 export function staffLabel(staffId: string): string {
