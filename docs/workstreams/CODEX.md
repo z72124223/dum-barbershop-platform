@@ -5,7 +5,7 @@
 - Role: Codex
 - Issue: #29
 - Branch: `codex/29-mvp2-history-taipei`
-- Primary responsibility: MVP2 past schedule/note lookup and automatic Asia/Taipei alignment
+- Primary responsibility: MVP2 past schedule/note lookup, agenda note editing and automatic Asia/Taipei alignment
 - Status: `PR_OPEN`
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
@@ -16,15 +16,16 @@
 - Base: `codex/27-first-mvp` / Draft PR #28
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/29
 - Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/30
-- Last validated implementation commit: `5b241ea2f696f6b71a44394a91ff62425ca5662d`
-- Scope implemented: `/staff` adds a history tab with inclusive start/end dates plus Staff and booking/note filters; each result shows its Taipei date/time and the original booking note or independent manual note.
+- Last validated implementation commit: `b663e069f538859562e6abfed8a29c437b52b7a2`
+- Scope implemented: `/staff` adds a history tab with inclusive start/end dates plus Staff and booking/note filters; each result shows its Taipei date/time and current saved booking note or independent manual note. The agenda now provides explicit edit, save and cancel controls for note content while leaving all other entry fields unchanged; the history tab remains read-only.
+- Edit safety: independent note content cannot be blank, booking notes may be cleared, cancel performs no write, same-origin cross-tab update conflicts are detected, and keyboard focus returns to the edit control after closing the editor.
 - Time boundary: all Taipei date, calendar shift, formatting and elapsed-slot logic now comes from one pure `Asia/Taipei` module; the browser clock refreshes every minute and on focus/visibility return.
 - Customer safety: elapsed Taipei slots are disabled and confirmation rechecks the slot before saving.
 - Persistence boundary: the existing `dum_mvp_schedule_entries_v1` browser data shape and key are unchanged; no API, database, cross-device sync or external provider was added.
 - Explicit exclusions retained: photos, portfolio/works, LINE, finance/payment, membership and AI remain out of scope.
-- Checks: `pnpm typecheck` PASS; `pnpm lint` PASS; `pnpm test` PASS (48 / 48); `pnpm build` PASS on Next.js 16.2.10.
+- Checks: `pnpm typecheck` PASS; `pnpm lint` PASS; `pnpm test` PASS (50 / 50); `pnpm build` PASS on Next.js 16.2.10.
 - HTTP smoke: `/`, `/booking` and `/staff/login` return 200; anonymous `/staff` returns 307 to `/staff/login?next=%2Fstaff`.
-- Visual browser QA: not separately claimed; the rebuilt local preview is running at `http://localhost:3100`.
+- Visual browser QA: not separately claimed; the rebuilt loopback-only local preview is running at `http://127.0.0.1:3100`.
 - Owner decision needed: none for this device-local Mock MVP2.
 - Blockers: none for local review; production identity, shared persistence and hosting remain outside this Issue.
 - Exact next action: review Draft PR #30; after PR #28 merges, retarget #30 from `codex/27-first-mvp` to `main` and verify the resulting diff/checks.
