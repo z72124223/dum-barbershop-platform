@@ -45,13 +45,13 @@ Session 最長保留 8 小時，並由本機 Mock Cookie 保護 `/staff` 路由�
 
 MVP1 PR #28 與 MVP2 PR #30 已於 2026-08-01 合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前只進行 Issue #32 的文件與決策基線，網站仍是本機 Mock，未公開也不可輸入真實資料。
 
-Owner 已核准八項最小架構、時段、登入、個資保存與備份提案；正式網域仍待提供，因此決策尚未啟用。完整紀錄位於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
+Owner 已核准八項最小架構、時段、登入、個資保存與備份提案，並已註冊正式網域 `dumbarbershop.com`；決策基線可供後續 MVP3 切片實作，但網站仍須等待 #37 GO 才能公開。完整紀錄位於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
 
 ## 本機執行
 
 需要 Node.js `>=20.9.0` 與 pnpm `11.7.0`。
 
-這是本機開發最低需求；D-017 提案的 Windows Production runtime 目標為固定的 Node.js 24 LTS，待 Issue #32 核准。
+這是本機開發最低需求；D-017 已接受的 Windows Production runtime 目標為固定的 Node.js 24 LTS。
 
 ```bash
 corepack enable

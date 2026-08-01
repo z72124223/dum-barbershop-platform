@@ -109,18 +109,18 @@
 
 ### D-017 — MVP3 最小正式上線基線
 
-- 狀態：Proposed / eight values approved / Production domain required / not activated
+- 狀態：Accepted / implementation authorized / not publicly activated
 - Git 紀錄：Epic #31、Issue #32
-- Owner 指令：2026-08-01 先核准開始執行切片，隨後在 Codex 對完整核准範本回覆「同意」；Issue #32 已記錄八項值、`@z72124223` 責任、Owner 管理個資窗口與 A／B 備份安排均獲核准，正式網域仍待提供。
+- Owner 指令：2026-08-01 先核准開始執行切片，隨後在 Codex 對完整核准範本回覆「同意」；Issue #32 已記錄八項值、`@z72124223` 責任、Owner 管理個資窗口與 A／B 備份安排均獲核准，並於同日記錄已註冊正式網域 `dumbarbershop.com` 與 public origin `https://dumbarbershop.com`。
 - 主機：此 Windows 電腦作為第一版單機 origin；接受單機故障期間中斷，正式啟用仍需 #37 GO。
-- 公開入口：Cloudflare Tunnel → loopback origin；不做 router port-forward，不直接公開 Next.js 或資料庫 port。
+- 公開入口：`https://dumbarbershop.com` → Cloudflare Tunnel → loopback origin；不做 router port-forward，不直接公開 Next.js 或資料庫 port。
 - 資料庫：MVP3 採本機 NTFS SQLite、WAL、`better-sqlite3` 與單一 App process；Repository port 保留 PostgreSQL 遷移能力。
 - 營運：可預約標籤為老闆／職員；每日 10:00–18:00 開始時段、60 分鐘固定 slot、未來 7 個台北日；成功寫入即成立。
 - 個資：只收姓名、電話、選定時段／職員與選填註記；兩個 Staff 角色在受保護工作台具有相同可見權；可識別資料保留 12 個月，之後匿名化，備份殘留上限 28 日。
 - 登入：Better Auth SQLite + Username plugin，只有兩個預先建立帳號，關閉註冊與帳號管理 UI；Session 絕對期限 8 小時並支援立即撤銷。
 - 營運控制：Staging／Production 完全分離；每日備份至當週連接的 Owner 加密卸除式磁碟、A／B 每週輪替且一份離機，所有物件硬上限 28 日；每月還原演練、RPO 24h／RTO 4h（只適用健康 origin 或已準備的替代主機）。
 - 詳細合約：`docs/PRODUCTION-BASELINE.md`。
-- 核准門檻：八項選擇與維護／告警／回滾責任人已記錄；Owner 仍須在 Issue #32 記錄實際網域。網域記錄前不得完成 #32 或開始 #33。
+- 核准門檻：八項選擇、維護／告警／回滾責任人與實際 Production domain 均已記錄；#33 可在 #32 的基線 PR 合併後開始。公開流量與真實資料仍須等待 #37 GO。
 - 安全界線：密碼、Token、備份路徑中的秘密與帳號憑證不進 Git。
 
 ---
@@ -129,7 +129,7 @@
 
 ### R-001 — 第三方預約 App / 平台
 
-MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner 已核准此選擇，待正式網域 gate 完成後，第三方預約平台只保留為未來替換候選，不阻塞 #33。未來重新評估時需比較：
+MVP3 選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner 已核准且正式網域 gate 已完成，第三方預約平台只保留為未來替換候選，不阻塞 #33。未來重新評估時需比較：
 
 - 多設計師排班
 - Google Calendar 同步
@@ -146,7 +146,7 @@ MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner �
 
 ### R-003 — 正式資料庫與後端平台
 
-Owner 已核准 D-017 提案的單機 SQLite 選擇；D-017 仍待正式網域才能 Accepted。PostgreSQL 保留為第二個 App node、持續 SQLite 寫入壅塞或高可用需求出現時的遷移目標，不再阻塞網域 gate 完成後的 #33。
+Owner 已核准 D-017 的單機 SQLite 選擇，D-017 已在正式網域記錄後 Accepted。PostgreSQL 保留為第二個 App node、持續 SQLite 寫入壅塞或高可用需求出現時的遷移目標，不阻塞 #33。
 
 ### R-004 — 通知供應商
 
@@ -168,7 +168,7 @@ Owner 已核准 D-017 提案的單機 SQLite 選擇；D-017 仍待正式網域�
 
 ## Needs Owner Decision
 
-下列項目只適用於 D-017 以外的未來功能，或 D-017 尚待提供的正式網域／安全輸入值。
+下列項目只適用於 D-017 以外的未來功能，或後續部署時才可安全提供的秘密值。
 
 - 正式服務名稱、價格與服務時間
 - 設計師名單、介紹、照片與服務能力
@@ -179,7 +179,7 @@ Owner 已核准 D-017 提案的單機 SQLite 選擇；D-017 仍待正式網域�
 - 會員制度、儲值、次數、點數與到期規則
 - LINE 登入與官方 LINE 預約整合
 - 實際網域字串、正式字體、正式色碼與品牌文案
-- #36 的安全輸入值：實際 backup path、告警地址與部署帳號；備份媒體型態與輪替規則已在 D-017 提案選定
+- #36 的安全輸入值：實際 backup path、告警地址與部署帳號；備份媒體型態與輪替規則已在 D-017 選定
 
 ---
 

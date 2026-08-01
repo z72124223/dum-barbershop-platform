@@ -144,7 +144,7 @@ MVP3-0 的正式決策合約位於 `docs/PRODUCTION-BASELINE.md`。每片一個 
 
 ## Current milestone
 
-`MVP3-0 production decision baseline — IN PROGRESS / NOT ACTIVATED`
+`MVP3-0 production decision baseline — ACCEPTED / PR #38 MERGE PENDING / NOT PUBLICLY ACTIVATED`
 
 Current execution sources:
 

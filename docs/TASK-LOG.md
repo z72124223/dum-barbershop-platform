@@ -15,14 +15,14 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
-| Codex — Implementation | #32 | `agent/32-production-decision-baseline` | IN_PROGRESS | `MVP3_DECISION_BASELINE` | `docs/workstreams/CODEX.md` | Production decisions, data governance and ADR only; no runtime change |
+| Codex — Implementation | #32 | `agent/32-production-decision-baseline` | READY_TO_MERGE | `MVP3_DECISION_BASELINE` | `docs/workstreams/CODEX.md` | Production decisions, data governance and ADR only; no runtime change |
 
 Current MVP3 gates:
 
 - `MVP1_MERGED` — PR #28 / merge `7e180ed3b215a89be14f7c591e2cc08c394b296e`
 - `MVP2_MERGED` — PR #30 / merge `f7bc974df32dc947969b6184a0e4454a143e6722`
 - `FINAL_MAIN_VALIDATED` — typecheck, lint, 50/50 tests and production build PASS
-- `MVP3_DECISION_BASELINE` — in progress under Issue #32
+- `MVP3_DECISION_BASELINE` — Owner inputs complete; PR #38 validation and merge pending
 - #33–#37 — pending in Epic order
 
 Prior completed Blueprint gates:

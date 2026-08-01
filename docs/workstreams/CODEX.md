@@ -6,11 +6,11 @@
 - Issue: #32
 - Branch: `agent/32-production-decision-baseline`
 - Primary responsibility: freeze the minimum Production architecture, business schedule, identity, data-retention and operations contract without changing runtime
-- Status: `PR_OPEN`
+- Status: `READY_TO_MERGE`
 
 ## MVP3_DECISION_BASELINE checkpoint
 
-- Status: `PR_OPEN`
+- Status: `READY_TO_MERGE`
 - Updated at: `2026-08-01 +08:00`
 - Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/32
@@ -20,12 +20,12 @@
 - Final `main` validation: Node 24.14.0 / pnpm 11.9.0; typecheck PASS; lint PASS; tests PASS (50/50); production build PASS.
 - Decision scope: Windows single-origin risk, Cloudflare Tunnel ingress, SQLite WAL, fixed staff/time contract, auto-confirm booking, customer data minimization and retention, Better Auth sessions, staging/production separation, backup/restore, alert and rollback ownership.
 - Runtime boundary: documentation only; no port, firewall, DNS, database, service, secret or real customer data change.
-- Decision proposal: proposed D-017 and `docs/PRODUCTION-BASELINE.md`; Owner approved the exact eight values in Codex on 2026-08-01, recorded in Issue #32 comment `5150975055`.
+- Decision baseline: accepted D-017 and `docs/PRODUCTION-BASELINE.md`; Owner approved the exact eight values in Codex on 2026-08-01, recorded in Issue #32 comment `5150975055`.
 - Approved responsibility: `@z72124223` is the accountable maintenance／alert／rollback Owner, manages the customer-data contact channel and approved encrypted A／B backup rotation.
-- Required Owner input: Issue #32 must still name the actual Production domain; credentials and secret paths remain out of Git.
-- Blocker: #32 cannot complete and #33 cannot start before the Production domain is recorded in GitHub.
+- Production identity: `dumbarbershop.com` / `https://dumbarbershop.com`, registration confirmed and recorded in Issue #32 comment `5151098342`.
+- Blocker: none for #32 validation and merge; public traffic and real customer data remain blocked until #37 GO.
 - Proposal commit: `c2202d7acbd413e6b6ec4c9cc98523cd6a79681f`; documentation links, diff check and secret／PII pattern scans PASS.
-- Exact next action: request and record the actual Production domain／hostname. Keep PR #38 Draft, do not close #32 and do not start #33 before that remaining gate.
+- Exact next action: validate and merge PR #38, close Issue #32, then start #33 from updated `main` on an independent branch.
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
 
