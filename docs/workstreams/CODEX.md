@@ -1,21 +1,40 @@
-# Codex Work Log — Blueprint Build-Complete
+# Codex Work Log — MVP3 Minimum Production
 
-## Active identity — Issue #29
+## Active identity — Issue #32
 
 - Role: Codex
-- Issue: #29
-- Branch: `codex/29-mvp2-history-taipei`
-- Primary responsibility: MVP2 past schedule/note lookup, agenda note editing and automatic Asia/Taipei alignment
-- Status: `PR_OPEN`
+- Issue: #32
+- Branch: `agent/32-production-decision-baseline`
+- Primary responsibility: freeze the minimum Production architecture, business schedule, identity, data-retention and operations contract without changing runtime
+- Status: `READY_TO_MERGE`
+
+## MVP3_DECISION_BASELINE checkpoint
+
+- Status: `READY_TO_MERGE`
+- Updated at: `2026-08-01 +08:00`
+- Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
+- Issue: https://github.com/z72124223/dum-barbershop-platform/issues/32
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/38
+- Branch: `agent/32-production-decision-baseline`
+- Integration gate completed: PR #28 merged at `7e180ed3b215a89be14f7c591e2cc08c394b296e`; PR #30 was retargeted to `main`, revalidated and merged at `f7bc974df32dc947969b6184a0e4454a143e6722`.
+- Final `main` validation: Node 24.14.0 / pnpm 11.9.0; typecheck PASS; lint PASS; tests PASS (50/50); production build PASS.
+- Decision scope: Windows single-origin risk, Cloudflare Tunnel ingress, SQLite WAL, fixed staff/time contract, auto-confirm booking, customer data minimization and retention, Better Auth sessions, staging/production separation, backup/restore, alert and rollback ownership.
+- Runtime boundary: documentation only; no port, firewall, DNS, database, service, secret or real customer data change.
+- Decision baseline: accepted D-017 and `docs/PRODUCTION-BASELINE.md`; Owner approved the exact eight values in Codex on 2026-08-01, recorded in Issue #32 comment `5150975055`.
+- Approved responsibility: `@z72124223` is the accountable maintenance／alert／rollback Owner, manages the customer-data contact channel and approved encrypted A／B backup rotation.
+- Production identity: `dumbarbershop.com` / `https://dumbarbershop.com`, registration confirmed and recorded in Issue #32 comment `5151098342`.
+- Blocker: none for #32 validation and merge; public traffic and real customer data remain blocked until #37 GO.
+- Proposal commit: `c2202d7acbd413e6b6ec4c9cc98523cd6a79681f`; documentation links, diff check and secret／PII pattern scans PASS.
+- Exact next action: validate and merge PR #38, close Issue #32, then start #33 from updated `main` on an independent branch.
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
 
-- Status: `VALIDATED`
+- Status: `MERGED`
 - Updated at: `2026-07-29 +08:00`
 - Branch: `codex/29-mvp2-history-taipei`
-- Base: `codex/27-first-mvp` / Draft PR #28
+- Base: `main` after PR #28 merged
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/29
-- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/30
+- Merged PR: https://github.com/z72124223/dum-barbershop-platform/pull/30
 - Last validated implementation commit: `b663e069f538859562e6abfed8a29c437b52b7a2`
 - Scope implemented: `/staff` adds a history tab with inclusive start/end dates plus Staff and booking/note filters; each result shows its Taipei date/time and current saved booking note or independent manual note. The agenda now provides explicit edit, save and cancel controls for note content while leaving all other entry fields unchanged; the history tab remains read-only.
 - Edit safety: independent note content cannot be blank, booking notes may be cleared, cancel performs no write, same-origin cross-tab update conflicts are detected, and keyboard focus returns to the edit control after closing the editor.
@@ -28,7 +47,8 @@
 - Visual browser QA: not separately claimed; the rebuilt loopback-only local preview is running at `http://127.0.0.1:3100`.
 - Owner decision needed: none for this device-local Mock MVP2.
 - Blockers: none for local review; production identity, shared persistence and hosting remain outside this Issue.
-- Exact next action: review Draft PR #30; after PR #28 merges, retarget #30 from `codex/27-first-mvp` to `main` and verify the resulting diff/checks.
+- Merge: `f7bc974df32dc947969b6184a0e4454a143e6722` after retarget, 50/50 tests and production build validation.
+- Exact next action: none for Issue #29; continue under Epic #31 / Issue #32.
 
 ## ISSUE_27_FIRST_MVP checkpoint
 
@@ -36,7 +56,7 @@
 - Updated at: `2026-07-29 +08:00`
 - Branch: `codex/27-first-mvp`
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/27
-- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/28
+- Merged PR: https://github.com/z72124223/dum-barbershop-platform/pull/28
 - Last validated implementation commit: `6a6c393473396a3488ca7b68c7948cc0d3944cfa`
 - Scope implemented: four focused routes only — `/`, `/booking`, `/staff/login` and `/staff`; Owner and Staff share one schedule/notes workspace.
 - Customer flow: choose date, time and staff; enter name, phone and optional note; confirm into the shared device-local schedule.
