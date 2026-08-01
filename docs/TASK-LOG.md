@@ -1,9 +1,9 @@
 # DUM BARBERSHOP Platform — Task Log
 
-最後更新：2026-07-14（Asia/Taipei）
-目前 Milestone：Blueprint local preview — Build-Complete validation
-父任務：Issue #2
-目前實作：Issue #20
+最後更新：2026-08-01（Asia/Taipei）
+目前 Milestone：MVP3 minimum production go-live
+父任務：Issue #31
+目前實作：Issue #32
 
 本檔案是里程碑級儀表板。詳細續接資訊位於角色日誌：
 
@@ -15,9 +15,17 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
-| Codex — Implementation | #20 | `codex/20-blueprint-build-complete` | DONE | `BLUEPRINT_BUILD_COMPLETE` | `docs/workstreams/CODEX.md` | Blueprint local preview, tests, build and integration simulation |
+| Codex — Implementation | #32 | `agent/32-production-decision-baseline` | IN_PROGRESS | `MVP3_DECISION_BASELINE` | `docs/workstreams/CODEX.md` | Production decisions, data governance and ADR only; no runtime change |
 
-Current completed gates:
+Current MVP3 gates:
+
+- `MVP1_MERGED` — PR #28 / merge `7e180ed3b215a89be14f7c591e2cc08c394b296e`
+- `MVP2_MERGED` — PR #30 / merge `f7bc974df32dc947969b6184a0e4454a143e6722`
+- `FINAL_MAIN_VALIDATED` — typecheck, lint, 50/50 tests and production build PASS
+- `MVP3_DECISION_BASELINE` — in progress under Issue #32
+- #33–#37 — pending in Epic order
+
+Prior completed Blueprint gates:
 
 - `BOOKING_LIFECYCLE_COMPLETE`
 - `STAFF_OPERATIONS_COMPLETE`

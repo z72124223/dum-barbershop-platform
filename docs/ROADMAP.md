@@ -123,15 +123,35 @@ Local preview status: **Complete as a responsive web preview**. Native watchOS w
 
 Local preview status: **Complete as disabled delivery placeholders**. LINE registration, credentials, consent and outbound delivery remain reserved.
 
+## MVP3 — Minimum Production Go-Live
+
+這是目前唯一啟用的產品路線；先前 Blueprint 的圖片、作品、LINE、會員、付款、Calendar、分析與成長／通知自動化不會隨正式上線一起啟用。
+
+依賴主線：
+
+`PR #28 merged → PR #30 retargeted / validated / merged → #32 → #33 → #34 → #35 → #36 → #37`
+
+- [x] PR #28：MVP1 合併至 `main`（2026-08-01）
+- [x] PR #30：MVP2 retarget `main`、50/50 tests 與 production build 通過後合併（2026-08-01）
+- [ ] #32 / MVP3-0：正式上線決策與資料治理基線
+- [ ] #33 / MVP3-1：共用預約資料層與併發保護
+- [ ] #34 / MVP3-2：老闆／職員正式登入與伺服器端授權
+- [ ] #35 / MVP3-3：客戶預約與員工時段／註記跨裝置串接
+- [ ] #36 / MVP3-4：Windows 常駐、HTTPS、備份、監控與回滾
+- [ ] #37 / MVP3-5：正式上線驗收、切換與 24–72 小時穩定觀察
+
+MVP3-0 的正式決策合約位於 `docs/PRODUCTION-BASELINE.md`。每片一個 Issue、feature branch、checks、Commit、Push 與 Draft PR；#37 是唯一可啟用 Production 流量與真實資料的切片。
+
 ## Current milestone
 
-`Blueprint local preview — BUILD-COMPLETE / NOT PRODUCTION-READY`
+`MVP3-0 production decision baseline — IN PROGRESS / NOT ACTIVATED`
 
 Current execution sources:
 
-- Parent Epic: Issue #2
-- Original M1: Issue #14 / PR #17
-- Blueprint build-complete implementation: Issue #20 / `codex/20-blueprint-build-complete`
+- Parent Epic: Issue #31
+- Current slice: Issue #32 / `agent/32-production-decision-baseline`
+- Merged baseline: PR #28 and PR #30
+- Prior Blueprint history: Issue #2, Issue #14 / PR #17, Issue #20
 - Task dashboard: `docs/TASK-LOG.md`
 
 Issues #4–#8 and the three-window plan are superseded historical records.

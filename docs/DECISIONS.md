@@ -107,13 +107,29 @@
 - 阻塞範圍：帳號註冊、憑證、第三方服務或 Owner 決策只阻塞直接受影響部分。其餘範圍使用 Mock、disabled adapter 或 `TODO(owner-decision)` 繼續。
 - 安全界線：不得因此自行決定價格、政策、會員權益、個資規則、付款行為、真實身分或正式供應商，也不得把 build-complete 說成 production-ready。
 
+### D-017 — MVP3 最小正式上線基線
+
+- 狀態：Proposed / Owner confirmation required / not activated
+- Git 紀錄：Epic #31、Issue #32
+- Owner 指令：2026-08-01 核准開始執行切片；這不是下列八項具體值的逐項核准。
+- 主機：此 Windows 電腦作為第一版單機 origin；接受單機故障期間中斷，正式啟用仍需 #37 GO。
+- 公開入口：Cloudflare Tunnel → loopback origin；不做 router port-forward，不直接公開 Next.js 或資料庫 port。
+- 資料庫：MVP3 採本機 NTFS SQLite、WAL、`better-sqlite3` 與單一 App process；Repository port 保留 PostgreSQL 遷移能力。
+- 營運：可預約標籤為老闆／職員；每日 10:00–18:00 開始時段、60 分鐘固定 slot、未來 7 個台北日；成功寫入即成立。
+- 個資：只收姓名、電話、選定時段／職員與選填註記；兩個 Staff 角色在受保護工作台具有相同可見權；可識別資料保留 12 個月，之後匿名化，備份殘留上限 28 日。
+- 登入：Better Auth SQLite + Username plugin，只有兩個預先建立帳號，關閉註冊與帳號管理 UI；Session 絕對期限 8 小時並支援立即撤銷。
+- 營運控制：Staging／Production 完全分離；每日備份至當週連接的 Owner 加密卸除式磁碟、A／B 每週輪替且一份離機，所有物件硬上限 28 日；每月還原演練、RPO 24h／RTO 4h（只適用健康 origin 或已準備的替代主機）。
+- 詳細合約：`docs/PRODUCTION-BASELINE.md`。
+- 核准門檻：Owner 必須在 Issue #32 明確核准八項選擇，並記錄實際網域與負責維護／告警／回滾的非秘密責任人；核准前不得完成 #32 或開始 #33。
+- 安全界線：密碼、Token、備份路徑中的秘密與帳號憑證不進 Git。
+
 ---
 
 ## Reserved
 
 ### R-001 — 第三方預約 App / 平台
 
-候選可包含專用預約平台或自建核心，但尚未正式選定。正式選擇前需比較：
+MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner 接受 D-017 後，第三方預約平台只保留為未來替換候選，不阻塞 #33。未來重新評估時需比較：
 
 - 多設計師排班
 - Google Calendar 同步
@@ -130,7 +146,7 @@
 
 ### R-003 — 正式資料庫與後端平台
 
-PostgreSQL 類型資料庫為優先候選，實際託管方案待評估。
+D-017 提案選擇單機 SQLite，待 Owner 核准後才成為 MVP3 決策。PostgreSQL 保留為第二個 App node、持續 SQLite 寫入壅塞或高可用需求出現時的遷移目標，不再阻塞核准後的 #33。
 
 ### R-004 — 通知供應商
 
@@ -152,17 +168,18 @@ PostgreSQL 類型資料庫為優先候選，實際託管方案待評估。
 
 ## Needs Owner Decision
 
+下列項目只適用於 D-017 以外的未來功能或 D-017 尚待 Owner 明確核准／安全輸入的部分。
+
 - 正式服務名稱、價格與服務時間
 - 設計師名單、介紹、照片與服務能力
-- 營業時間、休假與排班規則
+- MVP3 固定時段以外的營業、休假與排班規則
 - 訂金金額、適用服務與退款規則
 - 取消期限、遲到、爽約與插單政策
 - 已確認免訂金預約是否可能被調整
 - 會員制度、儲值、次數、點數與到期規則
-- 客戶資料保存期限與員工權限
 - LINE 登入與官方 LINE 預約整合
-- 網域、正式字體、正式色碼與品牌文案
-- 正式部署與營運監控方案
+- 實際網域字串、正式字體、正式色碼與品牌文案
+- #36 的安全輸入值：實際 backup path、告警地址與部署帳號；備份媒體型態與輪替規則已在 D-017 提案選定
 
 ---
 
