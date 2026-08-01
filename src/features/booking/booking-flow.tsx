@@ -6,10 +6,14 @@ import {
   MVP_STAFF_OPTIONS,
   MVP_TIME_OPTIONS,
   formatMvpDate,
+  isTaipeiSlotPast,
+  nextMvpScheduleSlot,
   staffLabel,
+  taipeiToday,
   upcomingTaipeiDates,
 } from "@/features/schedule/mvp-schedule-config";
 import { useMvpSchedule } from "@/features/schedule/use-mvp-schedule";
+import { useTaipeiClock } from "@/features/schedule/use-taipei-clock";
 
 const steps = ["選擇時段", "填寫資料", "確認預約"] as const;
 
@@ -27,10 +31,16 @@ function createEntryId(): string {
 }
 
 export function BookingFlow() {
-  const dates = useMemo(() => upcomingTaipeiDates(), []);
+  const now = useTaipeiClock();
+  const currentTaipeiDate = taipeiToday(now);
+  const dates = useMemo(
+    () => upcomingTaipeiDates(7, currentTaipeiDate),
+    [currentTaipeiDate],
+  );
+  const [initialSlot] = useState(() => nextMvpScheduleSlot());
   const { entries, ready, failure, addEntry } = useMvpSchedule();
   const [step, setStep] = useState(0);
-  const [date, setDate] = useState(dates[0] ?? "");
+  const [date, setDate] = useState(initialSlot.date);
   const [startTime, setStartTime] = useState("");
   const [staffId, setStaffId] = useState<string>(MVP_STAFF_OPTIONS[0].id);
   const [customerName, setCustomerName] = useState("");
@@ -61,6 +71,10 @@ export function BookingFlow() {
 
   function goNext() {
     setError("");
+    if (step === 0 && !dates.includes(date)) {
+      setError("台北日期已更新，請重新選擇日期與時間。");
+      return;
+    }
     if (step === 0 && (!date || !startTime || !staffId)) {
       setError("請先選擇日期、時間與職員。");
       return;
@@ -77,8 +91,20 @@ export function BookingFlow() {
 
   function confirmBooking() {
     setError("");
+    if (!dates.includes(date)) {
+      setStep(0);
+      setStartTime("");
+      setError("台北日期已更新，請重新選擇日期與時間。");
+      return;
+    }
     if (!acknowledged) {
       setError("請先確認這筆資料只會儲存在目前瀏覽器。");
+      return;
+    }
+    if (isTaipeiSlotPast(date, startTime, now)) {
+      setStep(0);
+      setStartTime("");
+      setError("這個時段已依台灣台北時間開始，請重新選擇。");
       return;
     }
 
@@ -128,8 +154,8 @@ export function BookingFlow() {
   return (
     <section className="booking-shell" aria-labelledby="booking-title">
       <div className="local-notice" role="note">
-        <strong>第一版靜態預約</strong>
-        <span>資料只保存在目前瀏覽器，不會自動送到店家或其他裝置。</span>
+        <strong>台灣台北時間 · 靜態預約</strong>
+        <span>時段自動依 Asia/Taipei 對齊；資料仍只保存在目前瀏覽器。</span>
       </div>
 
       <ol className="step-tabs" aria-label="預約步驟">
@@ -197,11 +223,12 @@ export function BookingFlow() {
               <div className="time-options">
                 {MVP_TIME_OPTIONS.map((time) => {
                   const occupied = occupiedTimes.has(time);
+                  const elapsed = isTaipeiSlotPast(date, time, now);
                   return (
                     <button
                       key={time}
                       type="button"
-                      disabled={occupied}
+                      disabled={occupied || elapsed}
                       className={startTime === time ? "selected" : ""}
                       aria-pressed={startTime === time}
                       onClick={() => {
@@ -210,7 +237,8 @@ export function BookingFlow() {
                       }}
                     >
                       {time}
-                      {occupied ? <small>已有預約</small> : null}
+                      {elapsed ? <small>已過時間</small> : null}
+                      {!elapsed && occupied ? <small>已有預約</small> : null}
                     </button>
                   );
                 })}

@@ -126,4 +126,30 @@ describe("MVP schedule entry domain", () => {
     assert.equal(parseMvpScheduleEntries([booking, { ...note, source: "customer" }]), null);
     assert.equal(parseMvpScheduleEntries({ entries: [booking] }), null);
   });
+
+  it("requires createdAt to carry an explicit timezone", () => {
+    assert.deepEqual(
+      validateMvpScheduleEntry({
+        ...booking,
+        createdAt: "2026-07-29T10:00:00",
+      }),
+      { ok: false, error: "invalid_created_at" },
+    );
+    assert.deepEqual(
+      validateMvpScheduleEntry({
+        ...booking,
+        createdAt: "2026-07-29",
+      }),
+      { ok: false, error: "invalid_created_at" },
+    );
+
+    const withOffset = validateMvpScheduleEntry({
+      ...booking,
+      createdAt: "2026-07-29T10:00:00+08:00",
+    });
+    assert.equal(withOffset.ok, true);
+    if (withOffset.ok) {
+      assert.equal(withOffset.entry.createdAt, "2026-07-29T02:00:00.000Z");
+    }
+  });
 });

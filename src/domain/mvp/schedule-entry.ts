@@ -1,3 +1,8 @@
+import {
+  isTaipeiCalendarDate,
+  isTaipeiClockTime,
+} from "./taipei-time";
+
 export type MvpScheduleEntryDate = string;
 export type MvpScheduleEntryTime = string;
 
@@ -45,8 +50,8 @@ export type MvpScheduleEntryValidationResult =
   | { ok: true; entry: MvpScheduleEntry }
   | { ok: false; error: MvpScheduleEntryValidationError };
 
-const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const TIME_PATTERN = /^([01]\d|2[0-3]):([0-5]\d)$/;
+const RFC3339_PATTERN =
+  /^(\d{4}-\d{2}-\d{2})T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
@@ -57,21 +62,20 @@ function isNonEmpty(value: string): boolean {
 }
 
 export function isMvpScheduleEntryDate(value: string): boolean {
-  const match = DATE_PATTERN.exec(value);
-  if (!match) return false;
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  const date = new Date(Date.UTC(year, month - 1, day));
-
-  return date.getUTCFullYear() === year
-    && date.getUTCMonth() === month - 1
-    && date.getUTCDate() === day;
+  return isTaipeiCalendarDate(value);
 }
 
 export function isMvpScheduleEntryTime(value: string): boolean {
-  return TIME_PATTERN.test(value);
+  return isTaipeiClockTime(value);
+}
+
+function isRfc3339Instant(value: string): boolean {
+  const match = RFC3339_PATTERN.exec(value);
+  return Boolean(
+    match
+    && isTaipeiCalendarDate(match[1])
+    && Number.isFinite(new Date(value).getTime()),
+  );
 }
 
 export function normalizeMvpScheduleEntry(
@@ -136,7 +140,7 @@ export function validateMvpScheduleEntry(
   if (
     typeof value.createdAt !== "string"
     || !isNonEmpty(value.createdAt)
-    || !Number.isFinite(new Date(value.createdAt).getTime())
+    || !isRfc3339Instant(value.createdAt.trim())
   ) {
     return { ok: false, error: "invalid_created_at" };
   }

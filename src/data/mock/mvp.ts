@@ -1,14 +1,9 @@
 import type { MvpScheduleEntry } from "../../domain/mvp";
-import { isMvpScheduleEntryDate, sortMvpScheduleEntries } from "../../domain/mvp";
-
-function taipeiToday(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Taipei",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(now);
-}
+import {
+  isMvpScheduleEntryDate,
+  sortMvpScheduleEntries,
+  taipeiToday,
+} from "../../domain/mvp";
 
 export function createMockMvpScheduleEntries(
   baseDate: string = taipeiToday(),
