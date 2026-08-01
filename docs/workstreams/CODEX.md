@@ -6,14 +6,15 @@
 - Issue: #32
 - Branch: `agent/32-production-decision-baseline`
 - Primary responsibility: freeze the minimum Production architecture, business schedule, identity, data-retention and operations contract without changing runtime
-- Status: `IN_PROGRESS`
+- Status: `PR_OPEN`
 
 ## MVP3_DECISION_BASELINE checkpoint
 
-- Status: `IN_PROGRESS`
+- Status: `PR_OPEN`
 - Updated at: `2026-08-01 +08:00`
 - Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/32
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/38
 - Branch: `agent/32-production-decision-baseline`
 - Integration gate completed: PR #28 merged at `7e180ed3b215a89be14f7c591e2cc08c394b296e`; PR #30 was retargeted to `main`, revalidated and merged at `f7bc974df32dc947969b6184a0e4454a143e6722`.
 - Final `main` validation: Node 24.14.0 / pnpm 11.9.0; typecheck PASS; lint PASS; tests PASS (50/50); production build PASS.
@@ -22,7 +23,8 @@
 - Decision proposal: proposed D-017 and `docs/PRODUCTION-BASELINE.md`; Owner has not yet approved the exact eight values.
 - Required Owner record: Issue #32 must name the actual domain and accountable maintenance／alert／rollback owner; credentials and secret paths remain out of Git.
 - Blocker: #32 cannot complete and #33 cannot start before explicit Owner approval is recorded in GitHub.
-- Exact next action: validate documentation links and governance consistency, commit, push and open a Draft PR for #32, then request the single Owner approval record.
+- Proposal commit: `c2202d7acbd413e6b6ec4c9cc98523cd6a79681f`; documentation links, diff check and secret／PII pattern scans PASS.
+- Exact next action: wait for one Owner record approving the eight proposed values and naming the Production domain plus accountable maintenance／alert／rollback owner. Keep PR #38 Draft, do not close #32 and do not start #33 before that gate.
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
 
