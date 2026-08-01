@@ -1,6 +1,9 @@
 import {
   DomainError,
+  STAFF_SESSION_TTL_MS,
+  isStaffSessionActive,
   overlaps,
+  permissionsForStaffRole,
   type AuditEvent,
   type Booking,
   type CalendarBlock,
@@ -9,7 +12,11 @@ import {
   type EntityId,
   type MembershipPlaceholder,
   type IntegrationOperation,
-  type StaffRole,
+  type IsoInstant,
+  type StaffDemoAccount,
+  type StaffIdentitySession,
+  type StaffSignInInput,
+  type StaffSignInResult,
 } from "../../domain";
 import {
   mockBookings,
@@ -17,6 +24,7 @@ import {
   mockCustomers,
   mockMemberships,
   mockIntegrationOperations,
+  mockStaffIdentityAccounts,
 } from "../../data/mock";
 import type {
   AuditRepository,
@@ -31,7 +39,6 @@ import type {
   NotificationProvider,
   NotificationReceipt,
   PaymentProvider,
-  PreviewIdentitySession,
   ProviderBookingReceipt,
 } from "../ports";
 
@@ -196,22 +203,71 @@ export class MockBookingProvider implements BookingProvider {
   }
 }
 
-const rolePermissions: Record<StaffRole, string[]> = {
-  owner: ["schedule:read", "booking:write", "customer:read", "integration:read", "settings:preview"],
-  manager: ["schedule:read", "booking:write", "customer:read", "integration:read"],
-  barber: ["schedule:read", "booking:write", "customer:read_assigned"],
-  reception: ["schedule:read", "booking:write", "customer:read"],
-  read_only: ["schedule:read"],
-};
-
 export class MockIdentityProvider implements IdentityProvider {
-  async getPreviewSession(role: StaffRole = "read_only"): Promise<PreviewIdentitySession> {
-    return {
+  async listDemoAccounts(): Promise<Omit<StaffDemoAccount, "accessCode">[]> {
+    return mockStaffIdentityAccounts.map(({ id, accountId, displayName, role, staffId, active }) => ({
+      id,
+      accountId,
+      displayName,
+      role,
+      ...(staffId ? { staffId } : {}),
+      active,
+    }));
+  }
+
+  async signIn(input: StaffSignInInput, now: IsoInstant = new Date().toISOString()): Promise<StaffSignInResult> {
+    const account = mockStaffIdentityAccounts.find((item) => item.accountId === input.accountId);
+    if (!account || account.accessCode !== input.accessCode) {
+      return { ok: false, reason: "invalid_credentials" };
+    }
+    if (!account.active) return { ok: false, reason: "account_disabled" };
+
+    const issuedAt = new Date(now);
+    const session: StaffIdentitySession = {
+      version: 2,
       mode: "mock",
-      authenticated: false,
-      previewRole: role,
-      permissions: [...rolePermissions[role]],
+      authenticated: true,
+      sessionId: `mock-session-${account.id}-${issuedAt.getTime()}`,
+      identity: {
+        id: account.id,
+        accountId: account.accountId,
+        displayName: account.displayName,
+        role: account.role,
+        ...(account.staffId ? { staffId: account.staffId } : {}),
+      },
+      permissions: permissionsForStaffRole(account.role),
+      issuedAt: issuedAt.toISOString(),
+      expiresAt: new Date(issuedAt.getTime() + STAFF_SESSION_TTL_MS).toISOString(),
     };
+    return { ok: true, session };
+  }
+
+  async restoreSession(
+    session: StaffIdentitySession,
+    now: IsoInstant = new Date().toISOString(),
+  ): Promise<StaffIdentitySession | null> {
+    if (session.version !== 2 || !isStaffSessionActive(session, now)) return null;
+    const account = mockStaffIdentityAccounts.find((item) => item.id === session.identity.id && item.active);
+    if (
+      !account ||
+      account.accountId !== session.identity.accountId ||
+      account.role !== session.identity.role ||
+      account.staffId !== session.identity.staffId
+    ) return null;
+    const expectedPermissions = permissionsForStaffRole(account.role);
+    if (
+      session.permissions.length !== expectedPermissions.length ||
+      expectedPermissions.some((permission) => !session.permissions.includes(permission))
+    ) return null;
+    return {
+      ...clone(session),
+      identity: { ...session.identity, displayName: account.displayName },
+      permissions: expectedPermissions,
+    };
+  }
+
+  async signOut(sessionId: string): Promise<void> {
+    void sessionId;
   }
 }
 

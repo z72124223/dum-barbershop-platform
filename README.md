@@ -1,67 +1,49 @@
 # DUM BARBERSHOP Platform
 
-DUM BARBERSHOP website, booking and multi-staff operation platform.
+DUM BARBERSHOP 客戶預約與員工工作台第一版 MVP。
 
-## Repository authority
+## 目前範圍
 
-This private repository is the project's **single source of truth** for product decisions, architecture, implementation, review and release history.
+本版只有四個頁面：
 
-Chat messages and local notes are not authoritative until they are recorded in this repository.
+- `/`：客戶首頁
+- `/booking`：免登入的三步驟客戶預約
+- `/staff/login`：老闆／職員本機 Mock 登入
+- `/staff`：整合預約時段與手動文字註記的員工工作台
 
-## Required reading
+客戶預約與員工新增的資料使用同一份瀏覽器本機儲存，因此在同一瀏覽器內可以互相看到。資料不會傳送到其他裝置，也沒有正式後端、API 或資料庫。
 
-All contributors and AI workers must begin with [`AGENTS.md`](AGENTS.md), then follow its required reading order.
+## 員工示範登入
 
-Core documents:
+兩個虛構帳號共用公開示範通行碼 `DUM-DEMO`：
 
-1. [`docs/PROJECT-CONSTITUTION.md`](docs/PROJECT-CONSTITUTION.md)
-2. [`docs/DECISIONS.md`](docs/DECISIONS.md)
-3. [`docs/BLUEPRINT.md`](docs/BLUEPRINT.md)
-4. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-5. [`docs/ROADMAP.md`](docs/ROADMAP.md)
-6. [`docs/TWO-ROLE-WORK-MODEL.md`](docs/TWO-ROLE-WORK-MODEL.md)
-7. [`docs/EXECUTION-MODE.md`](docs/EXECUTION-MODE.md)
-8. [`docs/WORK-PROTOCOL.md`](docs/WORK-PROTOCOL.md)
-9. [`docs/CONTINUITY-PROTOCOL.md`](docs/CONTINUITY-PROTOCOL.md)
-10. [`docs/TASK-LOG.md`](docs/TASK-LOG.md)
+- 老闆：`owner.demo`
+- 職員：`staff.demo`
 
-Role logs:
+Session 最長保留 8 小時，並由本機 Mock Cookie 保護 `/staff` 路由。這只是第一版驗收行為，不是正式營運用的登入系統。
 
-- [`docs/workstreams/GPT.md`](docs/workstreams/GPT.md)
-- [`docs/workstreams/CODEX.md`](docs/workstreams/CODEX.md)
+## 明確不包含
 
-## Current state
+- 照片與作品
+- LINE
+- 金流、訂金、儲值或會員
+- AI 與 AI API
+- 正式 API、資料庫或第三方整合
+- 真實員工、客戶或營運資料
 
-The repository contains a **Blueprint build-complete local preview**. The public website, customer booking lifecycle, multi-staff operations, provider-neutral integration simulator and Apple-style quick-action preview can all be inspected locally with fictional or masked data.
+## 本機執行
 
-This is not production-ready. Build-complete means every safe Blueprint area has a working local preview; it does not mean that real content, policies, accounts, credentials or providers have been approved.
-
-- Implementation Issue: #20
-- Merged implementation branch: `codex/20-blueprint-build-complete` via PR #21
-- Durable implementation log: `docs/workstreams/CODEX.md`
-- Original M1 delivery: Issue #14 / PR #17
-
-No production booking provider, identity service, Google Calendar sync, outbound notification, payment system, membership policy, real customer database or deployment has been approved or enabled.
-
-## Local requirements
-
-- Node.js `>=20.9.0`
-- pnpm `11.7.0` (declared in `package.json`)
-
-## Install and run
+需要 Node.js `>=20.9.0` 與 pnpm `11.7.0`。
 
 ```bash
 corepack enable
 pnpm install
-cp .env.example .env.local
 pnpm dev
 ```
 
-Open `http://localhost:3000`.
+開啟 `http://localhost:3000`。
 
-The local environment file is optional for the Mock preview. Never add credentials, provider tokens or real customer data.
-
-## Validation commands
+## 驗證
 
 ```bash
 pnpm typecheck
@@ -70,61 +52,8 @@ pnpm test
 pnpm build
 ```
 
-## Local routes
+## 專案規則
 
-- `/` — complete Blueprint homepage information architecture
-- `/services` — fictional service categories, details and booking entries
-- `/barbers` — fictional staff profiles and staff-specific booking entries
-- `/works` — ten Blueprint work categories without real customer media
-- `/booking` — complete multi-step Mock booking flow; no real booking is created
-- `/booking/manage` — local lookup, detail, cancellation request and reschedule preview
-- `/membership` — disabled membership placeholder
-- `/about` — brand/platform structure with reserved real story and imagery
-- `/contact` — safe address, phone, LINE, Instagram, map and transport placeholders
-- `/policies` — explicit Owner-decision placeholders
-- `/staff` — no-auth local Staff today/full-day workspace
-- `/staff/operations` — day/week, queue, customer, schedule and role previews
-- `/staff/integrations` — provider health, idempotency, conflict, retry and delivery simulator
-- `/staff/quick-actions` — responsive Today, Next, Blocks, Checked In and Completed preview
+GitHub Repository 是本專案的正式規格與交接來源。開始工作前請先讀 [`AGENTS.md`](AGENTS.md)，再依其中順序讀取治理文件。
 
-The customer booking flow uses fictional services, staff, dates, availability and customer details. Use only fictional form values. The confirmation explicitly states that no request was sent to the shop, no notification was delivered and no payment was collected.
-
-The Staff Prototype uses the fixed fictional operating date `2026-07-14` so schedule, conflict and status-transition tests remain reproducible. It supports day/week views, staff filtering, booking details, safe pending/waitlist handling, local block/leave/overtime previews, masked fictional customer history and Domain-controlled status actions. Role switching is only a permission UI preview; it has no authentication and must not be used for real operations.
-
-## Build-complete safety boundaries
-
-- All names, phone displays, services, schedules, bookings and customer histories are fictional or masked.
-- Formal prices, policies, membership benefits, deposits and privacy rules remain disabled or `TODO(owner-decision)`.
-- Booking, identity, calendar, notification, payment and membership integrations use provider-neutral ports with local Mock or disabled adapters only.
-- LINE, reminders, review requests and return campaigns never send externally.
-- Integration scenarios show success, conflict, timeout, partial failure and bounded retry without contacting a provider.
-- The installable manifest and Apple-style quick actions are web previews; there is no native watchOS application or external registration.
-- Reloading the browser resets customer and Staff UI changes; no production database exists.
-- Do not enter secrets or real customer data into the repository or the local prototype.
-
-## Validation evidence
-
-The current build-complete baseline passes:
-
-- TypeScript typecheck
-- ESLint
-- 36 automated Domain, adapter, booking, Staff, integration and quick-action tests
-- Next.js Production Build
-- Desktop and mobile browser smoke at the main customer and Staff routes
-
-See `docs/workstreams/CODEX.md` and Issue #20 for exact commits and checkpoint evidence.
-
-## Continuity
-
-GPT and Codex each maintain one durable work log. Before quota exhaustion, shutdown or handoff, the active role must update its log and leave a `CHECKPOINT` in its Issue.
-
-Codex must also Commit and Push all recoverable code to its remote feature branch. A new Task resumes from Git and does not require previous chat context.
-
-## Repository
-
-- Owner: `z72124223`
-- Visibility: Private
-- Default branch: `main`
-- Product / QA role: GPT
-- Implementation: Codex local environment
-- Work unit: GitHub Issue → durable log → feature branch / review → checkpoints → draft PR → review → merge
+本次實作依據為 Issue #27，分支為 `codex/27-first-mvp`。所有資料皆為虛構或遮罩內容；本版是本機靜態 MVP，不是 production-ready。
