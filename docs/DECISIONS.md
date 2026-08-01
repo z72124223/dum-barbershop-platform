@@ -109,9 +109,9 @@
 
 ### D-017 — MVP3 最小正式上線基線
 
-- 狀態：Proposed / Owner confirmation required / not activated
+- 狀態：Proposed / eight values approved / Production domain required / not activated
 - Git 紀錄：Epic #31、Issue #32
-- Owner 指令：2026-08-01 核准開始執行切片；這不是下列八項具體值的逐項核准。
+- Owner 指令：2026-08-01 先核准開始執行切片，隨後在 Codex 對完整核准範本回覆「同意」；Issue #32 已記錄八項值、`@z72124223` 責任、Owner 管理個資窗口與 A／B 備份安排均獲核准，正式網域仍待提供。
 - 主機：此 Windows 電腦作為第一版單機 origin；接受單機故障期間中斷，正式啟用仍需 #37 GO。
 - 公開入口：Cloudflare Tunnel → loopback origin；不做 router port-forward，不直接公開 Next.js 或資料庫 port。
 - 資料庫：MVP3 採本機 NTFS SQLite、WAL、`better-sqlite3` 與單一 App process；Repository port 保留 PostgreSQL 遷移能力。
@@ -120,7 +120,7 @@
 - 登入：Better Auth SQLite + Username plugin，只有兩個預先建立帳號，關閉註冊與帳號管理 UI；Session 絕對期限 8 小時並支援立即撤銷。
 - 營運控制：Staging／Production 完全分離；每日備份至當週連接的 Owner 加密卸除式磁碟、A／B 每週輪替且一份離機，所有物件硬上限 28 日；每月還原演練、RPO 24h／RTO 4h（只適用健康 origin 或已準備的替代主機）。
 - 詳細合約：`docs/PRODUCTION-BASELINE.md`。
-- 核准門檻：Owner 必須在 Issue #32 明確核准八項選擇，並記錄實際網域與負責維護／告警／回滾的非秘密責任人；核准前不得完成 #32 或開始 #33。
+- 核准門檻：八項選擇與維護／告警／回滾責任人已記錄；Owner 仍須在 Issue #32 記錄實際網域。網域記錄前不得完成 #32 或開始 #33。
 - 安全界線：密碼、Token、備份路徑中的秘密與帳號憑證不進 Git。
 
 ---
@@ -129,7 +129,7 @@
 
 ### R-001 — 第三方預約 App / 平台
 
-MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner 接受 D-017 後，第三方預約平台只保留為未來替換候選，不阻塞 #33。未來重新評估時需比較：
+MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner 已核准此選擇，待正式網域 gate 完成後，第三方預約平台只保留為未來替換候選，不阻塞 #33。未來重新評估時需比較：
 
 - 多設計師排班
 - Google Calendar 同步
@@ -146,7 +146,7 @@ MVP3 提案選擇自建 Next.js Modular Monolith 與站內資料邊界；Owner �
 
 ### R-003 — 正式資料庫與後端平台
 
-D-017 提案選擇單機 SQLite，待 Owner 核准後才成為 MVP3 決策。PostgreSQL 保留為第二個 App node、持續 SQLite 寫入壅塞或高可用需求出現時的遷移目標，不再阻塞核准後的 #33。
+Owner 已核准 D-017 提案的單機 SQLite 選擇；D-017 仍待正式網域才能 Accepted。PostgreSQL 保留為第二個 App node、持續 SQLite 寫入壅塞或高可用需求出現時的遷移目標，不再阻塞網域 gate 完成後的 #33。
 
 ### R-004 — 通知供應商
 
@@ -168,7 +168,7 @@ D-017 提案選擇單機 SQLite，待 Owner 核准後才成為 MVP3 決策。Pos
 
 ## Needs Owner Decision
 
-下列項目只適用於 D-017 以外的未來功能或 D-017 尚待 Owner 明確核准／安全輸入的部分。
+下列項目只適用於 D-017 以外的未來功能，或 D-017 尚待提供的正式網域／安全輸入值。
 
 - 正式服務名稱、價格與服務時間
 - 設計師名單、介紹、照片與服務能力

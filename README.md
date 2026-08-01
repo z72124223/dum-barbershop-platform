@@ -45,7 +45,7 @@ Session 最長保留 8 小時，並由本機 Mock Cookie 保護 `/staff` 路由�
 
 MVP1 PR #28 與 MVP2 PR #30 已於 2026-08-01 合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前只進行 Issue #32 的文件與決策基線，網站仍是本機 Mock，未公開也不可輸入真實資料。
 
-待 Owner 核准的最小架構、時段、登入、個資保存、備份與切換提案記錄於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
+Owner 已核准八項最小架構、時段、登入、個資保存與備份提案；正式網域仍待提供，因此決策尚未啟用。完整紀錄位於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
 
 ## 本機執行
 

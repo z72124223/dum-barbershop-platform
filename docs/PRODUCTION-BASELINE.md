@@ -1,19 +1,19 @@
 # MVP3 Production Baseline
 
-狀態：**Proposed / Owner confirmation required / not activated**
+狀態：**Proposed / eight values approved / Production domain required / not activated**
 
 提案日期：2026-08-01（Asia/Taipei）
 
 Git authority：Epic #31、Issue #32、proposed Decision D-017
 
-本文件把讓 MVP3 可以施工的最小正式上線選擇整理成一組 Owner approval proposal。Owner 已授權開始執行切片，但尚未在 GitHub 明確逐項核准以下值；核准前 D-017 不得標為 Accepted、#32 不得完成、#33 不得開始。它不代表網站已公開、不授權輸入真實客戶資料，也不取代 #37 的正式 GO / NO-GO。
+本文件把讓 MVP3 可以施工的最小正式上線選擇整理成一組 Owner approval proposal。Owner 於 2026-08-01 在 Codex 回覆「同意」，並已由 Codex 如實記錄於 [Issue #32](https://github.com/z72124223/dum-barbershop-platform/issues/32#issuecomment-5150975055)：八項提案、Owner 責任、個資窗口管理與 A／B 備份安排均已核准。正式 Production domain／hostname 尚未提供，因此 D-017 仍不得標為 Accepted、#32 不得完成、#33 不得開始。它不代表網站已公開、不授權輸入真實客戶資料，也不取代 #37 的正式 GO / NO-GO。
 
-## 1. Proposed Owner decisions
+## 1. Owner-approved proposed decisions
 
-| # | 推薦選擇（待 Owner 明確核准） | 理由與界線 |
+| # | Owner 於 2026-08-01 核准的選擇 | 理由與界線 |
 |---:|---|---|
 | 1 | 此 Windows 電腦是第一版正式 origin；接受單機維護、停電或硬體故障期間會中斷服務。Owner 對營運負責，`production-maintainer` 角色執行維護；預設維護窗為每週一 03:00–04:00（台北時間）。 | 符合 Owner 要求與最快 MVP；#36 必須驗證自動重啟、備份還原與告警。實際維護者姓名不寫入 Git。 |
-| 2 | 公開入口採 Cloudflare Tunnel：正式網域 / HTTPS → outbound-only tunnel → `127.0.0.1`。不做 router port-forward，不直接公開 Next.js 或資料庫 port。Staging 與 Production 使用不同 hostname。 | 降低家用網路、動態 IP、CGNAT 與入站防火牆設定耦合。實際 hostname 與帳號在 #36 以部署設定安全提供。 |
+| 2 | 公開入口採 Cloudflare Tunnel：正式網域 / HTTPS → outbound-only tunnel → `127.0.0.1`。不做 router port-forward，不直接公開 Next.js 或資料庫 port。Staging 與 Production 使用不同 hostname。 | 降低家用網路、動態 IP、CGNAT 與入站防火牆設定耦合。正式 hostname 必須記錄於 #32；實際帳號與密鑰在 #36 以部署設定安全提供。 |
 | 3 | MVP3 資料庫採本機固定 NTFS 磁碟上的 SQLite、WAL、單一 App process，Node driver 採 `better-sqlite3`；Repository port 保留 PostgreSQL 遷移能力。 | 適合單店低寫入量、部署最快；不得放在 OneDrive、NAS 或網路分享。第二個 App node、持續寫入壅塞或高可用需求出現時再遷移 PostgreSQL。 |
 | 4 | 角色固定為 `owner` 與 `staff`，兩筆 Staff member 使用 server-generated opaque ID，公開標籤維持「老闆」與「職員」，不公開真實姓名。顯示包含今天在內的未來 7 個台北日；每日開始時段為 10:00–18:00、每格 60 分鐘，最後一格是 18:00–19:00。 | 角色、登入帳號與可被預約的人員是不同欄位；直接延續已驗收 UI，避免加入人物介紹、照片、服務目錄、價格或排班系統。手動註記不占用 booking slot。 |
 | 5 | 客戶預約成功寫入共用資料庫後即自動成立；同一職員／日期／時段競態只允許一筆成功。 | 「待確認」會需要通知與狀態查詢，超出本 MVP；成功畫面必須只在 transaction commit 後出現。 |
@@ -21,15 +21,15 @@ Git authority：Epic #31、Issue #32、proposed Decision D-017
 | 7 | 正式登入採 Better Auth + SQLite + Username plugin，關閉公開註冊、重設密碼與帳號管理 UI；只由受控 CLI 建立一個老闆與一個職員帳號。Session 絕對期限 8 小時、不滑動延長、不使用 cookie session cache，停用帳號或重設密碼立即撤銷 Sessions。 | Next.js 建議使用 auth library；Provider 保持在 Identity adapter 後。兩角色第一版共用 schedule read/write 與 note update 權限，不自行增加 owner-only 功能。 |
 | 8 | Staging／Production 分離 hostname、DB、secret 與 service config。每日 SQLite online backup 寫入兩顆 Owner 控制的加密卸除式磁碟 A／B，按週輪替且始終有一顆離機、離站保存；每月實際還原。RPO 24 小時；健康主機或已備妥替代主機的軟體／資料 RTO 4 小時，完整硬體更換不承諾 4 小時。外部監控告警送給具名 Owner，maintainer 可在資料或安全風險下依 runbook 回滾。 | 這是不用新增雲端備份 API 的最小 off-PC 目標。磁碟識別、告警地址、密碼與 recovery material 不進 Git；#36 必須驗證輪替、最大 28 日、解密還原與告警送達。 |
 
-### Owner confirmation still required
+### Remaining Owner input
 
-Issue #32 必須在合併前留下同一則可追溯 Owner 紀錄，包含：
+Issue #32 已記錄 Owner 對八項提案的核准，並確認：
 
-1. 核准或逐項修改上列 8 項推薦值。
-2. 提供正式 production domain／hostname（不是密碼；若尚未持有，#32 保持未完成）。
-3. 確認 GitHub Owner `@z72124223` 是否同時是 maintenance、alert recipient 與 rollback accountable owner；若不是，提供責任人的非秘密稱呼或 handle。
-4. 確認客戶個資請求聯絡管道由同一 Owner 管理；實際電話／Email 不寫入 Git，只在 Production config／頁面內容安全提供。
-5. 確認採用兩顆加密卸除式磁碟 A／B、每週輪替且一顆離站的備份目的地。
+1. GitHub Owner `@z72124223` 同時是 maintenance、alert recipient 與 rollback accountable owner。
+2. 客戶個資請求聯絡管道由同一 Owner 管理；實際電話／Email 不寫入 Git，只在 Production config／頁面內容安全提供。
+3. 採用兩顆加密卸除式磁碟 A／B、每週輪替且一顆離站的備份目的地。
+
+唯一未完成輸入是正式 Production domain／hostname。這不是密碼；若尚未持有，#32 保持未完成。
 
 ## 2. Stable product contract
 
