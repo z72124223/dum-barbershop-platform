@@ -12,6 +12,14 @@ export const SCHEDULE_SCHEMA_TABLES = [
   "staff_time_blocks",
 ] as const;
 
+export const FORMAL_AUTH_SCHEMA_TABLES = [
+  "account",
+  "auth_rate_limits",
+  "session",
+  "user",
+  "verification",
+] as const;
+
 interface ScheduleMigration {
   version: number;
   name: string;
@@ -182,6 +190,81 @@ BEGIN
 END;
 `,
   },
+  {
+    version: 2,
+    name: "add_better_auth_1_6_26",
+    sql: `
+CREATE TABLE "user" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "email" TEXT NOT NULL UNIQUE,
+  "emailVerified" INTEGER NOT NULL,
+  "image" TEXT,
+  "createdAt" DATE NOT NULL,
+  "updatedAt" DATE NOT NULL,
+  "username" TEXT UNIQUE,
+  "displayUsername" TEXT
+);
+
+CREATE TABLE "session" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "expiresAt" DATE NOT NULL,
+  "token" TEXT NOT NULL UNIQUE,
+  "createdAt" DATE NOT NULL,
+  "updatedAt" DATE NOT NULL,
+  "ipAddress" TEXT,
+  "userAgent" TEXT,
+  "userId" TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE
+);
+
+CREATE TABLE "account" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "accountId" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "userId" TEXT NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+  "accessToken" TEXT,
+  "refreshToken" TEXT,
+  "idToken" TEXT,
+  "accessTokenExpiresAt" DATE,
+  "refreshTokenExpiresAt" DATE,
+  "scope" TEXT,
+  "password" TEXT,
+  "createdAt" DATE NOT NULL,
+  "updatedAt" DATE NOT NULL
+);
+
+CREATE TABLE "verification" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "identifier" TEXT NOT NULL,
+  "value" TEXT NOT NULL,
+  "expiresAt" DATE NOT NULL,
+  "createdAt" DATE NOT NULL,
+  "updatedAt" DATE NOT NULL
+);
+
+CREATE INDEX "session_userId_idx" ON "session" ("userId");
+CREATE INDEX "account_userId_idx" ON "account" ("userId");
+CREATE INDEX "verification_identifier_idx" ON "verification" ("identifier");
+
+CREATE TABLE auth_rate_limits (
+  key_hash TEXT PRIMARY KEY NOT NULL CHECK (length(key_hash) = 64),
+  failure_count INTEGER NOT NULL CHECK (failure_count BETWEEN 0 AND 5),
+  window_started_at_utc TEXT NOT NULL,
+  blocked_until_utc TEXT,
+  updated_at_utc TEXT NOT NULL
+);
+
+CREATE INDEX auth_rate_limits_updated_at_idx
+ON auth_rate_limits (updated_at_utc);
+
+ALTER TABLE staff_members
+ADD COLUMN auth_user_id TEXT REFERENCES "user" ("id") ON DELETE RESTRICT;
+
+CREATE UNIQUE INDEX staff_members_auth_user_id_unique
+ON staff_members (auth_user_id)
+WHERE auth_user_id IS NOT NULL;
+`,
+  },
 ];
 
 const SCHEMA_MIGRATIONS_BOOTSTRAP_SQL = `
@@ -200,8 +283,12 @@ export function scheduleMigrationChecksum(sql: string): string {
 export function applyScheduleMigrations(
   database: ControlledSqliteConnection,
   now = new Date(),
+  targetVersion = MIGRATIONS.length,
 ): void {
   try {
+    if (!Number.isInteger(targetVersion) || targetVersion < 1 || targetVersion > MIGRATIONS.length) {
+      throw new ScheduleMigrationIntegrityError("migration_order_invalid");
+    }
     const migrationNames = new Set<string>();
     for (const [index, migration] of MIGRATIONS.entries()) {
       if (
@@ -252,7 +339,7 @@ export function applyScheduleMigrations(
       );
     });
 
-    for (const migration of MIGRATIONS) {
+    for (const migration of MIGRATIONS.slice(0, targetVersion)) {
       if (!applied.some((row) => row.version === migration.version)) {
         applyOne.immediate(migration);
       }

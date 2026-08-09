@@ -1,6 +1,21 @@
 # Codex Work Log — MVP3 Minimum Production
 
-## Active identity — Issue #33
+## Active identity — Issue #34
+
+- Role: Codex
+- Issue: #34
+- Branch: `agent/34-formal-auth`
+- Parent Epic: #31
+- Status: `VALIDATED_PENDING_DRAFT_PR`
+- Scope: Better Auth 1.6.26 SQLite schema, nullable unique staff/auth binding, explicit account provisioning, server-side username login/session/authorization, revocation, rate limiting, strict transport/origin/body/route guards and minimal response DTOs.
+- Migration boundary: append-only migration 2; migration 1 checksum remains authoritative; startup and migrations create no auth users, credential accounts, sessions or rate-limit rows.
+- UI boundary: `/staff` is an authenticated server shell only. The formal client does not import the mock identity or localStorage schedule graph; Issue #35 UI/data adapter has not started.
+- Validation: typecheck PASS; lint PASS; 69/69 unit/integration tests PASS; production build PASS; client-bundle demo credential scan PASS; diff/secret/PII scan PASS.
+- Host caveat: exact HTTPS origin, trusted `X-Forwarded-Proto: https`, and a single proxy-overwritten `CF-Connecting-IP` are required. Loopback binding, Cloudflare overwrite proof, ingress, hosting and backup remain Issue #36.
+- Production boundary: no public traffic, real accounts, real credentials, real customer data, public staff ingress, deployment, backup or #37 GO was activated.
+- Exact next action: create the Issue #34 Draft PR against `main`, request review, and stop before Issue #35 or merge.
+
+## Previous identity — Issue #33
 
 - Role: Codex
 - Issue: #33
