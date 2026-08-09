@@ -16,6 +16,12 @@
 .env.local
 .env.*.local
 *.log
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
 # editor / OS / generated type state
 .DS_Store

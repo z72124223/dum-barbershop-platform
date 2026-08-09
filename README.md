@@ -43,13 +43,13 @@ Session 最長保留 8 小時，並由本機 Mock Cookie 保護 `/staff` 路由�
 
 ## 正式上線工作
 
-MVP1 PR #28 與 MVP2 PR #30 已於 2026-08-01 合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前只進行 Issue #32 的文件與決策基線，網站仍是本機 Mock，未公開也不可輸入真實資料。
+MVP1 PR #28、MVP2 PR #30 與 MVP3-0 PR #38 已於 2026-08-01 合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前進行 Issue #33 的共用預約資料層與併發保護，網站仍是本機 Mock，未公開也不可輸入真實資料。
 
 Owner 已核准八項最小架構、時段、登入、個資保存與備份提案，並已註冊正式網域 `dumbarbershop.com`；決策基線可供後續 MVP3 切片實作，但網站仍須等待 #37 GO 才能公開。完整紀錄位於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
 
 ## 本機執行
 
-需要 Node.js `>=20.9.0` 與 pnpm `11.7.0`。
+需要 Node.js 24 LTS（`>=24.0.0 <25`）與 pnpm `11.7.0`。
 
 這是本機開發最低需求；D-017 已接受的 Windows Production runtime 目標為固定的 Node.js 24 LTS。
 
@@ -74,4 +74,4 @@ pnpm build
 
 GitHub Repository 是本專案的正式規格與交接來源。開始工作前請先讀 [`AGENTS.md`](AGENTS.md)，再依其中順序讀取治理文件。
 
-MVP2 實作依據為 Issue #29；PR #28 與 PR #30 均已合併。所有資料皆為虛構或遮罩內容；目前執行中的 MVP3-0 只有文件變更，本網站仍不是 production-ready。
+MVP2 實作依據為 Issue #29；PR #28、PR #30 與決策基線 PR #38 均已合併。所有資料皆為虛構或遮罩內容；目前執行中的 MVP3-1 尚在建立共用 SQLite 資料層，本網站仍不是 production-ready。
