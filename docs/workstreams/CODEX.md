@@ -4,24 +4,30 @@
 
 - Role: Codex
 - Issue: #33
-- Branch: `agent/33-shared-booking-data`
+- Branch: `agent/33-sqlite-core`
 - Primary responsibility: implement the shared SQLite schedule data boundary, persistence and concurrency protection without changing UI, authentication or public ingress
-- Status: `IN_PROGRESS / DRAFT_PR`
+- Status: `PR_OPEN`
 
 ## MVP3_SHARED_DATA checkpoint
 
-- Status: `IN_PROGRESS / DRAFT_PR`
+- Status: `PR_OPEN`
 - Updated at: `2026-08-09 +08:00`
 - Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/33
-- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/39
-- Branch: `agent/33-shared-booking-data`
+- Stacked base / runtime-prep Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/39
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/40
+- Branch: `agent/33-sqlite-core`
+- Base checkpoint: `agent/33-shared-booking-data` at `1b1b52c81a6377e94b665dd8e05ac6aaf0fd643d`.
 - Dependency completed: Issue #32 closed and PR #38 merged at `e6f65bd8c58c3356b663c974926c26d779ace4a3`.
-- Current checkpoint: Node.js 24 runtime range, pinned `better-sqlite3` packages, Next.js server external package, pnpm native-build allowlist and SQLite file ignores.
-- Checks: typecheck PASS; lint PASS; existing tests PASS (50/50); production build PASS; `git diff --check` PASS.
-- Blocker: package registry downloads timed out, so the native `better-sqlite3` install/load path is not yet validated.
-- Production boundary: no schema, Repository, server write path, UI/auth change, public traffic or real customer data is included in this checkpoint.
-- Exact next action: complete native dependency validation, then implement migrations/checksums, connection PRAGMAs, schema, Repository, idempotency, race protection, optimistic concurrency and busy-to-503 tests.
+- Implemented: one controlled file-backed SQLite connection factory with verified `foreign_keys=ON`, WAL, `synchronous=FULL`, `secure_delete=ON` and 5000 ms busy timeout; ordered checksum migrations fail closed on drift.
+- Schema boundary: exactly the eight Issue #33 tables, approved two-staff／one-service／availability configuration only, partial booking slot uniqueness, and no Issue #34 auth schema or production customer／booking／note seed.
+- Repository safety: server-canonical Taipei slots, availability／time-block／elapsed checks, transactional minimal audit plus idempotency, safe 409 conflicts, note version CAS and retryable safe 503 mapping for SQLite busy conditions.
+- Validation evidence: standard frozen install PASS; Node.js 24.14.0 native prebuild load PASS; SQLite 3.53.4 file-backed WAL write／read PASS; typecheck PASS; full lint PASS; 61／61 unit and integration tests PASS, including real two-worker same-slot race, close／reopen persistence, independent clients, idempotency replay／conflict, booking-plus-note coexistence, stale CAS and real lock-to-503 behavior; production build PASS; `git diff --check`, secret scan and production SQLite PII／import／log scans PASS.
+- Environment limitation: this host has no MSVC／Windows SDK. The `better-sqlite3@13.0.2` reviewed `win32-x64` prebuild path passes; source-build fallback remains unavailable and is deferred to Issue #36 host-deployment selection and validation.
+- Retention limitation: #33 stores idempotency expiry metadata but does not activate a purge scheduler or expiry-reuse policy; later operational retention work must define it before production activation.
+- Production boundary: server core only; no UI wiring, localStorage import, formal authentication, public ingress, deployment, backup scheduler, real data or out-of-scope product features.
+- Validated implementation commit: `465565f8f963774435bf4a6d979f690c4d7b8ab1`.
+- Exact next action: independent review of Draft PR #40; after PR #39／the stacked base lands, retarget #40 to `main`, confirm the diff contains only Issue #33, and rerun the full checks before merge. Do not merge from this implementation window.
 
 ## MVP3_DECISION_BASELINE checkpoint
 
