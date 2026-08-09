@@ -3,3 +3,4 @@ export * from "./identity";
 export * from "./integrations";
 export * from "./mvp";
 export * from "./models";
+export * from "./schedule";

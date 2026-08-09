@@ -59,7 +59,11 @@ pnpm install
 pnpm dev
 ```
 
+Issue #33 在 Windows／Node.js 24 使用 `better-sqlite3@13.0.2` 隨套件提供的 `win32-x64` 原生 prebuild；pnpm 明確停用其舊式隱含 `node-gyp` 安裝 hook。此工作站已通過原生模組載入、檔案型 SQLite 寫入與 WAL 驗證，但未安裝 MSVC／Windows SDK，因此 source-build fallback 尚不可用，留待 Issue #36 的正式主機佈署決定與驗證。
+
 開啟 `http://localhost:3000`。
+
+共用 SQLite 核心位於 server-only 的 `src/adapters/sqlite` 邊界，目前不接入 UI。既有瀏覽器 `localStorage` 仍只供 demo／test，不會自動匯入 SQLite；正式網站仍不可輸入真實資料。
 
 ## 驗證
 

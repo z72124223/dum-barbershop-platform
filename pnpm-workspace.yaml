@@ -4,6 +4,8 @@ packages:
 nodeLinker: hoisted
 packageImportMethod: copy
 allowBuilds:
-  better-sqlite3: true
+  # 13.0.2 ships reviewed platform-native prebuilds; skip its legacy implicit
+  # node-gyp install hook so a clean Node 24 install does not require MSVC.
+  better-sqlite3: false
   sharp: true
   unrs-resolver: true
