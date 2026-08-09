@@ -1,20 +1,35 @@
 # Codex Work Log — MVP3 Minimum Production
 
-## Active identity — Issue #32
+## Active identity — Issue #33
 
 - Role: Codex
-- Issue: #32
-- Branch: `agent/32-production-decision-baseline`
-- Primary responsibility: freeze the minimum Production architecture, business schedule, identity, data-retention and operations contract without changing runtime
-- Status: `READY_TO_MERGE`
+- Issue: #33
+- Branch: `agent/33-shared-booking-data`
+- Primary responsibility: implement the shared SQLite schedule data boundary, persistence and concurrency protection without changing UI, authentication or public ingress
+- Status: `IN_PROGRESS / DRAFT_PR`
+
+## MVP3_SHARED_DATA checkpoint
+
+- Status: `IN_PROGRESS / DRAFT_PR`
+- Updated at: `2026-08-09 +08:00`
+- Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
+- Issue: https://github.com/z72124223/dum-barbershop-platform/issues/33
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/39
+- Branch: `agent/33-shared-booking-data`
+- Dependency completed: Issue #32 closed and PR #38 merged at `e6f65bd8c58c3356b663c974926c26d779ace4a3`.
+- Current checkpoint: Node.js 24 runtime range, pinned `better-sqlite3` packages, Next.js server external package, pnpm native-build allowlist and SQLite file ignores.
+- Checks: typecheck PASS; lint PASS; existing tests PASS (50/50); production build PASS; `git diff --check` PASS.
+- Blocker: package registry downloads timed out, so the native `better-sqlite3` install/load path is not yet validated.
+- Production boundary: no schema, Repository, server write path, UI/auth change, public traffic or real customer data is included in this checkpoint.
+- Exact next action: complete native dependency validation, then implement migrations/checksums, connection PRAGMAs, schema, Repository, idempotency, race protection, optimistic concurrency and busy-to-503 tests.
 
 ## MVP3_DECISION_BASELINE checkpoint
 
-- Status: `READY_TO_MERGE`
+- Status: `MERGED`
 - Updated at: `2026-08-01 +08:00`
 - Parent Epic: https://github.com/z72124223/dum-barbershop-platform/issues/31
 - Issue: https://github.com/z72124223/dum-barbershop-platform/issues/32
-- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/38
+- Merged PR: https://github.com/z72124223/dum-barbershop-platform/pull/38
 - Branch: `agent/32-production-decision-baseline`
 - Integration gate completed: PR #28 merged at `7e180ed3b215a89be14f7c591e2cc08c394b296e`; PR #30 was retargeted to `main`, revalidated and merged at `f7bc974df32dc947969b6184a0e4454a143e6722`.
 - Final `main` validation: Node 24.14.0 / pnpm 11.9.0; typecheck PASS; lint PASS; tests PASS (50/50); production build PASS.
@@ -23,9 +38,10 @@
 - Decision baseline: accepted D-017 and `docs/PRODUCTION-BASELINE.md`; Owner approved the exact eight values in Codex on 2026-08-01, recorded in Issue #32 comment `5150975055`.
 - Approved responsibility: `@z72124223` is the accountable maintenance／alert／rollback Owner, manages the customer-data contact channel and approved encrypted A／B backup rotation.
 - Production identity: `dumbarbershop.com` / `https://dumbarbershop.com`, registration confirmed and recorded in Issue #32 comment `5151098342`.
-- Blocker: none for #32 validation and merge; public traffic and real customer data remain blocked until #37 GO.
+- Merge: `e6f65bd8c58c3356b663c974926c26d779ace4a3`; Issue #32 closed on 2026-08-01.
+- Blocker: none for the completed #32 baseline; public traffic and real customer data remain blocked until #37 GO.
 - Proposal commit: `c2202d7acbd413e6b6ec4c9cc98523cd6a79681f`; documentation links, diff check and secret／PII pattern scans PASS.
-- Exact next action: validate and merge PR #38, close Issue #32, then start #33 from updated `main` on an independent branch.
+- Exact next action: completed; continue under Issue #33 on an independent branch.
 
 ## ISSUE_29_MVP2_HISTORY_TAIPEI checkpoint
 
