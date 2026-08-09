@@ -49,7 +49,7 @@ Owner 已核准八項最小架構、時段、登入、個資保存與備份提�
 
 ## 本機執行
 
-需要 Node.js `>=20.9.0` 與 pnpm `11.7.0`。
+需要 Node.js 24 LTS（`>=24.0.0 <25`）與 pnpm `11.7.0`。
 
 這是本機開發最低需求；D-017 已接受的 Windows Production runtime 目標為固定的 Node.js 24 LTS。
 
