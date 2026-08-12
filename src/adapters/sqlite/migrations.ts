@@ -3,6 +3,7 @@ import type { ControlledSqliteConnection } from "./connection";
 
 export const SCHEDULE_SCHEMA_TABLES = [
   "audit_events",
+  "customer_data_verifications",
   "idempotency_requests",
   "schedule_entries",
   "schema_migrations",
@@ -263,6 +264,155 @@ ADD COLUMN auth_user_id TEXT REFERENCES "user" ("id") ON DELETE RESTRICT;
 CREATE UNIQUE INDEX staff_members_auth_user_id_unique
 ON staff_members (auth_user_id)
 WHERE auth_user_id IS NOT NULL;
+`,
+  },
+  {
+    version: 3,
+    name: "add_cross_device_schedule_and_anonymization",
+    sql: `
+PRAGMA defer_foreign_keys = ON;
+
+ALTER TABLE idempotency_requests RENAME TO idempotency_requests_v2;
+ALTER TABLE schedule_entries RENAME TO schedule_entries_v2;
+DROP INDEX schedule_entries_booking_slot_unique;
+
+CREATE TABLE schedule_entries (
+  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) >= 16),
+  kind TEXT NOT NULL CHECK (kind IN ('booking', 'note')),
+  staff_member_id TEXT NOT NULL REFERENCES staff_members(id) ON DELETE RESTRICT,
+  service_definition_id TEXT REFERENCES service_definitions(id) ON DELETE RESTRICT,
+  slot_date TEXT NOT NULL CHECK (
+    slot_date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+  ),
+  slot_time_minutes INTEGER NOT NULL CHECK (
+    slot_time_minutes BETWEEN 600 AND 1080
+    AND slot_time_minutes % 60 = 0
+  ),
+  slot_starts_at_utc TEXT NOT NULL,
+  duration_minutes INTEGER,
+  status TEXT,
+  customer_name TEXT,
+  customer_phone TEXT,
+  title_text TEXT,
+  note_text TEXT NOT NULL DEFAULT '',
+  anonymized_at_utc TEXT,
+  source TEXT NOT NULL CHECK (source IN ('customer', 'staff')),
+  version INTEGER NOT NULL DEFAULT 1 CHECK (version >= 1),
+  created_at_utc TEXT NOT NULL,
+  updated_at_utc TEXT NOT NULL,
+  CHECK (
+    (
+      kind = 'booking'
+      AND service_definition_id IS NOT NULL
+      AND duration_minutes = 60
+      AND status = 'confirmed'
+      AND title_text IS NULL
+      AND (
+        (
+          anonymized_at_utc IS NULL
+          AND customer_name IS NOT NULL
+          AND length(trim(customer_name)) > 0
+          AND customer_phone IS NOT NULL
+          AND length(trim(customer_phone)) > 0
+        )
+        OR
+        (
+          anonymized_at_utc IS NOT NULL
+          AND customer_name IS NULL
+          AND customer_phone IS NULL
+          AND note_text = ''
+        )
+      )
+    )
+    OR
+    (
+      kind = 'note'
+      AND service_definition_id IS NULL
+      AND duration_minutes IS NULL
+      AND status IS NULL
+      AND customer_name IS NULL
+      AND customer_phone IS NULL
+      AND title_text IS NOT NULL
+      AND length(trim(title_text)) > 0
+      AND anonymized_at_utc IS NULL
+      AND source = 'staff'
+      AND length(trim(note_text)) > 0
+    )
+  )
+);
+
+INSERT INTO schedule_entries (
+  id, kind, staff_member_id, service_definition_id, slot_date,
+  slot_time_minutes, slot_starts_at_utc, duration_minutes, status,
+  customer_name, customer_phone, title_text, note_text, anonymized_at_utc,
+  source, version, created_at_utc, updated_at_utc
+)
+SELECT
+  id, kind, staff_member_id, service_definition_id, slot_date,
+  slot_time_minutes, slot_starts_at_utc, duration_minutes, status,
+  customer_name, customer_phone,
+  CASE WHEN kind = 'note' THEN '文字註記' ELSE NULL END,
+  note_text, NULL, source, version, created_at_utc, updated_at_utc
+FROM schedule_entries_v2;
+
+CREATE UNIQUE INDEX schedule_entries_booking_slot_unique
+ON schedule_entries (staff_member_id, slot_date, slot_time_minutes)
+WHERE kind = 'booking';
+
+CREATE TABLE idempotency_requests (
+  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) >= 16),
+  scope TEXT NOT NULL CHECK (length(trim(scope)) > 0),
+  idempotency_key TEXT NOT NULL CHECK (length(trim(idempotency_key)) > 0),
+  request_hash TEXT NOT NULL CHECK (length(request_hash) = 64),
+  resource_kind TEXT NOT NULL CHECK (resource_kind IN ('booking', 'note')),
+  resource_id TEXT NOT NULL REFERENCES schedule_entries(id) ON DELETE RESTRICT,
+  result_json TEXT NOT NULL,
+  created_at_utc TEXT NOT NULL,
+  expires_at_utc TEXT NOT NULL,
+  UNIQUE (scope, idempotency_key)
+);
+
+INSERT INTO idempotency_requests
+SELECT * FROM idempotency_requests_v2;
+
+DROP TABLE idempotency_requests_v2;
+DROP TABLE schedule_entries_v2;
+
+ALTER TABLE audit_events RENAME TO audit_events_v2;
+
+CREATE TABLE audit_events (
+  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) >= 16),
+  actor_type TEXT NOT NULL CHECK (actor_type IN ('customer', 'staff', 'system')),
+  actor_id TEXT,
+  action TEXT NOT NULL CHECK (
+    action IN (
+      'schedule_entry.created',
+      'schedule_entry.note_updated',
+      'schedule_entry.anonymized'
+    )
+  ),
+  resource_type TEXT NOT NULL CHECK (resource_type = 'schedule_entry'),
+  resource_id TEXT NOT NULL,
+  resource_version INTEGER NOT NULL CHECK (resource_version >= 1),
+  occurred_at_utc TEXT NOT NULL
+);
+
+INSERT INTO audit_events SELECT * FROM audit_events_v2;
+DROP TABLE audit_events_v2;
+
+CREATE TABLE customer_data_verifications (
+  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) >= 16),
+  booking_entry_id TEXT NOT NULL REFERENCES schedule_entries(id) ON DELETE RESTRICT,
+  purpose TEXT NOT NULL CHECK (purpose = 'anonymize_booking'),
+  issued_by_staff_id TEXT NOT NULL REFERENCES staff_members(id) ON DELETE RESTRICT,
+  issued_at_utc TEXT NOT NULL,
+  expires_at_utc TEXT NOT NULL,
+  consumed_at_utc TEXT,
+  consumed_by_staff_id TEXT REFERENCES staff_members(id) ON DELETE RESTRICT
+);
+
+CREATE INDEX customer_data_verifications_booking_idx
+ON customer_data_verifications (booking_entry_id, expires_at_utc);
 `,
   },
 ];

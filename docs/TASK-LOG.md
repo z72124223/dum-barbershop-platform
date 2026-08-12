@@ -1,9 +1,9 @@
 # DUM BARBERSHOP Platform — Task Log
 
-最後更新：2026-08-09（Asia/Taipei）
+最後更新：2026-08-12（Asia/Taipei）
 目前 Milestone：MVP3 minimum production go-live
 父任務：Issue #31
-目前實作：Issue #33
+目前實作：Issue #35
 
 本檔案是里程碑級儀表板。詳細續接資訊位於角色日誌：
 
@@ -15,7 +15,7 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
-| Codex — Implementation | #33 | `agent/33-shared-booking-data` | IN_PROGRESS / DRAFT_PR | `MVP3_SHARED_DATA` | `docs/workstreams/CODEX.md` | Shared SQLite schedule data, persistence and concurrency protection |
+| Codex — Implementation | #35 | `agent/35-cross-device-schedule` | VALIDATED / DRAFT_PR_PENDING | `MVP3_CROSS_DEVICE_SCHEDULE` | `docs/workstreams/CODEX.md` | Same-site schedule HTTP/UI, privacy notice and controlled anonymization |
 
 Current MVP3 gates:
 
@@ -23,8 +23,10 @@ Current MVP3 gates:
 - `MVP2_MERGED` — PR #30 / merge `f7bc974df32dc947969b6184a0e4454a143e6722`
 - `FINAL_MAIN_VALIDATED` — typecheck, lint, 50/50 tests and production build PASS
 - `MVP3_DECISION_BASELINE` — PR #38 merged at `e6f65bd8c58c3356b663c974926c26d779ace4a3`; Issue #32 closed
-- `MVP3_SHARED_DATA` — Issue #33 in progress; runtime-preparation checkpoint submitted as Draft PR #39
-- #34–#37 — pending in Epic order
+- `MVP3_SHARED_DATA` — Issue #33 merged through PR #40
+- `MVP3_FORMAL_AUTH` — Issue #34 merged through PR #41 at `bba3797c4efafb60005de8dff1b83bf37466054c`
+- `MVP3_CROSS_DEVICE_SCHEDULE` — Issue #35 validated locally; Draft PR pending
+- #36–#37 — deployment hardening and explicit GO remain pending
 
 Prior completed Blueprint gates:
 
