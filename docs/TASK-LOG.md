@@ -15,7 +15,7 @@
 | Role | Issue | Expected Branch | Status | Current Gate | Detailed Log | Primary Scope |
 |---|---:|---|---|---|---|---|
 | GPT — Product / QA | #13 / async review | documentation / review branch as needed | ASYNC | Non-blocking review | `docs/workstreams/GPT.md` | Specs, content, QA and later production decisions |
-| Codex — Implementation | #35 | `agent/35-cross-device-schedule` | VALIDATED / DRAFT_PR_PENDING | `MVP3_CROSS_DEVICE_SCHEDULE` | `docs/workstreams/CODEX.md` | Same-site schedule HTTP/UI, privacy notice and controlled anonymization |
+| Codex — Implementation | #35 | `agent/35-cross-device-schedule` | VALIDATED / DRAFT_PR #42 | `MVP3_CROSS_DEVICE_SCHEDULE` | `docs/workstreams/CODEX.md` | Same-site schedule HTTP/UI, privacy notice and controlled anonymization |
 
 Current MVP3 gates:
 
@@ -25,7 +25,7 @@ Current MVP3 gates:
 - `MVP3_DECISION_BASELINE` — PR #38 merged at `e6f65bd8c58c3356b663c974926c26d779ace4a3`; Issue #32 closed
 - `MVP3_SHARED_DATA` — Issue #33 merged through PR #40
 - `MVP3_FORMAL_AUTH` — Issue #34 merged through PR #41 at `bba3797c4efafb60005de8dff1b83bf37466054c`
-- `MVP3_CROSS_DEVICE_SCHEDULE` — Issue #35 validated locally; Draft PR pending
+- `MVP3_CROSS_DEVICE_SCHEDULE` — Issue #35 validated locally; Draft PR #42 open, not Ready or merged
 - #36–#37 — deployment hardening and explicit GO remain pending
 
 Prior completed Blueprint gates:

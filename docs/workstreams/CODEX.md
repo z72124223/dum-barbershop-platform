@@ -7,7 +7,9 @@
 - Branch: `agent/35-cross-device-schedule`
 - Parent Epic: #31
 - Base: `origin/main` `bba3797c4efafb60005de8dff1b83bf37466054c` after PR #41 merged.
-- Status: `VALIDATED_COMMIT_PENDING` — Draft PR only; not Ready, merged or publicly activated.
+- Status: `PR_OPEN` — Draft PR #42; not Ready, merged or publicly activated.
+- Implementation commit: `a1f8036b5ca738f7ed2fbb0a72d8964f04b5fd33`.
+- Draft PR: https://github.com/z72124223/dum-barbershop-platform/pull/42
 - Scope: same-site schedule HTTP DTO/service/handler layer; customer availability and fixed 60-minute booking; authenticated Staff schedule reads/writes; idempotency, transactional conflict and note CAS; fail-closed collection notice; Owner-issued single-use anonymization verification.
 - UI boundary: preserves `/`, `/booking`, `/staff/login` and `/staff`; production UI has no BrowserMvpEntryStore/localStorage import, while demo/test adapters remain isolated.
 - Privacy boundary: public DTOs contain no customer PII; safe errors/audit contain no name, phone, note, SQL, path, stack or session data. Anonymization clears name/phone/customer note, deletes booking idempotency fingerprints, consumes a booking-bound short-lived proof and retains the occupied booking row.
@@ -15,7 +17,7 @@
 - Validation: pnpm 11.7.0; typecheck PASS; lint PASS; 84/84 tests PASS; Next.js 16.2.11 production build PASS; in-app browser and Edge desktop route smoke PASS; 390×844 no horizontal overflow; browser console 0 error/0 warning. Both available surfaces use Chromium, so an independent browser engine is still pending review. Automated Tab/Enter delivery was unreliable, so actual focus traversal is not claimed; DOM uses native controls, zero positive tabindex and repository focus-visible styling.
 - Deployment gates: the real Owner-managed contact value is absent by design and must remain out of Git. Production fails closed until #36/#37 configure and verify it. Cloudflare DPA/processor evidence, retention scheduler, backup and ingress/host setup remain #36/#37 gates. Final `pnpm audit --prod` reports the unchanged dependency tree at 5 high / 2 moderate across Sharp/PostCSS/Nanoid; full audit is 10 high / 2 moderate after additional brace-expansion/js-yaml dev-tool advisories. No dependency or lockfile changed in #35; remediation remains a #36/#37 pre-GO gate.
 - Production boundary: no traffic, DNS, real accounts, real credentials, real customer data, external APIs or #37 GO was activated.
-- Exact next action: finish diff/link/secret/PII scans, commit and push this branch, create a Draft PR referencing #35 with full test/deployment gates, and do not mark Ready, merge or close Issue #35.
+- Exact next action: independent review of Draft PR #42; address only confirmed Issue #35 required fixes on this branch, rerun affected/full gates, and keep the PR Draft. Do not merge, close Issue #35, start #36/#37, or activate public traffic.
 
 ## Previous identity — Issue #34
 

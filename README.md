@@ -87,7 +87,7 @@ DUM BARBERSHOP 客戶預約與員工工作台 MVP2。
 
 ## 正式上線工作
 
-MVP1 PR #28、MVP2 PR #30、決策基線 PR #38、SQLite PR #40 與正式認證 PR #41 已合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前 Issue #35 僅完成可審查的跨裝置 schedule slice，網站未公開且不可輸入真實資料。
+MVP1 PR #28、MVP2 PR #30、決策基線 PR #38、SQLite PR #40 與正式認證 PR #41 已合併至 `main`。正式上線依 Epic #31 拆成 #32–#37；目前 Issue #35 的跨裝置 schedule slice 位於 Draft PR #42，網站未公開且不可輸入真實資料。
 
 Owner 已核准八項最小架構、時段、登入、個資保存與備份提案，並已註冊正式網域 `dumbarbershop.com`；決策基線可供後續 MVP3 切片實作，但網站仍須等待 #37 GO 才能公開。完整紀錄位於 [`docs/PRODUCTION-BASELINE.md`](docs/PRODUCTION-BASELINE.md)。
 

@@ -136,7 +136,7 @@ Local preview status: **Complete as disabled delivery placeholders**. LINE regis
 - [x] #32 / MVP3-0：正式上線決策與資料治理基線（PR #38，2026-08-01）
 - [x] #33 / MVP3-1：共用預約資料層與併發保護（PR #40 merged）
 - [x] #34 / MVP3-2：老闆／職員正式登入與伺服器端授權（PR #41 merged）
-- [ ] #35 / MVP3-3：客戶預約與員工時段／註記跨裝置串接（本機 gates 通過，Draft PR pending；Issue 保持開啟）
+- [ ] #35 / MVP3-3：客戶預約與員工時段／註記跨裝置串接（本機 gates 通過，Draft PR #42 open；Issue 保持開啟）
 - [ ] #36 / MVP3-4：Windows 常駐、HTTPS、備份、監控與回滾
 - [ ] #37 / MVP3-5：正式上線驗收、切換與 24–72 小時穩定觀察
 
@@ -144,7 +144,7 @@ MVP3-0 的正式決策合約位於 `docs/PRODUCTION-BASELINE.md`。每片一個 
 
 ## Current milestone
 
-`MVP3-3 cross-device schedule — VALIDATED / DRAFT PR PENDING / NOT PUBLICLY ACTIVATED`
+`MVP3-3 cross-device schedule — VALIDATED / DRAFT PR #42 OPEN / NOT PUBLICLY ACTIVATED`
 
 Current execution sources:
 
