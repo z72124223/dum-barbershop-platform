@@ -6,14 +6,16 @@
 - Issue: #34
 - Branch: `agent/34-formal-auth`
 - Parent Epic: #31
-- Status: `VALIDATED_PENDING_DRAFT_PR`
+- Status: `PR_OPEN`
 - Scope: Better Auth 1.6.26 SQLite schema, nullable unique staff/auth binding, explicit account provisioning, server-side username login/session/authorization, revocation, rate limiting, strict transport/origin/body/route guards and minimal response DTOs.
 - Migration boundary: append-only migration 2; migration 1 checksum remains authoritative; startup and migrations create no auth users, credential accounts, sessions or rate-limit rows.
 - UI boundary: `/staff` is an authenticated server shell only. The formal client does not import the mock identity or localStorage schedule graph; Issue #35 UI/data adapter has not started.
-- Validation: typecheck PASS; lint PASS; 69/69 unit/integration tests PASS; production build PASS; client-bundle demo credential scan PASS; diff/secret/PII scan PASS.
+- Corrective review: PR review `PRR_kwDOTWCr0c8AAAABJPtF9Q` confirmed a same-key failed-login race. The handler now serializes only the normalized username + trusted-IP HMAC key across inspect, Better Auth verification and failure/clear persistence; completed queues remove their in-memory key.
+- Regression proof: 20 concurrent wrong-password requests for one key enter Better Auth exactly five times, never more than one at once, and return 5×401 + 15×429. A separate barrier test proves different IP keys are not globally serialized; sequential, expiry, generic 401, authorization 403 and session contracts remain covered.
+- Validation: focused concurrency/expiry tests 3/3 PASS; typecheck PASS; lint PASS; 72/72 unit/integration tests PASS; production build PASS; `git diff --check`, client-bundle, secret, PII and auth-log scans PASS.
 - Host caveat: exact HTTPS origin, trusted `X-Forwarded-Proto: https`, and a single proxy-overwritten `CF-Connecting-IP` are required. Loopback binding, Cloudflare overwrite proof, ingress, hosting and backup remain Issue #36.
 - Production boundary: no public traffic, real accounts, real credentials, real customer data, public staff ingress, deployment, backup or #37 GO was activated.
-- Exact next action: create the Issue #34 Draft PR against `main`, request review, and stop before Issue #35 or merge.
+- Exact next action: push the validated corrective commit to existing Draft PR #41, record the fix and checks on the PR, and stop before Ready, merge, Issue #35 or public activation.
 
 ## Previous identity — Issue #33
 

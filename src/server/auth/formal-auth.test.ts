@@ -241,6 +241,128 @@ describe("formal staff authentication", () => {
     } finally { runtime.close(); database.close(); }
   });
 
+  it("resets the failed-login window after the block expires", () => {
+    const { database, runtime } = createHarness();
+    try {
+      const startedAt = new Date("2026-08-09T01:00:00.000Z");
+      for (let index = 0; index < 5; index += 1) {
+        runtime.rateLimiter.recordFailure("owner.formal", "203.0.113.34", startedAt);
+      }
+      assert.equal(
+        runtime.rateLimiter.inspect("OWNER.FORMAL", "203.0.113.34", startedAt).blocked,
+        true,
+      );
+
+      const expiredAt = new Date("2026-08-09T01:15:00.000Z");
+      assert.equal(
+        runtime.rateLimiter.inspect("owner.formal", "203.0.113.34", expiredAt).blocked,
+        false,
+      );
+      assert.equal(
+        runtime.rateLimiter.recordFailure("owner.formal", "203.0.113.34", expiredAt).blocked,
+        false,
+      );
+    } finally { runtime.close(); database.close(); }
+  });
+
+  it("admits at most five concurrent wrong-password attempts for one limiter key", async () => {
+    const { database, runtime } = createHarness();
+    try {
+      await provisionStaffAccount(database, { role: "owner", username: "owner.formal", password: OWNER_PASSWORD });
+      const upstreamHandler = runtime.auth.handler;
+      let entered = 0;
+      let active = 0;
+      let maxActive = 0;
+      let releaseFirst!: () => void;
+      const firstCanFinish = new Promise<void>((resolve) => {
+        releaseFirst = resolve;
+      });
+      let signalFirstEntered!: () => void;
+      const firstEntered = new Promise<void>((resolve) => {
+        signalFirstEntered = resolve;
+      });
+      runtime.auth.handler = async (upstreamRequest) => {
+        entered += 1;
+        active += 1;
+        maxActive = Math.max(maxActive, active);
+        if (entered === 1) {
+          signalFirstEntered();
+          await firstCanFinish;
+        }
+        try {
+          return await upstreamHandler(upstreamRequest);
+        } finally {
+          active -= 1;
+        }
+      };
+
+      const attempts = Array.from({ length: 20 }, () => (
+        signIn(runtime, "OWNER.FORMAL", "Wrong-password-34!")
+      ));
+      await firstEntered;
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      releaseFirst();
+      const responses = await Promise.all(attempts);
+
+      assert.equal(entered, 5);
+      assert.equal(maxActive, 1);
+      assert.equal(responses.filter(({ status }) => status === 401).length, 5);
+      assert.equal(responses.filter(({ status }) => status === 429).length, 15);
+    } finally { runtime.close(); database.close(); }
+  });
+
+  it("does not serialize concurrent attempts for different limiter keys", async () => {
+    const { database, runtime } = createHarness();
+    try {
+      await provisionStaffAccount(database, { role: "owner", username: "owner.formal", password: OWNER_PASSWORD });
+      const upstreamHandler = runtime.auth.handler;
+      let releaseFirst!: () => void;
+      const firstCanFinish = new Promise<void>((resolve) => {
+        releaseFirst = resolve;
+      });
+      let signalFirstEntered!: () => void;
+      const firstEntered = new Promise<void>((resolve) => {
+        signalFirstEntered = resolve;
+      });
+      let signalSecondEntered!: () => void;
+      const secondEntered = new Promise<void>((resolve) => {
+        signalSecondEntered = resolve;
+      });
+      runtime.auth.handler = async (upstreamRequest) => {
+        const ip = upstreamRequest.headers.get("cf-connecting-ip");
+        if (ip === "203.0.113.34") {
+          signalFirstEntered();
+          await firstCanFinish;
+        } else if (ip === "203.0.113.35") {
+          signalSecondEntered();
+        }
+        return upstreamHandler(upstreamRequest);
+      };
+
+      const first = signIn(runtime, "owner.formal", "Wrong-password-34!", "203.0.113.34");
+      await firstEntered;
+      const second = signIn(runtime, "owner.formal", "Wrong-password-34!", "203.0.113.35");
+      let timeout: NodeJS.Timeout | undefined;
+      try {
+        await Promise.race([
+          secondEntered,
+          new Promise<never>((_, reject) => {
+            timeout = setTimeout(
+              () => reject(new Error("different limiter key was blocked")),
+              1_000,
+            );
+          }),
+        ]);
+      } finally {
+        if (timeout) clearTimeout(timeout);
+        releaseFirst();
+      }
+
+      assert.equal((await first).status, 401);
+      assert.equal((await second).status, 401);
+    } finally { runtime.close(); database.close(); }
+  });
+
   it("fails closed on origin, host, proxy, IP, body, route, and redirect-shaped input", async () => {
     const { database, runtime } = createHarness();
     try {

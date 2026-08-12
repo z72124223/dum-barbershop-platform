@@ -157,40 +157,42 @@ async function handleSignIn(
     return safeError(400, "invalid_request", "The request was rejected.");
   }
 
-  const now = new Date();
-  const rateState = runtime.rateLimiter.inspect(input.username, clientIp, now);
-  if (rateState.blocked) {
-    return json(429, {
-      error: "too_many_attempts",
-      message: "登入嘗試過多，請稍後再試。",
-    }, { "retry-after": String(rateState.retryAfterSeconds) });
-  }
-
-  const upstream = await runtime.auth.handler(authRequestWithBody(request, bytes));
-  const cookie = cookieHeaderFromResponse(upstream);
-  if (!upstream.ok || !cookie) {
-    runtime.rateLimiter.recordFailure(input.username, clientIp, now);
-    return json(401, GENERIC_LOGIN_ERROR);
-  }
-
-  const sessionHeaders = new Headers(request.headers);
-  sessionHeaders.set("cookie", cookie);
-  const betterAuthSession = await readBetterAuthSession(runtime, sessionHeaders);
-  try {
-    const actor = await resolveStaffActor(runtime, sessionHeaders);
-    runtime.rateLimiter.clear(input.username, clientIp);
-    const headers = new Headers(JSON_HEADERS);
-    copySessionCookie(upstream, headers);
-    return json(200, toPublicStaffSession(actor), headers);
-  } catch {
-    if (betterAuthSession?.user.id) {
-      runtime.database.prepare(`DELETE FROM session WHERE userId = ?`).run(
-        betterAuthSession.user.id,
-      );
+  return runtime.rateLimiter.serializeAttempt(input.username, clientIp, async () => {
+    const now = new Date();
+    const rateState = runtime.rateLimiter.inspect(input.username, clientIp, now);
+    if (rateState.blocked) {
+      return json(429, {
+        error: "too_many_attempts",
+        message: "登入嘗試過多，請稍後再試。",
+      }, { "retry-after": String(rateState.retryAfterSeconds) });
     }
-    runtime.rateLimiter.recordFailure(input.username, clientIp, now);
-    return json(401, GENERIC_LOGIN_ERROR);
-  }
+
+    const upstream = await runtime.auth.handler(authRequestWithBody(request, bytes));
+    const cookie = cookieHeaderFromResponse(upstream);
+    if (!upstream.ok || !cookie) {
+      runtime.rateLimiter.recordFailure(input.username, clientIp, now);
+      return json(401, GENERIC_LOGIN_ERROR);
+    }
+
+    const sessionHeaders = new Headers(request.headers);
+    sessionHeaders.set("cookie", cookie);
+    const betterAuthSession = await readBetterAuthSession(runtime, sessionHeaders);
+    try {
+      const actor = await resolveStaffActor(runtime, sessionHeaders);
+      runtime.rateLimiter.clear(input.username, clientIp);
+      const headers = new Headers(JSON_HEADERS);
+      copySessionCookie(upstream, headers);
+      return json(200, toPublicStaffSession(actor), headers);
+    } catch {
+      if (betterAuthSession?.user.id) {
+        runtime.database.prepare(`DELETE FROM session WHERE userId = ?`).run(
+          betterAuthSession.user.id,
+        );
+      }
+      runtime.rateLimiter.recordFailure(input.username, clientIp, now);
+      return json(401, GENERIC_LOGIN_ERROR);
+    }
+  });
 }
 
 async function handleGetSession(

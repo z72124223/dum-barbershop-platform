@@ -21,6 +21,8 @@ export interface LoginRateLimitState {
 }
 
 export class StaffLoginRateLimiter {
+  private readonly serializedAttempts = new Map<string, Promise<void>>();
+
   constructor(
     private readonly database: ControlledSqliteConnection,
     private readonly secret: string,
@@ -39,6 +41,30 @@ export class StaffLoginRateLimiter {
       return new URL(`http://[${candidate}]/`).hostname.slice(1, -1).toLowerCase();
     } catch {
       return null;
+    }
+  }
+
+  async serializeAttempt<T>(
+    username: string,
+    clientIp: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const keyHash = this.keyHash(username, clientIp);
+    const previous = this.serializedAttempts.get(keyHash) ?? Promise.resolve();
+    let release!: () => void;
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.serializedAttempts.set(keyHash, current);
+
+    await previous;
+    try {
+      return await operation();
+    } finally {
+      release();
+      if (this.serializedAttempts.get(keyHash) === current) {
+        this.serializedAttempts.delete(keyHash);
+      }
     }
   }
 
