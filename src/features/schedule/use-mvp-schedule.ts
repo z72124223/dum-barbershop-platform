@@ -6,8 +6,8 @@ import {
   MVP_SCHEDULE_ENTRIES_CHANGED_EVENT,
   MVP_SCHEDULE_ENTRIES_STORAGE_KEY,
   type MvpEntryStoreFailureReason,
-} from "@/adapters";
-import { createMockMvpScheduleEntries } from "@/data/mock";
+} from "@/adapters/browser/mvp-entry-store";
+import { createMockMvpScheduleEntries } from "@/data/mock/mvp";
 import type { MvpScheduleEntry } from "@/domain";
 
 interface MvpScheduleState {

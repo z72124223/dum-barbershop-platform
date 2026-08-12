@@ -20,6 +20,7 @@ import {
   openControlledSqliteConnection,
 } from "./connection";
 import {
+  FORMAL_AUTH_SCHEMA_TABLES,
   SCHEDULE_SCHEMA_TABLES,
   ScheduleMigrationIntegrityError,
   applyScheduleMigrations,
@@ -150,7 +151,7 @@ try {
 `;
 
 describe("SQLite schedule core", () => {
-  it("rebuilds the exact #33 schema and verifies every connection pragma", () => {
+  it("rebuilds the exact #33 + #34 schema and verifies every connection pragma", () => {
     const databasePath = createDatabasePath("schema");
     const database = openControlledSqliteConnection(databasePath);
     try {
@@ -171,16 +172,20 @@ describe("SQLite schedule core", () => {
         WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
         ORDER BY name
       `).all() as Array<{ name: string }>).map((row) => row.name);
-      assert.deepEqual(tables, [...SCHEDULE_SCHEMA_TABLES]);
-      assert.equal(tables.some((table) => /auth|account|session|rate/i.test(table)), false);
+      assert.deepEqual(
+        tables,
+        [...SCHEDULE_SCHEMA_TABLES, ...FORMAL_AUTH_SCHEMA_TABLES].sort(),
+      );
 
-      const migration = database.prepare(`
+      const migrations = database.prepare(`
         SELECT version, name, checksum
-        FROM schema_migrations
-      `).get() as { version: number; name: string; checksum: string };
-      assert.equal(migration.version, 1);
-      assert.equal(migration.name, "create_schedule_core");
-      assert.match(migration.checksum, /^[a-f0-9]{64}$/);
+        FROM schema_migrations ORDER BY version
+      `).all() as Array<{ version: number; name: string; checksum: string }>;
+      assert.deepEqual(migrations.map(({ version, name }) => ({ version, name })), [
+        { version: 1, name: "create_schedule_core" },
+        { version: 2, name: "add_better_auth_1_6_26" },
+      ]);
+      for (const migration of migrations) assert.match(migration.checksum, /^[a-f0-9]{64}$/);
 
       const index = database.prepare(`
         SELECT sql
@@ -203,7 +208,7 @@ describe("SQLite schedule core", () => {
       applyScheduleMigrations(reopened, fixedClock());
       assert.equal(
         scalar(reopened, "SELECT count(*) AS value FROM schema_migrations"),
-        1,
+        2,
       );
     } finally {
       reopened.close();
@@ -258,7 +263,7 @@ describe("SQLite schedule core", () => {
       unknownDatabase.prepare(`
         INSERT INTO schema_migrations (
           version, name, checksum, applied_at_utc
-        ) VALUES (2, 'unrecognized', ?, ?)
+        ) VALUES (3, 'unrecognized', ?, ?)
       `).run("1".repeat(64), FIXED_NOW);
       assert.throws(
         () => applyScheduleMigrations(unknownDatabase, fixedClock()),

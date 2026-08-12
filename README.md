@@ -1,5 +1,29 @@
 # DUM BARBERSHOP Platform
 
+## MVP3-2 formal staff authentication
+
+Issue #34 adds a server-only Better Auth 1.6.26 boundary backed by the controlled
+SQLite database. Username login, eight-hour non-refreshing sessions, owner/staff
+authorization, revocation and the failed-login limiter all run on the server.
+The `/staff` page is currently an authenticated shell only; the shared schedule
+UI/data adapter remains Issue #35 scope.
+
+Formal auth requires exactly one HTTPS origin plus a local absolute database
+path and a secret of at least 32 characters. Production and staging use distinct
+host-only `__Host-` cookies. Migrations and application startup never create
+users, credentials or sessions. To provision one already-approved staff row,
+provide the variables listed in `.env.example`, then run the explicit command:
+
+```bash
+pnpm staff:provision -- owner
+pnpm staff:provision -- staff
+```
+
+Credentials must be supplied out of band and must never be committed or echoed.
+Public ingress, real customer data, deployment/backup and production activation
+remain blocked until Issues #36 and #37. Browser localStorage remains demo/test
+only and is not accepted by the formal server boundary.
+
 DUM BARBERSHOP 客戶預約與員工工作台 MVP2。
 
 ## 目前範圍

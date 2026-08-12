@@ -2,19 +2,30 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useStaffAuth } from "../../features/staff/staff-auth";
+
+interface StaffSectionNavProps {
+  session: {
+    role: "owner" | "staff";
+    label: string;
+    expiresAt: string;
+  };
+}
 
 const links = [
   ["工作台", "/staff"],
 ];
 
-export function StaffSectionNav() {
+export function StaffSectionNav({ session }: StaffSectionNavProps) {
   const router = useRouter();
-  const { session, signOut } = useStaffAuth();
 
   async function handleSignOut() {
-    await signOut();
+    await fetch("/api/auth/sign-out", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: "{}",
+    });
     router.replace("/staff/login");
+    router.refresh();
   }
 
   return (
@@ -22,11 +33,11 @@ export function StaffSectionNav() {
       <div className="staff-session-bar">
         <div>
           <span>角色</span>
-          <strong>{session ? (session.identity.role === "owner" ? "老闆" : "職員") : "讀取中"}</strong>
+          <strong>{session.label}</strong>
         </div>
         <button type="button" onClick={handleSignOut}>登出</button>
       </div>
-      <nav className="staff-section-nav" aria-label="Staff 模擬功能">
+      <nav className="staff-section-nav" aria-label="員工作業區">
         {links.map(([label, href]) => <Link key={href} href={href}>{label}</Link>)}
       </nav>
     </div>

@@ -7,5 +7,8 @@ allowBuilds:
   # 13.0.2 ships reviewed platform-native prebuilds; skip its legacy implicit
   # node-gyp install hook so a clean Node 24 install does not require MSVC.
   better-sqlite3: false
+  # tsx uses the reviewed platform package directly; do not run esbuild's
+  # install hook in clean CI or require additional host build tooling.
+  esbuild: false
   sharp: true
   unrs-resolver: true

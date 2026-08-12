@@ -1,6 +1,25 @@
 # Codex Work Log — MVP3 Minimum Production
 
-## Active identity — Issue #33
+## Active identity — Issue #34
+
+- Role: Codex
+- Issue: #34
+- Branch: `agent/34-formal-auth`
+- Parent Epic: #31
+- Status: `PR_OPEN` — Next.js security patch validated; commit/push pending.
+- Scope: Better Auth 1.6.26 SQLite schema, nullable unique staff/auth binding, explicit account provisioning, server-side username login/session/authorization, revocation, rate limiting, strict transport/origin/body/route guards and minimal response DTOs.
+- Migration boundary: append-only migration 2; migration 1 checksum remains authoritative; startup and migrations create no auth users, credential accounts, sessions or rate-limit rows.
+- UI boundary: `/staff` is an authenticated server shell only. The formal client does not import the mock identity or localStorage schedule graph; Issue #35 UI/data adapter has not started.
+- Corrective review: PR review `PRR_kwDOTWCr0c8AAAABJPtF9Q` confirmed a same-key failed-login race. The handler now serializes only the normalized username + trusted-IP HMAC key across inspect, Better Auth verification and failure/clear persistence; completed queues remove their in-memory key.
+- Regression proof: 20 concurrent wrong-password requests for one key enter Better Auth exactly five times, never more than one at once, and return 5×401 + 15×429. A separate barrier test proves different IP keys are not globally serialized; sequential, expiry, generic 401, authorization 403 and session contracts remain covered.
+- Corrective security patch: resolves blocking review `PRR_kwDOTWCr0c8AAAABJP_4xg` / review #4915722438 by pinning `next` and `eslint-config-next` from 16.2.10 to 16.2.11. The lockfile was generated in an isolated detached worktree using pnpm 11.7.0, then mechanically copied back; package versions outside the Next.js family did not change.
+- Validation: pnpm 11.7.0 online frozen install PASS and offline frozen reinstall PASS; focused concurrency/expiry tests 3/3 PASS; typecheck PASS; lint PASS; 72/72 unit/integration tests PASS; production build PASS on Next.js 16.2.11; `git diff --check`, client-bundle credential/session-key, secret, PII and auth-log scans PASS.
+- Audit delta: before 9 high / 7 moderate, including Next.js 4 high / 5 moderate. After: all Next.js advisories removed; remaining 5 high / 2 moderate are existing postcss (2 high / 2 moderate), nanoid (2 high) and sharp (1 high) chains, retained as Issue #36/#37 pre-GO hardening rather than scope for #34.
+- Host caveat: exact HTTPS origin, trusted `X-Forwarded-Proto: https`, and a single proxy-overwritten `CF-Connecting-IP` are required. Loopback binding, Cloudflare overwrite proof, ingress, hosting and backup remain Issue #36.
+- Production boundary: no public traffic, real accounts, real credentials, real customer data, public staff ingress, deployment, backup or #37 GO was activated.
+- Exact next action: commit and push only `package.json`, `pnpm-lock.yaml` and this durable log to `agent/34-formal-auth`, update Draft PR #41 and reply to the blocking review, then stop before Ready, merge, Issue #35 or public activation.
+
+## Previous identity — Issue #33
 
 - Role: Codex
 - Issue: #33
