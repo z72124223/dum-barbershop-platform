@@ -20,7 +20,9 @@ export interface StoredScheduleEntry {
   status: "confirmed" | null;
   customerName: string | null;
   customerPhone: string | null;
+  title: string | null;
   note: string;
+  anonymizedAtUtc: string | null;
   source: ScheduleEntrySource;
   version: number;
   createdAtUtc: string;
@@ -37,18 +39,56 @@ export interface CreateBookingCommand {
   note?: string;
 }
 
+export interface CreateStaffBookingCommand extends CreateBookingCommand {
+  actorId: string;
+}
+
 export interface CreateManualNoteCommand {
   idempotencyKey: string;
+  actorId: string;
   staffMemberId: string;
   slotDate: string;
   slotTime: string;
+  title: string;
   note: string;
 }
 
 export interface UpdateScheduleEntryNoteCommand {
+  actorId: string;
   entryId: string;
   expectedVersion: number;
   note: string;
+}
+
+export interface ScheduleEntryQuery {
+  fromDate?: string;
+  toDate?: string;
+}
+
+export interface PublicAvailabilitySlot {
+  staffMemberId: string;
+  staffLabel: string;
+  slotDate: string;
+  slotTime: string;
+  available: boolean;
+}
+
+export interface IssueAnonymizationVerificationCommand {
+  actorId: string;
+  bookingEntryId: string;
+}
+
+export interface AnonymizationVerification {
+  verificationId: string;
+  bookingEntryId: string;
+  expiresAtUtc: string;
+}
+
+export interface AnonymizeBookingCommand {
+  actorId: string;
+  bookingEntryId: string;
+  verificationId: string;
+  expectedVersion: number;
 }
 
 export interface ScheduleWriteResult {
@@ -60,6 +100,7 @@ export interface ScheduleWriteResult {
 
 export type ScheduleDataErrorCode =
   | "invalid_request"
+  | "entry_read_only"
   | "slot_unavailable"
   | "idempotency_conflict"
   | "version_conflict"
@@ -69,6 +110,7 @@ export type ScheduleDataErrorCode =
 
 const SAFE_ERROR_MESSAGES: Record<ScheduleDataErrorCode, string> = {
   invalid_request: "The schedule request is invalid.",
+  entry_read_only: "The schedule entry is read-only.",
   slot_unavailable: "The selected schedule slot is unavailable.",
   idempotency_conflict: "The request key was already used for different data.",
   version_conflict: "The schedule entry was updated by another request.",
@@ -117,13 +159,18 @@ export function toSafeScheduleErrorResponse(
 
 export interface ScheduleEntryRepository {
   listStaffMembers(): Promise<ScheduleStaffMember[]>;
-  listEntries(): Promise<StoredScheduleEntry[]>;
+  listAvailability(): Promise<PublicAvailabilitySlot[]>;
+  listEntries(query?: ScheduleEntryQuery): Promise<StoredScheduleEntry[]>;
   createCustomerBooking(command: CreateBookingCommand): Promise<ScheduleWriteResult>;
-  createStaffBooking(command: CreateBookingCommand): Promise<ScheduleWriteResult>;
+  createStaffBooking(command: CreateStaffBookingCommand): Promise<ScheduleWriteResult>;
   createManualNote(
     command: CreateManualNoteCommand,
   ): Promise<ScheduleWriteResult>;
   updateNote(
     command: UpdateScheduleEntryNoteCommand,
   ): Promise<StoredScheduleEntry>;
+  issueAnonymizationVerification(
+    command: IssueAnonymizationVerificationCommand,
+  ): Promise<AnonymizationVerification>;
+  anonymizeBooking(command: AnonymizeBookingCommand): Promise<StoredScheduleEntry>;
 }

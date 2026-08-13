@@ -9,8 +9,14 @@ import {
 } from "../../domain/mvp/taipei-time";
 import {
   ScheduleDataError,
+  type AnonymizationVerification,
+  type AnonymizeBookingCommand,
   type CreateBookingCommand,
   type CreateManualNoteCommand,
+  type CreateStaffBookingCommand,
+  type IssueAnonymizationVerificationCommand,
+  type PublicAvailabilitySlot,
+  type ScheduleEntryQuery,
   type ScheduleEntryKind,
   type ScheduleEntryRepository,
   type ScheduleEntrySource,
@@ -35,6 +41,7 @@ import { applyScheduleMigrations } from "./migrations";
 const BOOKING_IDEMPOTENCY_SCOPE = "schedule.booking.create";
 const NOTE_IDEMPOTENCY_SCOPE = "schedule.note.create";
 const IDEMPOTENCY_RETENTION_MS = 24 * 60 * 60 * 1_000;
+const ANONYMIZATION_VERIFICATION_TTL_MS = 15 * 60 * 1_000;
 
 interface RepositoryOptions {
   clock?: () => Date;
@@ -59,7 +66,9 @@ interface ScheduleEntryRow {
   status: "confirmed" | null;
   customer_name: string | null;
   customer_phone: string | null;
+  title_text: string | null;
   note_text: string;
+  anonymized_at_utc: string | null;
   source: "customer" | "staff";
   version: number;
   created_at_utc: string;
@@ -88,12 +97,15 @@ interface CanonicalBooking {
   customerPhone: string;
   note: string;
   source: "customer" | "staff";
+  actorId: string | null;
 }
 
 interface CanonicalManualNote {
   idempotencyKey: string;
+  actorId: string;
   staffMemberId: string;
   slot: CanonicalSlot;
+  title: string;
   note: string;
 }
 
@@ -149,7 +161,7 @@ function canonicalizeSlot(slotDate: unknown, slotTime: unknown): CanonicalSlot {
 }
 
 function canonicalizeBooking(
-  command: CreateBookingCommand,
+  command: CreateBookingCommand | CreateStaffBookingCommand,
   source: ScheduleEntrySource,
 ): CanonicalBooking {
   if (source !== "customer" && source !== "staff") {
@@ -163,6 +175,9 @@ function canonicalizeBooking(
     customerPhone: requireString(command.customerPhone, { max: 50 }),
     note: requireString(command.note ?? "", { allowEmpty: true, max: 2_000 }),
     source,
+    actorId: source === "staff"
+      ? requireString((command as CreateStaffBookingCommand).actorId, { max: 200 })
+      : null,
   };
 }
 
@@ -171,8 +186,10 @@ function canonicalizeManualNote(
 ): CanonicalManualNote {
   return {
     idempotencyKey: requireString(command.idempotencyKey, { max: 200 }),
+    actorId: requireString(command.actorId, { max: 200 }),
     staffMemberId: requireString(command.staffMemberId, { max: 200 }),
     slot: canonicalizeSlot(command.slotDate, command.slotTime),
+    title: requireString(command.title, { max: 100 }),
     note: requireString(command.note, { max: 2_000 }),
   };
 }
@@ -192,14 +209,17 @@ function bookingRequestHash(command: CanonicalBooking): string {
     customerPhone: command.customerPhone,
     note: command.note,
     source: command.source,
+    actorId: command.actorId,
   });
 }
 
 function noteRequestHash(command: CanonicalManualNote): string {
   return hashCanonicalValue({
+    actorId: command.actorId,
     staffMemberId: command.staffMemberId,
     slotDate: command.slot.date,
     slotTimeMinutes: command.slot.minutes,
+    title: command.title,
     note: command.note,
   });
 }
@@ -340,7 +360,9 @@ function toStoredEntry(row: ScheduleEntryRow): StoredScheduleEntry {
     status: row.status,
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
+    title: row.title_text,
     note: row.note_text,
+    anonymizedAtUtc: row.anonymized_at_utc,
     source: row.source,
     version: row.version,
     createdAtUtc: row.created_at_utc,
@@ -374,8 +396,111 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
     });
   }
 
-  async listEntries(): Promise<StoredScheduleEntry[]> {
+  async listAvailability(): Promise<PublicAvailabilitySlot[]> {
     return runWithStorageBoundary(() => {
+      const now = this.currentInstant();
+      const clock = getTaipeiClockSnapshot(now);
+      const dates = Array.from(
+        { length: APPROVED_BOOKING_DAYS },
+        (_, index) => addTaipeiCalendarDays(clock.date, index),
+      );
+      const staff = this.database.prepare(`
+        SELECT id, role, public_label, is_active
+        FROM staff_members
+        WHERE is_active = 1
+        ORDER BY role ASC, public_label ASC, id ASC
+      `).all() as StaffRow[];
+      const bookings = this.database.prepare(`
+        SELECT staff_member_id, slot_date, slot_time_minutes
+        FROM schedule_entries
+        WHERE kind = 'booking' AND slot_date BETWEEN ? AND ?
+      `).all(dates[0], dates[dates.length - 1]) as Array<{
+        staff_member_id: string;
+        slot_date: string;
+        slot_time_minutes: number;
+      }>;
+      const blocks = this.database.prepare(`
+        SELECT staff_member_id, block_date, start_time_minutes, end_time_minutes
+        FROM staff_time_blocks
+        WHERE block_date BETWEEN ? AND ?
+      `).all(dates[0], dates[dates.length - 1]) as Array<{
+        staff_member_id: string;
+        block_date: string;
+        start_time_minutes: number;
+        end_time_minutes: number;
+      }>;
+      const windows = this.database.prepare(`
+        SELECT staff_member_id, weekday, start_time_minutes, end_time_minutes
+        FROM staff_availability_windows
+      `).all() as Array<{
+        staff_member_id: string;
+        weekday: number;
+        start_time_minutes: number;
+        end_time_minutes: number;
+      }>;
+
+      const occupied = new Set(bookings.map((booking) =>
+        `${booking.staff_member_id}|${booking.slot_date}|${booking.slot_time_minutes}`,
+      ));
+      const slots: PublicAvailabilitySlot[] = [];
+      for (const member of staff) {
+        for (const date of dates) {
+          const weekday = weekdayForTaipeiDate(date);
+          const window = windows.find((item) =>
+            item.staff_member_id === member.id && item.weekday === weekday,
+          );
+          for (
+            let minutes = APPROVED_FIRST_SLOT_MINUTES;
+            minutes <= APPROVED_LAST_SLOT_MINUTES;
+            minutes += APPROVED_SLOT_DURATION_MINUTES
+          ) {
+            const time = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:00`;
+            const blocked = blocks.some((block) =>
+              block.staff_member_id === member.id
+              && block.block_date === date
+              && block.start_time_minutes < minutes + APPROVED_SLOT_DURATION_MINUTES
+              && block.end_time_minutes > minutes,
+            );
+            slots.push({
+              staffMemberId: member.id,
+              staffLabel: member.public_label,
+              slotDate: date,
+              slotTime: time,
+              available: Boolean(window)
+                && window!.start_time_minutes <= minutes
+                && window!.end_time_minutes >= minutes + APPROVED_SLOT_DURATION_MINUTES
+                && !blocked
+                && !occupied.has(`${member.id}|${date}|${minutes}`)
+                && !isTaipeiSlotPast(date, time, now),
+            });
+          }
+        }
+      }
+      return slots;
+    });
+  }
+
+  async listEntries(query: ScheduleEntryQuery = {}): Promise<StoredScheduleEntry[]> {
+    return runWithStorageBoundary(() => {
+      const values: string[] = [];
+      const where: string[] = [];
+      if (query.fromDate !== undefined) {
+        if (!isTaipeiCalendarDate(query.fromDate)) {
+          throw new ScheduleDataError("invalid_request", 400);
+        }
+        where.push("slot_date >= ?");
+        values.push(query.fromDate);
+      }
+      if (query.toDate !== undefined) {
+        if (!isTaipeiCalendarDate(query.toDate)) {
+          throw new ScheduleDataError("invalid_request", 400);
+        }
+        where.push("slot_date <= ?");
+        values.push(query.toDate);
+      }
+      if (query.fromDate && query.toDate && query.fromDate > query.toDate) {
+        throw new ScheduleDataError("invalid_request", 400);
+      }
       const rows = this.database.prepare(`
         SELECT
           id,
@@ -389,14 +514,17 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
           status,
           customer_name,
           customer_phone,
+          title_text,
           note_text,
+          anonymized_at_utc,
           source,
           version,
           created_at_utc,
           updated_at_utc
         FROM schedule_entries
+        ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
         ORDER BY slot_date, slot_time_minutes, kind, created_at_utc, id
-      `).all() as ScheduleEntryRow[];
+      `).all(...values) as ScheduleEntryRow[];
       return rows.map(toStoredEntry);
     });
   }
@@ -408,13 +536,13 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
   }
 
   async createStaffBooking(
-    command: CreateBookingCommand,
+    command: CreateStaffBookingCommand,
   ): Promise<ScheduleWriteResult> {
     return this.createBooking(command, "staff");
   }
 
   private async createBooking(
-    command: CreateBookingCommand,
+    command: CreateBookingCommand | CreateStaffBookingCommand,
     source: ScheduleEntrySource,
   ): Promise<ScheduleWriteResult> {
     const canonical = canonicalizeBooking(command, source);
@@ -496,7 +624,7 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
 
       this.insertAudit({
         actorType: canonical.source,
-        actorId: null,
+        actorId: canonical.actorId,
         action: "schedule_entry.created",
         entryId,
         version: 1,
@@ -559,25 +687,28 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
           status,
           customer_name,
           customer_phone,
+          title_text,
           note_text,
+          anonymized_at_utc,
           source,
           version,
           created_at_utc,
           updated_at_utc
-        ) VALUES (?, 'note', ?, NULL, ?, ?, ?, NULL, NULL, NULL, NULL, ?, 'staff', 1, ?, ?)
+        ) VALUES (?, 'note', ?, NULL, ?, ?, ?, NULL, NULL, NULL, NULL, ?, ?, NULL, 'staff', 1, ?, ?)
       `).run(
         entryId,
         canonical.staffMemberId,
         canonical.slot.date,
         canonical.slot.minutes,
         canonical.slot.startsAtUtc,
+        canonical.title,
         canonical.note,
         timestamp,
         timestamp,
       );
       this.insertAudit({
         actorType: "staff",
-        actorId: null,
+        actorId: canonical.actorId,
         action: "schedule_entry.created",
         entryId,
         version: 1,
@@ -608,6 +739,7 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
   async updateNote(
     command: UpdateScheduleEntryNoteCommand,
   ): Promise<StoredScheduleEntry> {
+    const actorId = requireString(command.actorId, { max: 200 });
     const entryId = requireString(command.entryId, { max: 200 });
     if (!Number.isInteger(command.expectedVersion) || command.expectedVersion < 1) {
       throw new ScheduleDataError("invalid_request", 400);
@@ -620,11 +752,20 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
     const update = this.database.transaction((): StoredScheduleEntry => {
       const existing = this.readEntry(entryId);
       if (!existing) throw new ScheduleDataError("not_found", 404);
+
+      const now = this.currentInstant();
+      const slotTime = `${String(Math.floor(existing.slot_time_minutes / 60)).padStart(2, "0")}:${String(existing.slot_time_minutes % 60).padStart(2, "0")}`;
+      if (
+        existing.anonymized_at_utc !== null
+        || isTaipeiSlotPast(existing.slot_date, slotTime, now)
+      ) {
+        throw new ScheduleDataError("entry_read_only", 409);
+      }
       if (existing.kind === "note" && !rawNote) {
         throw new ScheduleDataError("invalid_request", 400);
       }
 
-      const timestamp = this.currentInstant().toISOString();
+      const timestamp = now.toISOString();
       const result = this.database.prepare(`
         UPDATE schedule_entries
         SET note_text = ?, version = version + 1, updated_at_utc = ?
@@ -638,7 +779,7 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
       if (!updated) throw new ScheduleDataError("storage_failure", 500);
       this.insertAudit({
         actorType: "staff",
-        actorId: null,
+        actorId,
         action: "schedule_entry.note_updated",
         entryId,
         version: updated.version,
@@ -648,6 +789,138 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
     });
 
     return runWithStorageBoundary(() => update.immediate());
+  }
+
+  async issueAnonymizationVerification(
+    command: IssueAnonymizationVerificationCommand,
+  ): Promise<AnonymizationVerification> {
+    const actorId = requireString(command.actorId, { max: 200 });
+    const bookingEntryId = requireString(command.bookingEntryId, { max: 200 });
+    const issue = this.database.transaction((): AnonymizationVerification => {
+      const actor = this.database.prepare(`
+        SELECT id
+        FROM staff_members
+        WHERE id = ?
+          AND role = 'owner'
+          AND is_active = 1
+          AND auth_user_id IS NOT NULL
+      `).get(actorId);
+      if (!actor) throw new ScheduleDataError("not_found", 404);
+
+      const booking = this.database.prepare(`
+        SELECT id
+        FROM schedule_entries
+        WHERE id = ? AND kind = 'booking' AND anonymized_at_utc IS NULL
+      `).get(bookingEntryId);
+      if (!booking) throw new ScheduleDataError("not_found", 404);
+
+      const now = this.currentInstant();
+      const verification: AnonymizationVerification = {
+        verificationId: randomUUID(),
+        bookingEntryId,
+        expiresAtUtc: new Date(
+          now.getTime() + ANONYMIZATION_VERIFICATION_TTL_MS,
+        ).toISOString(),
+      };
+      this.database.prepare(`
+        INSERT INTO customer_data_verifications (
+          id, booking_entry_id, purpose, issued_by_staff_id,
+          issued_at_utc, expires_at_utc, consumed_at_utc, consumed_by_staff_id
+        ) VALUES (?, ?, 'anonymize_booking', ?, ?, ?, NULL, NULL)
+      `).run(
+        verification.verificationId,
+        bookingEntryId,
+        actorId,
+        now.toISOString(),
+        verification.expiresAtUtc,
+      );
+      return verification;
+    });
+
+    return runWithStorageBoundary(() => issue.immediate());
+  }
+
+  async anonymizeBooking(
+    command: AnonymizeBookingCommand,
+  ): Promise<StoredScheduleEntry> {
+    const actorId = requireString(command.actorId, { max: 200 });
+    const bookingEntryId = requireString(command.bookingEntryId, { max: 200 });
+    const verificationId = requireString(command.verificationId, { max: 200 });
+    if (!Number.isInteger(command.expectedVersion) || command.expectedVersion < 1) {
+      throw new ScheduleDataError("invalid_request", 400);
+    }
+
+    const anonymize = this.database.transaction((): StoredScheduleEntry => {
+      const actor = this.database.prepare(`
+        SELECT id
+        FROM staff_members
+        WHERE id = ? AND is_active = 1 AND auth_user_id IS NOT NULL
+      `).get(actorId);
+      if (!actor) throw new ScheduleDataError("not_found", 404);
+
+      const now = this.currentInstant();
+      const timestamp = now.toISOString();
+      const verification = this.database.prepare(`
+        SELECT id
+        FROM customer_data_verifications
+        WHERE id = ?
+          AND booking_entry_id = ?
+          AND purpose = 'anonymize_booking'
+          AND consumed_at_utc IS NULL
+          AND expires_at_utc > ?
+      `).get(verificationId, bookingEntryId, timestamp);
+      if (!verification) throw new ScheduleDataError("not_found", 404);
+
+      const updated = this.database.prepare(`
+        UPDATE schedule_entries
+        SET
+          customer_name = NULL,
+          customer_phone = NULL,
+          note_text = '',
+          anonymized_at_utc = ?,
+          version = version + 1,
+          updated_at_utc = ?
+        WHERE id = ?
+          AND kind = 'booking'
+          AND anonymized_at_utc IS NULL
+          AND version = ?
+      `).run(
+        timestamp,
+        timestamp,
+        bookingEntryId,
+        command.expectedVersion,
+      );
+      if (updated.changes === 0) {
+        throw new ScheduleDataError("version_conflict", 409);
+      }
+
+      this.database.prepare(`
+        DELETE FROM idempotency_requests WHERE resource_id = ?
+      `).run(bookingEntryId);
+
+      const consumed = this.database.prepare(`
+        UPDATE customer_data_verifications
+        SET consumed_at_utc = ?, consumed_by_staff_id = ?
+        WHERE id = ? AND consumed_at_utc IS NULL
+      `).run(timestamp, actorId, verificationId);
+      if (consumed.changes !== 1) {
+        throw new ScheduleDataError("version_conflict", 409);
+      }
+
+      const result = this.readEntry(bookingEntryId);
+      if (!result) throw new ScheduleDataError("storage_failure", 500);
+      this.insertAudit({
+        actorType: "staff",
+        actorId,
+        action: "schedule_entry.anonymized",
+        entryId: bookingEntryId,
+        version: result.version,
+        occurredAt: timestamp,
+      });
+      return toStoredEntry(result);
+    });
+
+    return runWithStorageBoundary(() => anonymize.immediate());
   }
 
   private currentInstant(): Date {
@@ -672,7 +945,9 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
         status,
         customer_name,
         customer_phone,
+        title_text,
         note_text,
+        anonymized_at_utc,
         source,
         version,
         created_at_utc,
@@ -696,7 +971,10 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
   private insertAudit(input: {
     actorType: "customer" | "staff";
     actorId: string | null;
-    action: "schedule_entry.created" | "schedule_entry.note_updated";
+    action:
+      | "schedule_entry.created"
+      | "schedule_entry.note_updated"
+      | "schedule_entry.anonymized";
     entryId: string;
     version: number;
     occurredAt: string;
@@ -757,6 +1035,13 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
   }
 }
 
+export function createSqliteScheduleEntryRepository(
+  database: ControlledSqliteConnection,
+  options: RepositoryOptions = {},
+): ScheduleEntryRepository {
+  return new SqliteScheduleEntryRepository(database, options);
+}
+
 export function openSqliteScheduleStore(
   filename: string,
   options: RepositoryOptions = {},
@@ -767,7 +1052,7 @@ export function openSqliteScheduleStore(
     applyScheduleMigrations(database, initializedAt);
     provisionApprovedScheduleConfig(database, initializedAt);
     return {
-      repository: new SqliteScheduleEntryRepository(database, options),
+      repository: createSqliteScheduleEntryRepository(database, options),
       close: () => database.close(),
     };
   } catch (error) {

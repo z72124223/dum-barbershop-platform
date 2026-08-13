@@ -305,6 +305,24 @@ h2 {
   gap: 22px;
 }
 
+.collection-notice {
+  padding: clamp(22px, 4vw, 36px);
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) + 2px);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.collection-notice h2 {
+  margin-bottom: 20px;
+}
+
+.collection-notice a {
+  color: #f4d2ce;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .step-tabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

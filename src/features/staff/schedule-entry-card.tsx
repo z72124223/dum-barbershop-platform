@@ -8,34 +8,43 @@ import {
 } from "react";
 import {
   taipeiSlotDateTime,
-  type MvpScheduleEntry,
+  type StaffScheduleEntryDto,
 } from "@/domain";
 import {
   formatMvpDate,
-  staffLabel,
 } from "@/features/schedule/mvp-schedule-config";
+import {
+  scheduleEntryEditorCapability,
+  SCHEDULE_ENTRY_READ_ONLY_MESSAGE,
+} from "@/features/staff/schedule-entry-card-capability";
 
 interface ScheduleEntryCardProps {
-  entry: MvpScheduleEntry;
+  entry: StaffScheduleEntryDto;
+  staffLabel: string;
   showDate?: boolean;
   onSaveNote?: (
-    entry: MvpScheduleEntry,
+    entry: StaffScheduleEntryDto,
     nextNote: string,
-  ) => string | null;
+  ) => Promise<string | null>;
 }
 
 export function ScheduleEntryCard({
   entry,
+  staffLabel,
   showDate = false,
   onSaveNote,
 }: ScheduleEntryCardProps) {
-  const dateTime = taipeiSlotDateTime(entry.date, entry.startTime);
+  const dateTime = taipeiSlotDateTime(entry.date, entry.time);
   const editorId = useId();
   const editButtonRef = useRef<HTMLButtonElement>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(entry.note);
   const [baseNote, setBaseNote] = useState(entry.note);
   const [error, setError] = useState("");
+  const editorCapability = scheduleEntryEditorCapability(editing, Boolean(onSaveNote));
+  const displayedError = editorCapability === "read_only"
+    ? SCHEDULE_ENTRY_READ_ONLY_MESSAGE
+    : error;
 
   function startEditing() {
     setDraft(entry.note);
@@ -55,7 +64,7 @@ export function ScheduleEntryCard({
     closeEditor();
   }
 
-  function saveNote(event: FormEvent<HTMLFormElement>) {
+  async function saveNote(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextNote = draft.trim();
 
@@ -63,7 +72,10 @@ export function ScheduleEntryCard({
       setError("文字註記內容不可空白。");
       return;
     }
-    if (!onSaveNote) return;
+    if (!onSaveNote) {
+      setError(SCHEDULE_ENTRY_READ_ONLY_MESSAGE);
+      return;
+    }
     if (entry.note !== baseNote) {
       setError("這筆註記已在另一個分頁更新，請取消後重新編輯。");
       return;
@@ -74,7 +86,7 @@ export function ScheduleEntryCard({
       return;
     }
 
-    const saveError = onSaveNote(entry, nextNote);
+    const saveError = await onSaveNote(entry, nextNote);
     if (saveError) {
       setError(saveError);
       return;
@@ -93,17 +105,17 @@ export function ScheduleEntryCard({
             <small>{entry.date}</small>
           </span>
         ) : null}
-        <time dateTime={dateTime}>{entry.startTime}</time>
+        <time dateTime={dateTime}>{entry.time}</time>
       </div>
       <div className="entry-type">
         <span>{entry.kind === "booking" ? "預約" : "註記"}</span>
       </div>
       <div className="entry-content">
         <div className="entry-heading">
-          <strong>{entry.kind === "booking" ? entry.customerName : entry.title}</strong>
-          <small>{staffLabel(entry.staffId)}</small>
+          <strong>{entry.kind === "booking" ? entry.customerName ?? "已匿名化預約" : entry.title}</strong>
+          <small>{staffLabel}</small>
         </div>
-        {entry.kind === "booking" ? <span>{entry.phone}</span> : null}
+        {entry.kind === "booking" && entry.phone ? <span>{entry.phone}</span> : null}
         {editing ? (
           <form className="entry-note-editor" onSubmit={saveNote}>
             <label htmlFor={editorId}>
@@ -115,13 +127,14 @@ export function ScheduleEntryCard({
               onChange={(event) => setDraft(event.target.value)}
               rows={3}
               required={entry.kind === "note"}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? `${editorId}-error` : undefined}
+              aria-invalid={displayedError ? true : undefined}
+              aria-describedby={displayedError ? `${editorId}-error` : undefined}
               autoFocus
+              disabled={editorCapability === "read_only"}
             />
-            {error ? (
+            {displayedError ? (
               <p id={`${editorId}-error`} className="entry-note-error" role="alert">
-                {error}
+                {displayedError}
               </p>
             ) : null}
             <div className="entry-note-actions">
@@ -132,7 +145,11 @@ export function ScheduleEntryCard({
               >
                 取消
               </button>
-              <button className="button button-small" type="submit">
+              <button
+                className="button button-small"
+                type="submit"
+                disabled={editorCapability === "read_only"}
+              >
                 儲存註記
               </button>
             </div>

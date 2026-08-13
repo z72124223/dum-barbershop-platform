@@ -4,7 +4,9 @@ export type FormalStaffRole = "owner" | "staff";
 export type StaffCapability =
   | "schedule:read"
   | "booking:write"
-  | "note:write";
+  | "note:write"
+  | "customer-data:verify"
+  | "customer-data:anonymize";
 
 export interface AuthenticatedStaffActor {
   authUserId: string;
@@ -36,8 +38,19 @@ const ROLE_CAPABILITIES: Record<
   FormalStaffRole,
   ReadonlySet<StaffCapability>
 > = {
-  owner: new Set(["schedule:read", "booking:write", "note:write"]),
-  staff: new Set(["schedule:read", "booking:write", "note:write"]),
+  owner: new Set([
+    "schedule:read",
+    "booking:write",
+    "note:write",
+    "customer-data:verify",
+    "customer-data:anonymize",
+  ]),
+  staff: new Set([
+    "schedule:read",
+    "booking:write",
+    "note:write",
+    "customer-data:anonymize",
+  ]),
 };
 
 export interface BetterAuthSessionData {

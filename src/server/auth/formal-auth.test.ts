@@ -118,7 +118,7 @@ describe("formal staff authentication", () => {
       applyScheduleMigrations(upgraded, new Date("2026-08-09T01:00:00.000Z"));
       const row = upgraded.prepare(`SELECT id, note_text, version FROM schedule_entries WHERE id = ?`).get(noteId);
       assert.deepEqual(row, { id: noteId, note_text: "legacy note", version: 1 });
-      assert.equal((upgraded.prepare(`SELECT count(*) AS count FROM schema_migrations`).get() as { count: number }).count, 2);
+      assert.equal((upgraded.prepare(`SELECT count(*) AS count FROM schema_migrations`).get() as { count: number }).count, 3);
       assert.equal((upgraded.prepare(`SELECT count(*) AS count FROM user`).get() as { count: number }).count, 0);
     } finally { upgraded.close(); }
   });

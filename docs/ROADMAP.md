@@ -134,9 +134,9 @@ Local preview status: **Complete as disabled delivery placeholders**. LINE regis
 - [x] PR #28：MVP1 合併至 `main`（2026-08-01）
 - [x] PR #30：MVP2 retarget `main`、50/50 tests 與 production build 通過後合併（2026-08-01）
 - [x] #32 / MVP3-0：正式上線決策與資料治理基線（PR #38，2026-08-01）
-- [ ] #33 / MVP3-1：共用預約資料層與併發保護
-- [ ] #34 / MVP3-2：老闆／職員正式登入與伺服器端授權
-- [ ] #35 / MVP3-3：客戶預約與員工時段／註記跨裝置串接
+- [x] #33 / MVP3-1：共用預約資料層與併發保護（PR #40 merged）
+- [x] #34 / MVP3-2：老闆／職員正式登入與伺服器端授權（PR #41 merged）
+- [ ] #35 / MVP3-3：客戶預約與員工時段／註記跨裝置串接（本機 gates 通過，Draft PR #42 open；Issue 保持開啟）
 - [ ] #36 / MVP3-4：Windows 常駐、HTTPS、備份、監控與回滾
 - [ ] #37 / MVP3-5：正式上線驗收、切換與 24–72 小時穩定觀察
 
@@ -144,13 +144,13 @@ MVP3-0 的正式決策合約位於 `docs/PRODUCTION-BASELINE.md`。每片一個 
 
 ## Current milestone
 
-`MVP3-1 shared booking data — IN PROGRESS / DRAFT PR #39 / NOT PUBLICLY ACTIVATED`
+`MVP3-3 cross-device schedule — VALIDATED / DRAFT PR #42 OPEN / NOT PUBLICLY ACTIVATED`
 
 Current execution sources:
 
 - Parent Epic: Issue #31
-- Current slice: Issue #33 / `agent/33-shared-booking-data`
-- Merged baseline: PR #28, PR #30 and PR #38
+- Current slice: Issue #35 / `agent/35-cross-device-schedule`
+- Merged baseline: PR #28, PR #30, PR #38, PR #40 and PR #41
 - Prior Blueprint history: Issue #2, Issue #14 / PR #17, Issue #20
 - Task dashboard: `docs/TASK-LOG.md`
 
