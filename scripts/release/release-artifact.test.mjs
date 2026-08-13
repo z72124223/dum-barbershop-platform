@@ -4,7 +4,11 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import {
+  assertManifestFilesMatch,
+  assertPhysicalPath,
   assertReleaseSha,
+  assertSafeReleaseMutation,
+  compareOrdinal,
   resolveReleaseDirectory,
   scanReleaseDirectory,
   writeReleaseManifest,
@@ -37,6 +41,25 @@ test("artifact scan hashes an app and writes a stable manifest", async (t) => {
   assert.equal(manifest.bindHost, "127.0.0.1");
 });
 
+test("artifact ordering is explicit ordinal and manifest comparison is structural", async (t) => {
+  const { root, release } = await fixture();
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  for (const name of ["z.js", "a.js", "0.js", "ä.js"]) {
+    await fs.writeFile(path.join(release, "app", name), name);
+  }
+  const first = await scanReleaseDirectory(release);
+  const second = await scanReleaseDirectory(release);
+  assert.deepEqual(first, second);
+  assert.deepEqual(
+    first.map((entry) => entry.path),
+    ["app/0.js", "app/a.js", "app/server.js", "app/z.js", "app/ä.js"],
+  );
+  assert.equal(compareOrdinal("Z", "a"), -1);
+  assert.doesNotThrow(() => assertManifestFilesMatch(first, structuredClone(first)));
+  const reordered = structuredClone(first).reverse();
+  assert.throws(() => assertManifestFilesMatch(first, reordered), /release_manifest_hash_mismatch/);
+});
+
 test("artifact scan rejects runtime data, secrets, and symlinks", async (t) => {
   const runtimeData = await fixture();
   const secret = await fixture();
@@ -53,4 +76,63 @@ test("artifact scan rejects runtime data, secrets, and symlinks", async (t) => {
     "BETTER_AUTH_SECRET=fictional-secret-that-must-never-ship",
   );
   await assert.rejects(scanReleaseDirectory(secret.release), /release_secret_forbidden/);
+});
+
+test("secret scan rejects quoted env, JSON, credential extensions, and large candidates", async (t) => {
+  const quoted = await fixture();
+  const json = await fixture();
+  const credential = await fixture();
+  const large = await fixture();
+  t.after(() => Promise.all([quoted, json, credential, large].map(({ root }) => (
+    fs.rm(root, { recursive: true, force: true })
+  ))));
+
+  await fs.writeFile(
+    path.join(quoted.release, "app", "quoted.txt"),
+    'DUM_CLOUDFLARE_TUNNEL_TOKEN="fictional-value-that-must-not-ship"\n',
+  );
+  await assert.rejects(scanReleaseDirectory(quoted.release), /release_secret_forbidden/);
+
+  await fs.writeFile(
+    path.join(json.release, "app", "runtime.json"),
+    JSON.stringify({ BETTER_AUTH_SECRET: "fictional-value-that-must-not-ship" }),
+  );
+  await assert.rejects(scanReleaseDirectory(json.release), /release_secret_forbidden/);
+
+  await fs.writeFile(path.join(credential.release, "app", "identity.pfx"), "fixture");
+  await assert.rejects(scanReleaseDirectory(credential.release), /release_runtime_data_forbidden/);
+
+  await fs.writeFile(
+    path.join(large.release, "app", "large.txt"),
+    `${"x".repeat(1_100_000)}\nTUNNEL_TOKEN='fictional-value-that-must-not-ship'\n`,
+  );
+  await assert.rejects(scanReleaseDirectory(large.release), /release_secret_forbidden/);
+});
+
+test("release mutation rejects a junction in an existing ancestor", async (t) => {
+  const container = await fs.mkdtemp(path.join(os.tmpdir(), "dum-release-link-"));
+  const physical = path.join(container, "physical");
+  const linked = path.join(container, "linked");
+  await fs.mkdir(physical);
+  try {
+    await fs.symlink(physical, linked, process.platform === "win32" ? "junction" : "dir");
+  } catch (error) {
+    if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+      t.skip("junction creation is unavailable on this host");
+      await fs.rm(container, { recursive: true, force: true });
+      return;
+    }
+    throw error;
+  }
+  t.after(async () => {
+    await fs.unlink(linked).catch(() => undefined);
+    await fs.rm(container, { recursive: true, force: true });
+  });
+
+  const target = path.join(linked, "releases", SHA);
+  await assert.rejects(assertPhysicalPath(target), /release_reparse_forbidden/);
+  await assert.rejects(
+    assertSafeReleaseMutation(linked, target),
+    /release_reparse_forbidden/,
+  );
 });

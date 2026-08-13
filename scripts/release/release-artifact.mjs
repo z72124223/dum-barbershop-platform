@@ -9,6 +9,8 @@ const FORBIDDEN_FILE_PATTERNS = [
   /(?:^|\/)\.env(?:\.|$)/i,
   /\.(?:db|sqlite)(?:-(?:shm|wal))?$/i,
   /\.(?:log|pid)$/i,
+  /\.(?:asc|conf|config|gpg|ini|kdbx|key|p12|pem|pfx|toml|ya?ml)$/i,
+  /(?:^|\/)(?:credential|credentials|secret|secrets)(?:[._-]|$)/i,
 ];
 
 const FORBIDDEN_APP_ROOTS = new Set([
@@ -22,10 +24,17 @@ const FORBIDDEN_APP_ROOTS = new Set([
 ]);
 
 const SECRET_VALUE_PATTERNS = [
-  /BETTER_AUTH_SECRET\s*=\s*[^\s"'`]{16,}/,
-  /(?:tunnel|cloudflared)[_-]?token\s*=\s*[^\s"'`]{16,}/i,
+  /["']?(?:BETTER_AUTH_SECRET|DUM_CLOUDFLARE_TUNNEL_TOKEN|CLOUDFLARE_TUNNEL_TOKEN|TUNNEL_TOKEN)["']?\s*[:=]\s*["']?[^\s"'`,;}]{16,}/i,
   /-----BEGIN (?:PGP |RSA |EC |OPENSSH )?PRIVATE KEY-----/,
 ];
+
+const SECRET_SCANNABLE_EXTENSIONS = new Set([
+  "", ".cjs", ".js", ".json", ".mjs", ".txt",
+]);
+
+export function compareOrdinal(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
 
 export function assertReleaseSha(value) {
   if (!RELEASE_SHA_PATTERN.test(value ?? "")) {
@@ -44,14 +53,52 @@ export function resolveReleaseDirectory(outputRoot, releaseSha) {
   return { root, target };
 }
 
+function samePhysicalPath(left, right) {
+  const normalize = (value) => {
+    const resolved = path.resolve(value);
+    return process.platform === "win32" ? resolved.toLowerCase() : resolved;
+  };
+  return normalize(left) === normalize(right);
+}
+
+async function lstatOrNull(filename) {
+  try {
+    return await fs.lstat(filename);
+  } catch (error) {
+    if (error?.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+export async function assertPhysicalPath(filename) {
+  const resolved = path.resolve(filename);
+  const parsed = path.parse(resolved);
+  const relativeParts = resolved.slice(parsed.root.length).split(path.sep).filter(Boolean);
+  let current = parsed.root;
+  for (const part of relativeParts) {
+    current = path.join(current, part);
+    const stats = await lstatOrNull(current);
+    if (!stats) break;
+    if (stats.isSymbolicLink()) throw new Error("release_reparse_forbidden");
+    const physical = await fs.realpath(current);
+    if (!samePhysicalPath(physical, current)) {
+      throw new Error("release_reparse_forbidden");
+    }
+  }
+  return resolved;
+}
+
 async function walk(root, current = root) {
   const entries = await fs.readdir(current, { withFileTypes: true });
   const files = [];
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of entries.sort((a, b) => compareOrdinal(a.name, b.name))) {
     const absolute = path.join(current, entry.name);
     if (entry.isSymbolicLink()) throw new Error("release_symlink_forbidden");
-    if (entry.isDirectory()) files.push(...await walk(root, absolute));
-    else if (entry.isFile()) files.push(path.relative(root, absolute).replaceAll("\\", "/"));
+    const stats = await fs.lstat(absolute);
+    const physical = await fs.realpath(absolute);
+    if (!samePhysicalPath(physical, absolute)) throw new Error("release_reparse_forbidden");
+    if (stats.isDirectory()) files.push(...await walk(root, absolute));
+    else if (stats.isFile()) files.push(path.relative(root, absolute).replaceAll("\\", "/"));
     else throw new Error("release_entry_type_forbidden");
   }
   return files;
@@ -74,10 +121,8 @@ function assertAllowedPath(relativePath) {
 }
 
 async function assertNoEmbeddedSecret(filename) {
-  const stats = await fs.stat(filename);
-  if (stats.size > 1_048_576) return;
   const extension = path.extname(filename).toLowerCase();
-  if (!["", ".cjs", ".js", ".json", ".mjs", ".txt"].includes(extension)) return;
+  if (!SECRET_SCANNABLE_EXTENSIONS.has(extension)) return;
   const content = await fs.readFile(filename, "utf8");
   if (SECRET_VALUE_PATTERNS.some((pattern) => pattern.test(content))) {
     throw new Error("release_secret_forbidden");
@@ -86,6 +131,7 @@ async function assertNoEmbeddedSecret(filename) {
 
 export async function scanReleaseDirectory(releaseDirectory) {
   const releaseRoot = path.resolve(releaseDirectory);
+  await assertPhysicalPath(releaseRoot);
   const appRoot = path.join(releaseRoot, "app");
   const entrypoint = path.join(appRoot, "server.js");
   if (!(await fs.stat(entrypoint).catch(() => null))?.isFile()) {
@@ -102,6 +148,49 @@ export async function scanReleaseDirectory(releaseDirectory) {
     hashes.push({ path: relativePath, sha256: await sha256(absolute) });
   }
   return hashes;
+}
+
+export async function assertSafeReleaseMutation(outputRoot, target) {
+  const root = path.resolve(outputRoot);
+  const releaseTarget = path.resolve(target);
+  const relative = path.relative(root, releaseTarget);
+  if (
+    !relative
+    || relative.startsWith("..")
+    || path.isAbsolute(relative)
+    || relative.split(path.sep).length !== 2
+    || relative.split(path.sep)[0] !== "releases"
+    || !RELEASE_SHA_PATTERN.test(relative.split(path.sep)[1] ?? "")
+  ) {
+    throw new Error("release_path_invalid");
+  }
+  await assertPhysicalPath(root);
+  await assertPhysicalPath(path.dirname(releaseTarget));
+  const targetStats = await lstatOrNull(releaseTarget);
+  if (targetStats) {
+    await assertPhysicalPath(releaseTarget);
+    if (!targetStats.isDirectory()) throw new Error("release_path_invalid");
+    await walk(releaseTarget);
+  }
+}
+
+export function assertManifestFilesMatch(actual, expected) {
+  if (!Array.isArray(expected) || actual.length !== expected.length) {
+    throw new Error("release_manifest_hash_mismatch");
+  }
+  for (let index = 0; index < actual.length; index += 1) {
+    const actualEntry = actual[index];
+    const expectedEntry = expected[index];
+    if (
+      !expectedEntry
+      || Object.keys(expectedEntry).sort(compareOrdinal).join(",") !== "path,sha256"
+      || expectedEntry.path !== actualEntry.path
+      || expectedEntry.sha256 !== actualEntry.sha256
+      || !/^[0-9a-f]{64}$/.test(expectedEntry.sha256)
+    ) {
+      throw new Error("release_manifest_hash_mismatch");
+    }
+  }
 }
 
 export async function writeReleaseManifest(releaseDirectory, releaseSha, hashes) {

@@ -4,6 +4,7 @@ import path from "node:path";
 import process from "node:process";
 import {
   assertReleaseSha,
+  assertSafeReleaseMutation,
   resolveReleaseDirectory,
   scanReleaseDirectory,
   writeReleaseManifest,
@@ -36,17 +37,19 @@ const staticSource = path.join(repositoryRoot, ".next", "static");
 const publicSource = path.join(repositoryRoot, "public");
 
 for (const required of [standaloneSource, staticSource, publicSource]) {
-  if (!(await fs.stat(required).catch(() => null))?.isDirectory()) {
+  if (!(await fs.lstat(required).catch(() => null))?.isDirectory()) {
     throw new Error("standalone_build_missing");
   }
 }
 
-if (await fs.stat(target).catch(() => null)) {
+await assertSafeReleaseMutation(outputRoot, target);
+if (await fs.lstat(target).catch(() => null)) {
   if (!replace) throw new Error("release_already_exists");
   await fs.rm(target, { recursive: true, force: false });
 }
 
 await fs.mkdir(path.dirname(target), { recursive: true });
+await assertSafeReleaseMutation(outputRoot, target);
 await fs.mkdir(target, { recursive: false });
 const appTarget = path.join(target, "app");
 await fs.cp(standaloneSource, appTarget, { recursive: true, dereference: true });
