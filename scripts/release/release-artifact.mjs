@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 export const RELEASE_SHA_PATTERN = /^[0-9a-f]{40}$/;
+export const RELEASE_NODE_VERSION = "24.19.0";
 
 const FORBIDDEN_FILE_PATTERNS = [
   /(?:^|\/)\.env(?:\.|$)/i,
@@ -225,6 +226,7 @@ export async function writeReleaseManifest(releaseDirectory, releaseSha, hashes)
   const manifest = {
     schemaVersion: 1,
     releaseSha: assertReleaseSha(releaseSha),
+    nodeVersion: RELEASE_NODE_VERSION,
     entrypoint: "app/server.js",
     bindHost: "127.0.0.1",
     files: hashes,

@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import {
+  RELEASE_NODE_VERSION,
   assertPhysicalTree,
   assertReleaseSha,
   assertSafeReleaseMutation,
@@ -17,6 +18,9 @@ function option(name, fallback) {
 }
 
 const repositoryRoot = path.resolve(import.meta.dirname, "..", "..");
+if (process.versions.node !== RELEASE_NODE_VERSION) {
+  throw new Error("release_node_version_invalid");
+}
 const releaseSha = assertReleaseSha(
   option("--sha", process.env.DUM_RELEASE_SHA)
     ?? execFileSync("git", ["rev-parse", "HEAD"], {

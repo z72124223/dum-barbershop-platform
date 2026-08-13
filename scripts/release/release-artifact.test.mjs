@@ -39,6 +39,7 @@ test("artifact scan hashes an app and writes a stable manifest", async (t) => {
   assert.deepEqual(hashes.map((entry) => entry.path), ["app/server.js"]);
   const manifest = await writeReleaseManifest(release, SHA, hashes);
   assert.equal(manifest.releaseSha, SHA);
+  assert.equal(manifest.nodeVersion, "24.19.0");
   assert.equal(manifest.bindHost, "127.0.0.1");
 });
 
