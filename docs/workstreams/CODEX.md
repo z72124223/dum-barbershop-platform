@@ -1,5 +1,18 @@
 # Codex Work Log — MVP3 Minimum Production
 
+## Active identity — Issue #36
+
+- Role: Codex
+- Issue: #36
+- Branch: `agent/36-production-readiness`
+- Parent Epic: #31
+- Base: `origin/main` `4d9f6acc04fd082236d4bc36c39e1d0de3731721` after PR #42 merged and Issue #35 closed.
+- Status: `IN_PROGRESS` — launch-blocker implementation only; Draft PR pending.
+- Scope: supported dependency audit remediation; standalone fixed-SHA release artifacts; no-PII health/readiness; retention/maintenance; encrypted A/B online backup and isolated restore; fixed-release deploy/rollback and disabled Production Scheduled Task registration; Cloudflared staging/Production templates; generic external monitor; minimal operator runbook.
+- Safety boundary: repository artifacts only. Do not install or change Windows, services, Scheduled Tasks, Cloudflare/DNS, real secrets/accounts/data, or the existing port 3100 process. Keep Production tasks disabled/stopped, apex traffic blocked until Issue #37 GO, and all fixtures fictional.
+- Production boundary: do not merge, close Issue #36, start Issue #37, enable public traffic, or accept real customer data from this implementation window.
+- Exact next action: create and push the initial durable-log commit, open a Draft PR referencing Issue #36, then validate upstream-supported dependency versions before the smallest lockfile update.
+
 ## Active identity — Issue #35
 
 - Role: Codex
