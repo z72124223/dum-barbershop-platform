@@ -13,6 +13,10 @@ import {
 import {
   formatMvpDate,
 } from "@/features/schedule/mvp-schedule-config";
+import {
+  scheduleEntryEditorCapability,
+  SCHEDULE_ENTRY_READ_ONLY_MESSAGE,
+} from "@/features/staff/schedule-entry-card-capability";
 
 interface ScheduleEntryCardProps {
   entry: StaffScheduleEntryDto;
@@ -37,6 +41,10 @@ export function ScheduleEntryCard({
   const [draft, setDraft] = useState(entry.note);
   const [baseNote, setBaseNote] = useState(entry.note);
   const [error, setError] = useState("");
+  const editorCapability = scheduleEntryEditorCapability(editing, Boolean(onSaveNote));
+  const displayedError = editorCapability === "read_only"
+    ? SCHEDULE_ENTRY_READ_ONLY_MESSAGE
+    : error;
 
   function startEditing() {
     setDraft(entry.note);
@@ -64,7 +72,10 @@ export function ScheduleEntryCard({
       setError("文字註記內容不可空白。");
       return;
     }
-    if (!onSaveNote) return;
+    if (!onSaveNote) {
+      setError(SCHEDULE_ENTRY_READ_ONLY_MESSAGE);
+      return;
+    }
     if (entry.note !== baseNote) {
       setError("這筆註記已在另一個分頁更新，請取消後重新編輯。");
       return;
@@ -116,13 +127,14 @@ export function ScheduleEntryCard({
               onChange={(event) => setDraft(event.target.value)}
               rows={3}
               required={entry.kind === "note"}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? `${editorId}-error` : undefined}
+              aria-invalid={displayedError ? true : undefined}
+              aria-describedby={displayedError ? `${editorId}-error` : undefined}
               autoFocus
+              disabled={editorCapability === "read_only"}
             />
-            {error ? (
+            {displayedError ? (
               <p id={`${editorId}-error`} className="entry-note-error" role="alert">
-                {error}
+                {displayedError}
               </p>
             ) : null}
             <div className="entry-note-actions">
@@ -133,7 +145,11 @@ export function ScheduleEntryCard({
               >
                 取消
               </button>
-              <button className="button button-small" type="submit">
+              <button
+                className="button button-small"
+                type="submit"
+                disabled={editorCapability === "read_only"}
+              >
                 儲存註記
               </button>
             </div>

@@ -85,6 +85,54 @@ function request(
   });
 }
 
+function rawBodyRequest(
+  route: string,
+  body: BodyInit | null,
+  headers: Record<string, string> = {},
+): Request {
+  return new Request(`${ORIGIN}${route}`, {
+    method: "POST",
+    headers: {
+      host: HOST,
+      "x-forwarded-proto": "https",
+      "cf-connecting-ip": "203.0.113.35",
+      origin: ORIGIN,
+      "sec-fetch-site": "same-origin",
+      "content-type": "application/json",
+      ...headers,
+    },
+    body,
+    duplex: "half",
+  } as RequestInit & { duplex: "half" });
+}
+
+function bodyStream(chunks: readonly Uint8Array[]): ReadableStream<Uint8Array> {
+  let index = 0;
+  return new ReadableStream<Uint8Array>({
+    pull(controller) {
+      const chunk = chunks[index++];
+      if (chunk) controller.enqueue(chunk);
+      else controller.close();
+    },
+  }, { highWaterMark: 0 });
+}
+
+function countRepositoryCalls(runtime: ScheduleServerRuntime): () => number {
+  const repository = runtime.repository;
+  let calls = 0;
+  runtime.repository = new Proxy(repository, {
+    get(target, property) {
+      const value = Reflect.get(target, property, target) as unknown;
+      if (typeof value !== "function") return value;
+      return (...args: unknown[]) => {
+        calls += 1;
+        return Reflect.apply(value, target, args);
+      };
+    },
+  });
+  return () => calls;
+}
+
 async function cookieFor(
   authRuntime: FormalAuthRuntime,
   username: string,
@@ -108,6 +156,7 @@ async function harness(options: { clock?: () => Date } = {}): Promise<{
   authRuntime: FormalAuthRuntime;
   ownerCookie: string;
   staffCookie: string;
+  auditCount(entryId: string): number;
   close(): void;
 }> {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "dum-schedule-http-"));
@@ -144,6 +193,9 @@ async function harness(options: { clock?: () => Date } = {}): Promise<{
     authRuntime,
     ownerCookie,
     staffCookie,
+    auditCount: (entryId: string) => (database.prepare(`
+      SELECT count(*) AS value FROM audit_events WHERE resource_id = ?
+    `).get(entryId) as { value: number }).value,
     close: () => database.close(),
   };
 }
@@ -243,6 +295,184 @@ describe("collection notice configuration", () => {
 });
 
 describe("same-site schedule HTTP boundary", () => {
+  it("accepts a small no-Content-Length chunked JSON request", async () => {
+    const fixture = await harness();
+    try {
+      const slot = (await fixture.runtime.repository.listAvailability()).find(
+        (candidate) => candidate.available,
+      );
+      assert.ok(slot);
+      const bytes = new TextEncoder().encode(JSON.stringify({
+        idempotencyKey: "chunked-small-booking",
+        staffMemberId: slot.staffMemberId,
+        slotDate: slot.slotDate,
+        slotTime: slot.slotTime,
+        customerName: "Fictional chunked customer",
+        customerPhone: "0900-000-901",
+        note: "small chunked request",
+      }));
+      const chunks: Uint8Array[] = [];
+      for (let index = 0; index < bytes.byteLength; index += 17) {
+        chunks.push(bytes.slice(index, index + 17));
+      }
+      const chunked = rawBodyRequest(
+        "/api/schedule/bookings",
+        bodyStream(chunks),
+      );
+      assert.equal(chunked.headers.get("content-length"), null);
+      const response = await handlePublicBookingRequest(chunked, fixture.runtime);
+      assert.equal(response.status, 201);
+    } finally {
+      fixture.close();
+    }
+  });
+
+  it("bounds and cancels 8193-byte chunked bodies even when Content-Length is absent or false", async () => {
+    for (const declaredLength of [undefined, "1"] as const) {
+      const fixture = await harness();
+      try {
+        const repositoryCalls = countRepositoryCalls(fixture.runtime);
+        let pulls = 0;
+        let producedBytes = 0;
+        let cancelled = false;
+        const chunks = [
+          new Uint8Array(4_096),
+          new Uint8Array(4_096),
+          new Uint8Array(1),
+        ];
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            const chunk = chunks[pulls];
+            pulls += 1;
+            producedBytes += chunk.byteLength;
+            controller.enqueue(chunk);
+          },
+          cancel() {
+            cancelled = true;
+          },
+        }, { highWaterMark: 0 });
+        const response = await handlePublicBookingRequest(
+          rawBodyRequest(
+            "/api/schedule/bookings",
+            stream,
+            declaredLength ? { "content-length": declaredLength } : {},
+          ),
+          fixture.runtime,
+        );
+        assert.equal(response.status, 400, declaredLength ?? "no content-length");
+        assert.equal(cancelled, true);
+        assert.equal(pulls, 3);
+        assert.equal(producedBytes, 8_193);
+        assert.equal(repositoryCalls(), 0);
+      } finally {
+        fixture.close();
+      }
+    }
+  });
+
+  it("accepts exactly 8192 bytes and rejects invalid UTF-8 through the handler boundary", async () => {
+    const exactFixture = await harness();
+    try {
+      const slot = (await exactFixture.runtime.repository.listAvailability()).find(
+        (candidate) => candidate.available,
+      );
+      assert.ok(slot);
+      const body = JSON.stringify({
+        idempotencyKey: "exact-body-limit-booking",
+        staffMemberId: slot.staffMemberId,
+        slotDate: slot.slotDate,
+        slotTime: slot.slotTime,
+        customerName: "Fictional exact-limit customer",
+        customerPhone: "0900-000-902",
+        note: "exact body boundary",
+      });
+      const exactBytes = new TextEncoder().encode(`${body}${" ".repeat(8_192 - body.length)}`);
+      assert.equal(exactBytes.byteLength, 8_192);
+      const exactRequest = rawBodyRequest(
+        "/api/schedule/bookings",
+        bodyStream([exactBytes.slice(0, 4_096), exactBytes.slice(4_096)]),
+      );
+      assert.equal(exactRequest.headers.get("content-length"), null);
+      const accepted = await handlePublicBookingRequest(exactRequest, exactFixture.runtime);
+      assert.equal(accepted.status, 201);
+    } finally {
+      exactFixture.close();
+    }
+
+    const invalidFixture = await harness();
+    try {
+      const repositoryCalls = countRepositoryCalls(invalidFixture.runtime);
+      const invalidUtf8 = rawBodyRequest(
+        "/api/schedule/bookings",
+        bodyStream([new Uint8Array([0x7b, 0x22, 0xc3, 0x28, 0x22, 0x7d])]),
+      );
+      const rejected = await handlePublicBookingRequest(
+        invalidUtf8,
+        invalidFixture.runtime,
+      );
+      assert.equal(rejected.status, 400);
+      assert.equal(repositoryCalls(), 0);
+    } finally {
+      invalidFixture.close();
+    }
+  });
+
+  it("rejects encoded, malformed, null, wrong-type, and declared-oversized bodies before repository access", async () => {
+    const fixtures: Array<{
+      label: string;
+      bytes: Uint8Array;
+      headers: Record<string, string>;
+      rejectedBeforePull?: boolean;
+    }> = [
+      { label: "gzip", bytes: new TextEncoder().encode("{}"), headers: { "content-encoding": "gzip" }, rejectedBeforePull: true },
+      { label: "identity", bytes: new TextEncoder().encode("{}"), headers: { "content-encoding": "identity" }, rejectedBeforePull: true },
+      { label: "br", bytes: new TextEncoder().encode("{}"), headers: { "content-encoding": "br" }, rejectedBeforePull: true },
+      { label: "wrong content type", bytes: new TextEncoder().encode("{}"), headers: { "content-type": "text/plain" }, rejectedBeforePull: true },
+      { label: "declared oversized", bytes: new TextEncoder().encode("{}"), headers: { "content-length": "8193" }, rejectedBeforePull: true },
+      { label: "null", bytes: new TextEncoder().encode("null"), headers: {} },
+      { label: "invalid json", bytes: new TextEncoder().encode("{"), headers: {} },
+    ];
+
+    for (const candidate of fixtures) {
+      const fixture = await harness();
+      try {
+        const repositoryCalls = countRepositoryCalls(fixture.runtime);
+        let pulls = 0;
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls += 1;
+            controller.enqueue(candidate.bytes);
+            controller.close();
+          },
+        }, { highWaterMark: 0 });
+        const response = await handlePublicBookingRequest(
+          rawBodyRequest("/api/schedule/bookings", stream, candidate.headers),
+          fixture.runtime,
+        );
+        assert.equal(response.status, 400, candidate.label);
+        assert.equal(repositoryCalls(), 0, candidate.label);
+        if (candidate.rejectedBeforePull) {
+          assert.equal(pulls, 0, candidate.label);
+        }
+      } finally {
+        fixture.close();
+      }
+    }
+
+    const missingBodyFixture = await harness();
+    try {
+      const repositoryCalls = countRepositoryCalls(missingBodyFixture.runtime);
+      const response = await handlePublicBookingRequest(
+        rawBodyRequest("/api/schedule/bookings", null),
+        missingBodyFixture.runtime,
+      );
+      assert.equal(response.status, 400);
+      assert.equal(repositoryCalls(), 0);
+    } finally {
+      missingBodyFixture.close();
+    }
+  });
+
   it("shares public bookings with authenticated staff and returns no public PII", async () => {
     const fixture = await harness();
     try {
@@ -433,6 +663,113 @@ describe("same-site schedule HTTP boundary", () => {
     }
   });
 
+  it("returns entry_read_only for same-minute and past-date direct PATCH without writes", async () => {
+    let now = new Date("2026-08-09T00:00:00.000Z");
+    const fixture = await harness({ clock: () => now });
+    try {
+      const [staff] = await fixture.runtime.repository.listStaffMembers();
+      const bookingResponse = await handleStaffScheduleRequest(
+        request("/api/staff/schedule/bookings", {
+          method: "POST",
+          origin: true,
+          cookie: fixture.ownerCookie,
+          body: {
+            idempotencyKey: "http-elapsed-note-booking",
+            staffMemberId: staff.id,
+            slotDate: "2026-08-09",
+            slotTime: "10:00",
+            customerName: "Fictional direct PATCH customer",
+            customerPhone: "0900-000-939",
+            note: "original booking note",
+          },
+        }),
+        fixture.runtime,
+        "create_booking",
+      );
+      assert.equal(bookingResponse.status, 201);
+      const bookingId = (await bookingResponse.json() as { entryId: string }).entryId;
+      const noteResponse = await handleStaffScheduleRequest(
+        request("/api/staff/schedule/notes", {
+          method: "POST",
+          origin: true,
+          cookie: fixture.ownerCookie,
+          body: {
+            idempotencyKey: "http-past-note",
+            staffMemberId: staff.id,
+            slotDate: "2026-08-09",
+            slotTime: "11:00",
+            title: "Past direct PATCH",
+            note: "original manual note",
+          },
+        }),
+        fixture.runtime,
+        "create_note",
+      );
+      assert.equal(noteResponse.status, 201);
+      const noteId = (await noteResponse.json() as { entryId: string }).entryId;
+      assert.equal(fixture.auditCount(bookingId), 1);
+      assert.equal(fixture.auditCount(noteId), 1);
+
+      now = new Date("2026-08-09T02:00:00.000Z");
+      const sameMinute = await handleStaffScheduleRequest(
+        request(`/api/staff/schedule/entries/${bookingId}/note`, {
+          method: "PATCH",
+          origin: true,
+          cookie: fixture.staffCookie,
+          body: { expectedVersion: 1, note: "must not replace started note" },
+        }),
+        fixture.runtime,
+        "update_note",
+        bookingId,
+      );
+      assert.equal(sameMinute.status, 409);
+      assert.equal((await sameMinute.json() as { error: string }).error, "entry_read_only");
+
+      now = new Date("2026-08-10T00:00:00.000Z");
+      for (const attemptedNote of ["must not replace past note", ""]) {
+        const oldDate = await handleStaffScheduleRequest(
+          request(`/api/staff/schedule/entries/${noteId}/note`, {
+            method: "PATCH",
+            origin: true,
+            cookie: fixture.staffCookie,
+            body: { expectedVersion: 1, note: attemptedNote },
+          }),
+          fixture.runtime,
+          "update_note",
+          noteId,
+        );
+        assert.equal(oldDate.status, 409);
+        assert.equal((await oldDate.json() as { error: string }).error, "entry_read_only");
+      }
+
+      const entries = await fixture.runtime.repository.listEntries();
+      const preservedBooking = entries.find((entry) => entry.id === bookingId);
+      const preservedNote = entries.find((entry) => entry.id === noteId);
+      assert.deepEqual(
+        {
+          customerName: preservedBooking?.customerName,
+          customerPhone: preservedBooking?.customerPhone,
+          note: preservedBooking?.note,
+          version: preservedBooking?.version,
+        },
+        {
+          customerName: "Fictional direct PATCH customer",
+          customerPhone: "0900-000-939",
+          note: "original booking note",
+          version: 1,
+        },
+      );
+      assert.deepEqual(
+        { note: preservedNote?.note, version: preservedNote?.version },
+        { note: "original manual note", version: 1 },
+      );
+      assert.equal(fixture.auditCount(bookingId), 1);
+      assert.equal(fixture.auditCount(noteId), 1);
+    } finally {
+      fixture.close();
+    }
+  });
+
   it("re-authenticates every staff read/write operation and keeps errors free of PII", async () => {
     const fixture = await harness();
     try {
@@ -508,6 +845,7 @@ describe("same-site schedule HTTP boundary", () => {
         } }),
         fixture.runtime,
       );
+      assert.equal(bookingResponse.status, 201);
       const bookingId = (await bookingResponse.json() as { booking: { id: string } }).booking.id;
 
       const noteResponse = await handleStaffScheduleRequest(
@@ -575,6 +913,53 @@ describe("same-site schedule HTTP boundary", () => {
         "anonymize_booking",
       );
       assert.equal(anonymized.status, 200);
+      const anonymizedBaseline = (await fixture.runtime.repository.listEntries()).find(
+        (entry) => entry.id === bookingId,
+      );
+      assert.ok(anonymizedBaseline?.anonymizedAtUtc);
+      assert.equal(fixture.auditCount(bookingId), 2);
+      for (const attemptedNote of ["must not restore anonymized PII", ""]) {
+        const rejectedPatch = await handleStaffScheduleRequest(
+          request(`/api/staff/schedule/entries/${bookingId}/note`, {
+            method: "PATCH",
+            origin: true,
+            cookie: fixture.staffCookie,
+            body: { expectedVersion: 2, note: attemptedNote },
+          }),
+          fixture.runtime,
+          "update_note",
+          bookingId,
+        );
+        assert.equal(rejectedPatch.status, 409);
+        const rejectedJson = await rejectedPatch.json() as {
+          error: string;
+          message: string;
+        };
+        assert.equal(rejectedJson.error, "entry_read_only");
+        for (const pii of ["虛構匿名化顧客", "0900-000-955", "虛構匿名化顧客註記"]) {
+          assert.equal(JSON.stringify(rejectedJson).includes(pii), false);
+        }
+      }
+      const protectedBooking = (await fixture.runtime.repository.listEntries()).find(
+        (entry) => entry.id === bookingId,
+      );
+      assert.deepEqual(
+        {
+          customerName: protectedBooking?.customerName,
+          customerPhone: protectedBooking?.customerPhone,
+          note: protectedBooking?.note,
+          version: protectedBooking?.version,
+          anonymizedAtUtc: protectedBooking?.anonymizedAtUtc,
+        },
+        {
+          customerName: null,
+          customerPhone: null,
+          note: "",
+          version: 2,
+          anonymizedAtUtc: anonymizedBaseline.anonymizedAtUtc,
+        },
+      );
+      assert.equal(fixture.auditCount(bookingId), 2);
       const replay = await handleStaffScheduleRequest(
         request("/api/staff/privacy/anonymize", { method: "POST", origin: true, cookie: fixture.ownerCookie, body: {
           bookingEntryId: bookingId,

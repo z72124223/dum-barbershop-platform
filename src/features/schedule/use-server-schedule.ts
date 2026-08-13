@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   SafeScheduleHttpError,
   StaffScheduleDto,
@@ -31,38 +31,41 @@ export function useServerSchedule() {
     entries: [],
   });
   const [ready, setReady] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [failure, setFailure] = useState<ServerScheduleFailure | null>(null);
+  const loadSequence = useRef(0);
 
   const reload = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    setReady(false);
+    setLoading(true);
+    setFailure(null);
     const result = await requestJson<StaffScheduleDto>("/api/staff/schedule", {
       headers: { accept: "application/json" },
     });
+    if (sequence !== loadSequence.current) return result;
     if (result.ok) {
       setData(result.value);
+      setReady(true);
       setFailure(null);
     } else {
+      setReady(false);
       setFailure(result.reason);
     }
-    setReady(true);
+    setLoading(false);
     return result;
   }, []);
 
   useEffect(() => {
     let cancelled = false;
-    void requestJson<StaffScheduleDto>("/api/staff/schedule", {
-      headers: { accept: "application/json" },
-    }).then((result) => {
-      if (cancelled) return;
-      if (result.ok) {
-        setData(result.value);
-        setFailure(null);
-      } else {
-        setFailure(result.reason);
-      }
-      setReady(true);
+    queueMicrotask(() => {
+      if (!cancelled) void reload();
     });
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true;
+      loadSequence.current += 1;
+    };
+  }, [reload]);
 
   const createBooking = useCallback(async (input: Record<string, string>) => {
     const result = await requestJson<{ entryId: string }>("/api/staff/schedule/bookings", {
@@ -104,6 +107,7 @@ export function useServerSchedule() {
     entries: data.entries,
     staff: data.staff,
     ready,
+    loading,
     failure,
     reload,
     createBooking,

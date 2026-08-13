@@ -78,14 +78,47 @@ async function readJsonObject(
   if (request.headers.get("content-type")?.split(";", 1)[0]?.trim() !== "application/json") {
     return null;
   }
+  if (request.headers.has("content-encoding")) return null;
   const declared = request.headers.get("content-length");
   if (declared && (!/^\d+$/.test(declared) || Number(declared) > BODY_LIMIT_BYTES)) {
     return null;
   }
-  const bytes = new Uint8Array(await request.arrayBuffer());
-  if (bytes.byteLength > BODY_LIMIT_BYTES) return null;
+  if (!request.body) return null;
+
+  const reader = request.body.getReader();
+  const bytes = new Uint8Array(BODY_LIMIT_BYTES);
+  let length = 0;
   try {
-    const value = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      if (!chunk.value?.byteLength) continue;
+      if (chunk.value.byteLength > BODY_LIMIT_BYTES - length) {
+        try {
+          await reader.cancel();
+        } catch {
+          // The request is already rejected; cancellation is best-effort.
+        }
+        return null;
+      }
+      bytes.set(chunk.value, length);
+      length += chunk.value.byteLength;
+    }
+  } catch {
+    try {
+      await reader.cancel();
+    } catch {
+      // Keep stream errors inside the safe invalid-request boundary.
+    }
+    return null;
+  } finally {
+    reader.releaseLock();
+  }
+
+  try {
+    const value = JSON.parse(
+      new TextDecoder("utf-8", { fatal: true }).decode(bytes.subarray(0, length)),
+    ) as unknown;
     return typeof value === "object" && value !== null && !Array.isArray(value)
       ? value as Record<string, unknown>
       : null;
@@ -117,6 +150,7 @@ function scheduleFailure(error: unknown): Response {
   if (error instanceof ScheduleDataError) {
     const safe = toSafeScheduleErrorResponse(error);
     const messages: Record<ScheduleDataError["code"], string> = {
+      entry_read_only: "此時段已開始或已設為唯讀，不能再修改註記。",
       invalid_request: "提交的時段資料無效。",
       slot_unavailable: "這個時段已被預約，請重新選擇。",
       idempotency_conflict: "這個請求識別碼已用於不同資料。",

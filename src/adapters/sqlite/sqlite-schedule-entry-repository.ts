@@ -752,11 +752,20 @@ class SqliteScheduleEntryRepository implements ScheduleEntryRepository {
     const update = this.database.transaction((): StoredScheduleEntry => {
       const existing = this.readEntry(entryId);
       if (!existing) throw new ScheduleDataError("not_found", 404);
+
+      const now = this.currentInstant();
+      const slotTime = `${String(Math.floor(existing.slot_time_minutes / 60)).padStart(2, "0")}:${String(existing.slot_time_minutes % 60).padStart(2, "0")}`;
+      if (
+        existing.anonymized_at_utc !== null
+        || isTaipeiSlotPast(existing.slot_date, slotTime, now)
+      ) {
+        throw new ScheduleDataError("entry_read_only", 409);
+      }
       if (existing.kind === "note" && !rawNote) {
         throw new ScheduleDataError("invalid_request", 400);
       }
 
-      const timestamp = this.currentInstant().toISOString();
+      const timestamp = now.toISOString();
       const result = this.database.prepare(`
         UPDATE schedule_entries
         SET note_text = ?, version = version + 1, updated_at_utc = ?

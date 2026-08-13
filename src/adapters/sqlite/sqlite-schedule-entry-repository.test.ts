@@ -678,6 +678,77 @@ describe("SQLite schedule core", () => {
     }
   });
 
+  it("keeps already-started and past-date note updates read-only", async () => {
+    const databasePath = createDatabasePath("elapsed-note-update");
+    let now = new Date("2026-08-09T00:00:00.000Z");
+    const store = openSqliteScheduleStore(databasePath, { clock: () => now });
+    try {
+      const [staffMember] = await store.repository.listStaffMembers();
+      const startedToday = await store.repository.createStaffBooking({
+        idempotencyKey: "elapsed-update-booking",
+        actorId: staffMember.id,
+        staffMemberId: staffMember.id,
+        slotDate: "2026-08-09",
+        slotTime: "10:00",
+        customerName: "Fictional elapsed customer",
+        customerPhone: "0900-000-350",
+        note: "original booking note",
+      });
+      const pastDate = await store.repository.createManualNote({
+        idempotencyKey: "past-update-note",
+        actorId: staffMember.id,
+        staffMemberId: staffMember.id,
+        slotDate: "2026-08-09",
+        slotTime: "11:00",
+        title: "Past note",
+        note: "original manual note",
+      });
+
+      now = new Date("2026-08-09T02:00:00.000Z");
+      await assert.rejects(
+        store.repository.updateNote({
+          actorId: staffMember.id,
+          entryId: startedToday.entryId,
+          expectedVersion: 1,
+          note: "must not replace the started slot",
+        }),
+        assertScheduleError("entry_read_only", 409),
+      );
+
+      now = new Date("2026-08-10T00:00:00.000Z");
+      await assert.rejects(
+        store.repository.updateNote({
+          actorId: staffMember.id,
+          entryId: pastDate.entryId,
+          expectedVersion: 1,
+          note: "must not replace the past date",
+        }),
+        assertScheduleError("entry_read_only", 409),
+      );
+
+      const entries = await store.repository.listEntries();
+      const preservedBooking = entries.find((entry) => entry.id === startedToday.entryId);
+      const preservedNote = entries.find((entry) => entry.id === pastDate.entryId);
+      assert.deepEqual(
+        { note: preservedBooking?.note, version: preservedBooking?.version },
+        { note: "original booking note", version: 1 },
+      );
+      assert.deepEqual(
+        { note: preservedNote?.note, version: preservedNote?.version },
+        { note: "original manual note", version: 1 },
+      );
+
+      const inspection = openControlledSqliteConnection(databasePath);
+      try {
+        assert.equal(scalar(inspection, "SELECT count(*) AS value FROM audit_events"), 2);
+      } finally {
+        inspection.close();
+      }
+    } finally {
+      store.close();
+    }
+  });
+
   it("anonymizes only with owner-issued single-use verification while preserving slot occupancy", async () => {
     const databasePath = createDatabasePath("anonymize");
     let now = new Date(FIXED_NOW);
@@ -773,6 +844,37 @@ describe("SQLite schedule core", () => {
       assert.equal(anonymized.version, 2);
       assert.equal(anonymized.anonymizedAtUtc, FIXED_NOW);
 
+      for (const attemptedNote of ["must not restore a note", ""]) {
+        await assert.rejects(
+          store.repository.updateNote({
+            actorId: staff.id,
+            entryId: booking.entryId,
+            expectedVersion: 2,
+            note: attemptedNote,
+          }),
+          assertScheduleError("entry_read_only", 409),
+        );
+      }
+      const preservedAnonymized = (await store.repository.listEntries()).find(
+        (entry) => entry.id === booking.entryId,
+      );
+      assert.deepEqual(
+        {
+          customerName: preservedAnonymized?.customerName,
+          customerPhone: preservedAnonymized?.customerPhone,
+          note: preservedAnonymized?.note,
+          version: preservedAnonymized?.version,
+          anonymizedAtUtc: preservedAnonymized?.anonymizedAtUtc,
+        },
+        {
+          customerName: null,
+          customerPhone: null,
+          note: "",
+          version: 2,
+          anonymizedAtUtc: FIXED_NOW,
+        },
+      );
+
       await assert.rejects(
         store.repository.anonymizeBooking({
           actorId: owner.id,
@@ -818,6 +920,13 @@ describe("SQLite schedule core", () => {
           resource_id: booking.entryId,
           resource_version: 2,
         });
+        assert.equal(
+          scalar(
+            inspection,
+            `SELECT count(*) AS value FROM audit_events WHERE resource_id = '${booking.entryId}'`,
+          ),
+          2,
+        );
         const consumed = inspection.prepare(`
           SELECT consumed_at_utc, consumed_by_staff_id
           FROM customer_data_verifications WHERE id = ?

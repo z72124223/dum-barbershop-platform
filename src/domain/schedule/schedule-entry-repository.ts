@@ -100,6 +100,7 @@ export interface ScheduleWriteResult {
 
 export type ScheduleDataErrorCode =
   | "invalid_request"
+  | "entry_read_only"
   | "slot_unavailable"
   | "idempotency_conflict"
   | "version_conflict"
@@ -109,6 +110,7 @@ export type ScheduleDataErrorCode =
 
 const SAFE_ERROR_MESSAGES: Record<ScheduleDataErrorCode, string> = {
   invalid_request: "The schedule request is invalid.",
+  entry_read_only: "The schedule entry is read-only.",
   slot_unavailable: "The selected schedule slot is unavailable.",
   idempotency_conflict: "The request key was already used for different data.",
   version_conflict: "The schedule entry was updated by another request.",

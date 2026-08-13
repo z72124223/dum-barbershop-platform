@@ -57,6 +57,7 @@ export interface StaffScheduleDto {
 export interface SafeScheduleHttpError {
   error:
     | "invalid_request"
+    | "entry_read_only"
     | "forbidden"
     | "unauthenticated"
     | "not_found"

@@ -15,6 +15,7 @@ interface ScheduleHistoryPanelProps {
   staff: readonly ScheduleStaffDto[];
   now: Date;
   ready: boolean;
+  loading: boolean;
 }
 
 type HistoryStaffFilter = "all" | string;
@@ -25,6 +26,7 @@ export function ScheduleHistoryPanel({
   staff,
   now,
   ready,
+  loading,
 }: ScheduleHistoryPanelProps) {
   const [initialRange] = useState(() => defaultTaipeiHistoryRange(now));
   const [fromDate, setFromDate] = useState(initialRange.fromDate);
@@ -113,14 +115,14 @@ export function ScheduleHistoryPanel({
             <p className="eyebrow">ASIA / TAIPEI</p>
             <h2>歷史時段與當時註記</h2>
           </div>
-          <span>{historyEntries.length} 筆</span>
+          <span>{ready ? historyEntries.length : 0} 筆</span>
         </header>
 
         <p className="timezone-note">
           僅列出台灣台北目前時間以前已開始的時段；預約備註與獨立文字註記會分開顯示。
         </p>
 
-        {!ready ? <p className="inline-state" role="status">正在讀取共用歷史…</p> : null}
+        {loading ? <p className="inline-state" role="status">正在讀取共用歷史…</p> : null}
         {!validRange ? (
           <p className="form-error" role="alert">
             請確認日期完整，且開始日期不得晚於結束日期。
@@ -132,7 +134,7 @@ export function ScheduleHistoryPanel({
             <span>調整日期、職員或資料類型後再查詢。</span>
           </div>
         ) : null}
-        {validRange ? (
+        {ready && validRange ? (
           <div className="agenda-list history-list">
             {historyEntries.map((entry) => (
               <ScheduleEntryCard
