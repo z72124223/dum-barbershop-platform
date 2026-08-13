@@ -15,7 +15,6 @@ function option(name, fallback) {
   return index === -1 ? fallback : process.argv[index + 1];
 }
 
-const replace = process.argv.includes("--replace");
 const repositoryRoot = path.resolve(import.meta.dirname, "..", "..");
 const releaseSha = assertReleaseSha(
   option("--sha", process.env.DUM_RELEASE_SHA)
@@ -44,8 +43,7 @@ for (const required of [standaloneSource, staticSource, publicSource]) {
 
 await assertSafeReleaseMutation(outputRoot, target);
 if (await fs.lstat(target).catch(() => null)) {
-  if (!replace) throw new Error("release_already_exists");
-  await fs.rm(target, { recursive: true, force: false });
+  throw new Error("release_already_exists");
 }
 
 await fs.mkdir(path.dirname(target), { recursive: true });

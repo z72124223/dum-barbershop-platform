@@ -136,3 +136,20 @@ test("release mutation rejects a junction in an existing ancestor", async (t) =>
     /release_reparse_forbidden/,
   );
 });
+
+test("release mutation accepts only the exact SHA child below releases", async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "dum-release-guard-"));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  await fs.mkdir(path.join(root, "releases"));
+  await assert.doesNotReject(
+    assertSafeReleaseMutation(root, path.join(root, "releases", SHA)),
+  );
+  await assert.rejects(
+    assertSafeReleaseMutation(root, path.join(root, "releases", SHA, "child")),
+    /release_path_invalid/,
+  );
+  await assert.rejects(
+    assertSafeReleaseMutation(root, path.join(root, "state", SHA)),
+    /release_path_invalid/,
+  );
+});
