@@ -10,6 +10,7 @@
 /out/
 /build/
 /.test-dist/
+/.artifacts/
 
 # local environment and logs
 .env

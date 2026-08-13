@@ -1,0 +1,65 @@
+import { execFileSync } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import process from "node:process";
+import {
+  assertReleaseSha,
+  resolveReleaseDirectory,
+  scanReleaseDirectory,
+  writeReleaseManifest,
+} from "./release-artifact.mjs";
+
+function option(name, fallback) {
+  const index = process.argv.indexOf(name);
+  return index === -1 ? fallback : process.argv[index + 1];
+}
+
+const replace = process.argv.includes("--replace");
+const repositoryRoot = path.resolve(import.meta.dirname, "..", "..");
+const releaseSha = assertReleaseSha(
+  option("--sha", process.env.DUM_RELEASE_SHA)
+    ?? execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: repositoryRoot,
+      encoding: "utf8",
+    }).trim(),
+);
+const headSha = execFileSync("git", ["rev-parse", "HEAD"], {
+  cwd: repositoryRoot,
+  encoding: "utf8",
+}).trim();
+if (headSha !== releaseSha) throw new Error("release_sha_not_head");
+
+const outputRoot = path.resolve(repositoryRoot, option("--output-root", ".artifacts"));
+const { target } = resolveReleaseDirectory(outputRoot, releaseSha);
+const standaloneSource = path.join(repositoryRoot, ".next", "standalone");
+const staticSource = path.join(repositoryRoot, ".next", "static");
+const publicSource = path.join(repositoryRoot, "public");
+
+for (const required of [standaloneSource, staticSource, publicSource]) {
+  if (!(await fs.stat(required).catch(() => null))?.isDirectory()) {
+    throw new Error("standalone_build_missing");
+  }
+}
+
+if (await fs.stat(target).catch(() => null)) {
+  if (!replace) throw new Error("release_already_exists");
+  await fs.rm(target, { recursive: true, force: false });
+}
+
+await fs.mkdir(path.dirname(target), { recursive: true });
+await fs.mkdir(target, { recursive: false });
+const appTarget = path.join(target, "app");
+await fs.cp(standaloneSource, appTarget, { recursive: true, dereference: true });
+await fs.mkdir(path.join(appTarget, ".next"), { recursive: true });
+await fs.cp(staticSource, path.join(appTarget, ".next", "static"), {
+  recursive: true,
+  dereference: true,
+});
+await fs.cp(publicSource, path.join(appTarget, "public"), {
+  recursive: true,
+  dereference: true,
+});
+
+const hashes = await scanReleaseDirectory(target);
+await writeReleaseManifest(target, releaseSha, hashes);
+process.stdout.write(`${JSON.stringify({ status: "ok", releaseSha, files: hashes.length })}\n`);
