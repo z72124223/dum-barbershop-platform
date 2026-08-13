@@ -3,6 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import {
+  assertPhysicalTree,
   assertReleaseSha,
   assertSafeReleaseMutation,
   resolveReleaseDirectory,
@@ -39,6 +40,7 @@ for (const required of [standaloneSource, staticSource, publicSource]) {
   if (!(await fs.lstat(required).catch(() => null))?.isDirectory()) {
     throw new Error("standalone_build_missing");
   }
+  await assertPhysicalTree(required);
 }
 
 await assertSafeReleaseMutation(outputRoot, target);
@@ -50,15 +52,15 @@ await fs.mkdir(path.dirname(target), { recursive: true });
 await assertSafeReleaseMutation(outputRoot, target);
 await fs.mkdir(target, { recursive: false });
 const appTarget = path.join(target, "app");
-await fs.cp(standaloneSource, appTarget, { recursive: true, dereference: true });
+await fs.cp(standaloneSource, appTarget, { recursive: true, dereference: false });
 await fs.mkdir(path.join(appTarget, ".next"), { recursive: true });
 await fs.cp(staticSource, path.join(appTarget, ".next", "static"), {
   recursive: true,
-  dereference: true,
+  dereference: false,
 });
 await fs.cp(publicSource, path.join(appTarget, "public"), {
   recursive: true,
-  dereference: true,
+  dereference: false,
 });
 
 const hashes = await scanReleaseDirectory(target);

@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   assertManifestFilesMatch,
   assertPhysicalPath,
+  assertPhysicalTree,
   assertReleaseSha,
   assertSafeReleaseMutation,
   compareOrdinal,
@@ -152,4 +153,29 @@ test("release mutation accepts only the exact SHA child below releases", async (
     assertSafeReleaseMutation(root, path.join(root, "state", SHA)),
     /release_path_invalid/,
   );
+});
+
+test("source validation rejects a nested symlink or junction before copy", async (t) => {
+  const container = await fs.mkdtemp(path.join(os.tmpdir(), "dum-release-source-"));
+  const source = path.join(container, "source");
+  const outside = path.join(container, "outside");
+  const nested = path.join(source, "nested");
+  await fs.mkdir(source);
+  await fs.mkdir(outside);
+  await fs.writeFile(path.join(outside, "credential.txt"), "fictional external data");
+  try {
+    await fs.symlink(outside, nested, process.platform === "win32" ? "junction" : "dir");
+  } catch (error) {
+    if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+      t.skip("junction creation is unavailable on this host");
+      await fs.rm(container, { recursive: true, force: true });
+      return;
+    }
+    throw error;
+  }
+  t.after(async () => {
+    await fs.unlink(nested).catch(() => undefined);
+    await fs.rm(container, { recursive: true, force: true });
+  });
+  await assert.rejects(assertPhysicalTree(source), /release_reparse_forbidden/);
 });

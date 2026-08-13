@@ -88,6 +88,34 @@ export async function assertPhysicalPath(filename) {
   return resolved;
 }
 
+export async function assertPhysicalTree(rootDirectory) {
+  const root = await assertPhysicalPath(rootDirectory);
+  const rootStats = await fs.lstat(root);
+  if (!rootStats.isDirectory() || rootStats.isSymbolicLink()) {
+    throw new Error("release_source_invalid");
+  }
+
+  const pending = [root];
+  while (pending.length > 0) {
+    const current = pending.pop();
+    const entries = await fs.readdir(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const absolute = path.join(current, entry.name);
+      const stats = await fs.lstat(absolute);
+      if (entry.isSymbolicLink() || stats.isSymbolicLink()) {
+        throw new Error("release_reparse_forbidden");
+      }
+      const physical = await fs.realpath(absolute);
+      if (!samePhysicalPath(physical, absolute)) {
+        throw new Error("release_reparse_forbidden");
+      }
+      if (stats.isDirectory()) pending.push(absolute);
+      else if (!stats.isFile()) throw new Error("release_entry_type_forbidden");
+    }
+  }
+  return root;
+}
+
 async function walk(root, current = root) {
   const entries = await fs.readdir(current, { withFileTypes: true });
   const files = [];
