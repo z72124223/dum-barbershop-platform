@@ -84,8 +84,9 @@ test("secret scan rejects quoted env, JSON, credential extensions, and large can
   const quoted = await fixture();
   const json = await fixture();
   const credential = await fixture();
+  const privateKey = await fixture();
   const large = await fixture();
-  t.after(() => Promise.all([quoted, json, credential, large].map(({ root }) => (
+  t.after(() => Promise.all([quoted, json, credential, privateKey, large].map(({ root }) => (
     fs.rm(root, { recursive: true, force: true })
   ))));
 
@@ -103,6 +104,12 @@ test("secret scan rejects quoted env, JSON, credential extensions, and large can
 
   await fs.writeFile(path.join(credential.release, "app", "identity.pfx"), "fixture");
   await assert.rejects(scanReleaseDirectory(credential.release), /release_runtime_data_forbidden/);
+
+  await fs.writeFile(
+    path.join(privateKey.release, "app", "identity.pem"),
+    "-----BEGIN PRIVATE KEY-----\nfictional\n-----END PRIVATE KEY-----\n",
+  );
+  await assert.rejects(scanReleaseDirectory(privateKey.release), /release_runtime_data_forbidden/);
 
   await fs.writeFile(
     path.join(large.release, "app", "large.txt"),
