@@ -9,6 +9,12 @@ Git authority：Epic #31、Issue #32、Decision D-017
 
 本文件把讓 MVP3 可以施工的最小正式上線選擇整理成一組 Owner 決策基線。Owner 於 2026-08-01 在 Codex 回覆「同意」，並已由 Codex 如實記錄於 [Issue #32](https://github.com/z72124223/dum-barbershop-platform/issues/32#issuecomment-5150975055)：八項提案、Owner 責任、個資窗口管理與 A／B 備份安排均已核准。Owner 隨後完成 `dumbarbershop.com` 註冊，正式 Production hostname 與 public origin 已記錄於 [Issue #32](https://github.com/z72124223/dum-barbershop-platform/issues/32#issuecomment-5151098342)，因此 D-017 已 Accepted，#33 可在本基線合併後開始。這不代表網站已公開、不授權輸入真實客戶資料，也不取代 #37 的正式 GO / NO-GO。
 
+## 2026-08-21 light deployment amendment
+
+Owner 對 Issue #36 明確要求「輕量、快速使用，不再不斷加基底」。因此本文件中只屬於 #36 部署作業的下列要求，改由 [Issue #36](https://github.com/z72124223/dum-barbershop-platform/issues/36) 的單機輕量驗收取代：staging／production 雙環境、兩顆 A／B 輪替備份磁碟、複雜 rollback 自動化、外部監控／告警平台與企業級故障演練。
+
+保留不變的底線是：Cloudflare Tunnel 到 loopback、不得公開 Next.js 或 SQLite 埠、每天一份加密離機備份、一次隔離還原驗證、App／Tunnel 重開機恢復、個資與真實流量仍須等 #37 明確 Owner GO。這是部署作業的範圍收斂，不變更預約、權限、個資保留或正式啟用決策。
+
 ## 1. Owner-approved decisions
 
 | # | Owner 於 2026-08-01 核准的選擇 | 理由與界線 |

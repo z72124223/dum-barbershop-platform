@@ -187,3 +187,29 @@ test("source validation rejects a nested symlink or junction before copy", async
   });
   await assert.rejects(assertPhysicalTree(source), /release_reparse_forbidden/);
 });
+
+test("source validation permits only an explicit audited link", async (t) => {
+  const container = await fs.mkdtemp(path.join(os.tmpdir(), "dum-release-allowed-link-"));
+  const source = path.join(container, "source");
+  const allowed = path.join(container, "allowed");
+  const linked = path.join(source, "only-this-link");
+  await fs.mkdir(source);
+  await fs.mkdir(allowed);
+  await fs.writeFile(path.join(allowed, "package.json"), "{}");
+  try {
+    await fs.symlink(allowed, linked, process.platform === "win32" ? "junction" : "dir");
+  } catch (error) {
+    if (["EPERM", "EACCES", "ENOTSUP"].includes(error?.code)) {
+      t.skip("junction creation is unavailable on this host");
+      await fs.rm(container, { recursive: true, force: true });
+      return;
+    }
+    throw error;
+  }
+  t.after(async () => {
+    await fs.unlink(linked).catch(() => undefined);
+    await fs.rm(container, { recursive: true, force: true });
+  });
+  await assert.doesNotReject(assertPhysicalTree(source, async (entry) => entry === linked));
+  await assert.rejects(assertPhysicalTree(source), /release_reparse_forbidden/);
+});

@@ -55,18 +55,18 @@ if (!standaloneStats?.isDirectory() || standaloneStats.isSymbolicLink()) {
 // package. Materialise that exact build output in the immutable release; do
 // not permit arbitrary source links.
 const tracedModules = path.join(standaloneSource, ".next", "node_modules");
-const tracedEntries = await fs.readdir(tracedModules, { withFileTypes: true }).catch(() => []);
-for (const entry of tracedEntries) {
-  const entryPath = path.join(tracedModules, entry.name);
-  const stats = await fs.lstat(entryPath);
-  if (!stats.isSymbolicLink()) continue;
-  const expectedName = /^better-sqlite3-[0-9a-f]+$/;
-  const expectedTarget = path.join(repositoryRoot, "node_modules", "better-sqlite3");
-  if (!expectedName.test(entry.name) || path.resolve(await fs.realpath(entryPath)) !== path.resolve(expectedTarget)) {
-    throw new Error("release_reparse_forbidden");
-  }
+const expectedTarget = path.join(repositoryRoot, "node_modules", "better-sqlite3");
+await assertPhysicalTree(standaloneSource, async (entryPath) => {
+  const relative = path.relative(tracedModules, entryPath);
+  if (
+    relative.startsWith("..")
+    || path.isAbsolute(relative)
+    || !/^better-sqlite3-[0-9a-f]+$/.test(relative)
+  ) return false;
+  if (path.resolve(await fs.realpath(entryPath)) !== path.resolve(expectedTarget)) return false;
   await assertPhysicalTree(expectedTarget);
-}
+  return true;
+});
 
 await assertSafeReleaseMutation(outputRoot, target);
 if (await fs.lstat(target).catch(() => null)) {

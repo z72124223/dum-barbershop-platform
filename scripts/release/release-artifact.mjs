@@ -89,7 +89,7 @@ export async function assertPhysicalPath(filename) {
   return resolved;
 }
 
-export async function assertPhysicalTree(rootDirectory) {
+export async function assertPhysicalTree(rootDirectory, allowReparse = async () => false) {
   const root = await assertPhysicalPath(rootDirectory);
   const rootStats = await fs.lstat(root);
   if (!rootStats.isDirectory() || rootStats.isSymbolicLink()) {
@@ -104,6 +104,7 @@ export async function assertPhysicalTree(rootDirectory) {
       const absolute = path.join(current, entry.name);
       const stats = await fs.lstat(absolute);
       if (entry.isSymbolicLink() || stats.isSymbolicLink()) {
+        if (await allowReparse(absolute, stats)) continue;
         throw new Error("release_reparse_forbidden");
       }
       const physical = await fs.realpath(absolute);
