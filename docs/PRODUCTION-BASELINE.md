@@ -11,9 +11,9 @@ Git authority：Epic #31、Issue #32、Decision D-017
 
 ## 2026-08-21 light deployment amendment
 
-Owner 對 Issue #36 明確要求「輕量、快速使用，不再不斷加基底」，並在 2026-08-21 決定目前備份只存同一台電腦。因此本文件中只屬於 #36 部署作業的下列要求，改由 [Issue #36](https://github.com/z72124223/dum-barbershop-platform/issues/36) 的單機輕量驗收取代：staging／production 雙環境、兩顆 A／B 輪替備份磁碟、離機備份、複雜 rollback 自動化、外部監控／告警平台與企業級故障演練。
+Owner 對 Issue #36 明確要求「輕量、快速使用，不再不斷加基底」，並在 2026-08-21 決定此 MVP 不做備份。因此本文件中只屬於 #36 部署作業的下列要求，改由 [Issue #36](https://github.com/z72124223/dum-barbershop-platform/issues/36) 的單機輕量驗收取代：staging／production 雙環境、任何備份或還原、兩顆 A／B 輪替備份磁碟、離機備份、複雜 rollback 自動化、外部監控／告警平台與企業級故障演練。
 
-保留不變的底線是：Cloudflare Tunnel 到 loopback、不得公開 Next.js 或 SQLite 埠、每天一份本機加密備份、一次隔離還原驗證、App／Tunnel 重開機恢復、個資與真實流量仍須等 #37 明確 Owner GO。本機備份不保障硬體故障後可復原；這是 Owner 接受的速度取捨。這是部署作業的範圍收斂，不變更預約、權限、個資保留或正式啟用決策。
+保留不變的底線是：Cloudflare Tunnel 到 loopback、不得公開 Next.js 或 SQLite 埠、App／Tunnel 重開機恢復、個資與真實流量仍須等 #37 明確 Owner GO。不做備份代表此電腦或磁碟故障時資料不可保證復原；這是 Owner 接受的速度取捨。這是部署作業的範圍收斂，不變更預約、權限、個資保留或正式啟用決策。
 
 ## 1. Owner-approved decisions
 
