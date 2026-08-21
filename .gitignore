@@ -11,6 +11,7 @@
 /build/
 /.test-dist/
 /.artifacts/
+/.artifacts-lite/
 
 # local environment and logs
 .env

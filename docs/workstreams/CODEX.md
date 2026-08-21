@@ -7,11 +7,11 @@
 - Branch: `agent/36-production-readiness`
 - Parent Epic: #31
 - Base: `origin/main` `4d9f6acc04fd082236d4bc36c39e1d0de3731721` after PR #42 merged and Issue #35 closed.
-- Status: `IN_PROGRESS` — launch-blocker implementation only; Draft PR pending.
-- Scope: supported dependency audit remediation; standalone fixed-SHA release artifacts; no-PII health/readiness; retention/maintenance; encrypted A/B online backup and isolated restore; fixed-release deploy/rollback and disabled Production Scheduled Task registration; Cloudflared staging/Production templates; generic external monitor; minimal operator runbook.
-- Safety boundary: repository artifacts only. Do not install or change Windows, services, Scheduled Tasks, Cloudflare/DNS, real secrets/accounts/data, or the existing port 3100 process. Keep Production tasks disabled/stopped, apex traffic blocked until Issue #37 GO, and all fixtures fictional.
+- Status: `IN_PROGRESS` — lightweight single-host implementation only; Draft PR pending.
+- Scope: supported dependency update; fixed-SHA standalone release; no-PII health endpoint; one loopback App task, one daily encrypted backup task, isolated restore helper, one Cloudflare Tunnel template and a compact operator guide. The former staging/production split, A/B rotation, complex rollback and monitoring platform are explicitly deferred by Issue #36.
+- Safety boundary: repository artifacts only. Do not install or change Windows, services, Scheduled Tasks, Cloudflare/DNS, real secrets/accounts/data, or the existing port 3100 process. Apex traffic remains blocked until Issue #37 GO, and all fixtures are fictional.
 - Production boundary: do not merge, close Issue #36, start Issue #37, enable public traffic, or accept real customer data from this implementation window.
-- Exact next action: create and push the initial durable-log commit, open a Draft PR referencing Issue #36, then validate upstream-supported dependency versions before the smallest lockfile update.
+- Exact next action: validate the lightweight scripts and standalone artifact, then commit/push the narrowed Draft PR #43 for independent review. Host installation, DNS and real values remain outside this repository checkpoint.
 
 ## Active identity — Issue #35
 
