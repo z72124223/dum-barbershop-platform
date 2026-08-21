@@ -1,5 +1,5 @@
 tunnel: <TUNNEL_UUID>
-credentials-file: C:\\Cloudflared\\<TUNNEL_UUID>.json
+credentials-file: C:\Windows\System32\config\systemprofile\.cloudflared\<TUNNEL_UUID>.json
 
 ingress:
   - hostname: dumbarbershop.com
