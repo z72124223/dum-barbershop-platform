@@ -1,0 +1,7 @@
+tunnel: <TUNNEL_UUID>
+credentials-file: C:\Windows\System32\config\systemprofile\.cloudflared\<TUNNEL_UUID>.json
+
+ingress:
+  - hostname: dumbarbershop.com
+    service: http://127.0.0.1:3210
+  - service: http_status:404
